@@ -1,14 +1,35 @@
 defmodule Meow.Evolution do
+  @moduledoc """
+  The entrypoint for running your algorithm.
+
+  Evolution consists of the following steps:
+
+  1. Randomly initialize the population
+  2. Evolve the population until the termination criteria is satisfied
+     1. Select parents and breed new individuals
+     2. Possibly apply mutation to some individuals
+     3. Form the new population (children and selected survivors)
+     4. Evaluate the new population
+  """
+
   alias Meow.{Individual, Population}
 
   # TODO: these should be configured elsewhere (as opts to run?)
   @population_size 20
   @mutation_probability 0.1
 
-  def run(spec) do
+  @doc """
+  Runs an evolutionary algorithm according to the given specification.
+
+  The first argument must be a module implementing the `Meow.EvolutionSpec`
+  behaviour, which defines the optimisation problem, as well as the
+  algorithm details.
+  """
+  @spec run(atom()) :: Population.t()
+  def run(spec) when is_atom(spec) do
     initialize_population(spec)
-    |> do_evaluate(spec)
-    |> evolve(spec)
+    |> evaluate_population(spec)
+    |> evolve_population(spec)
   end
 
   defp initialize_population(spec) do
@@ -22,55 +43,59 @@ defmodule Meow.Evolution do
     %Population{individuals: individuals}
   end
 
-  defp do_evaluate(population, spec) do
-    individuals =
-      Enum.map(population.individuals, fn
-        %{fitness: nil} = individual ->
+  defp evaluate_population(population, spec) do
+    {evaluated_individuals, number_of_evals} =
+      Enum.map_reduce(population.individuals, 0, fn
+        %{fitness: nil} = individual, number_of_evals ->
           fitness = spec.evaluate(individual.genome)
-          %{individual | fitness: fitness}
+          individual = %{individual | fitness: fitness}
+          {individual, number_of_evals + 1}
 
-        evaluated_individual ->
-          evaluated_individual
+        individual, number_of_evals ->
+          {individual, number_of_evals}
       end)
 
-    best_individual = Enum.max_by(individuals, & &1.fitness)
+    best_individual = Enum.max_by(evaluated_individuals, & &1.fitness)
 
-    improved? =
-      population.best_individual_ever == nil or
-        population.best_individual_ever.fitness <= best_individual.fitness
+    best_individual_ever =
+      if population.best_individual_ever do
+        Enum.max_by([population.best_individual_ever, best_individual], & &1.fitness)
+      else
+        best_individual
+      end
 
     %{
       population
-      | individuals: individuals,
-        best_individual_ever:
-          if(improved?, do: best_individual, else: population.best_individual_ever)
+      | individuals: evaluated_individuals,
+        best_individual_ever: best_individual_ever,
+        number_of_fitness_evals: population.number_of_fitness_evals + number_of_evals
     }
   end
 
-  defp evolve(population, spec) do
+  defp evolve_population(population, spec) do
     if spec.terminate?(population) do
       population
     else
       parents = spec.select_parents(population)
-      # TODO: we should keep a configured percentage of population (survivors)
-      children = do_crossover(parents, spec)
-      new_individuals = do_mutation(children, spec)
+      survivors = spec.select_survivors(population)
+      children = crossover(parents, spec)
+      new_individuals = children ++ survivors
+
+      new_individuals = mutation(new_individuals, spec)
 
       new_population = %{
         population
         | individuals: new_individuals,
-          generation: population.generation + 1,
-          number_of_fitness_evals:
-            population.number_of_fitness_evals + length(population.individuals)
+          generation: population.generation + 1
       }
 
-      new_population = do_evaluate(new_population, spec)
-
-      evolve(new_population, spec)
+      new_population
+      |> evaluate_population(spec)
+      |> evolve_population(spec)
     end
   end
 
-  defp do_mutation(individuals, spec) do
+  defp mutation(individuals, spec) do
     Enum.map(individuals, fn individual ->
       if :rand.uniform() < @mutation_probability do
         new_genome = spec.mutate(individual.genome)
@@ -81,7 +106,7 @@ defmodule Meow.Evolution do
     end)
   end
 
-  defp do_crossover(parents, spec) do
+  defp crossover(parents, spec) do
     parents
     |> Enum.chunk_every(2, 2, :discard)
     |> Enum.flat_map(fn [parent1, parent2] ->

@@ -52,6 +52,11 @@ defmodule Examples.Rastrigin do
   end
 
   @impl true
+  def select_survivors(_population) do
+    []
+  end
+
+  @impl true
   def crossover(genome1, genome2) do
     # Note: uniform crossover with 0.5 probability
     genome1

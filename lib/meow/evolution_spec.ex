@@ -66,6 +66,11 @@ defmodule Meow.EvolutionSpec do
   @callback select_parents(Population.t()) :: list(Individual.t())
 
   @doc """
+  Defines which individuals from the current population are kept for the next generation.
+  """
+  @callback select_survivors(Population.t()) :: list(Individual.t())
+
+  @doc """
   Combines two solutions (genomes) into two new solutions.
   """
   @callback crossover(Individual.genome(), Individual.genome()) ::
