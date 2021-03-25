@@ -26,4 +26,30 @@ defmodule Meow.Strategy.Crossover do
     end)
     |> Enum.unzip()
   end
+
+  @doc """
+  Implements intermediate crossover.
+
+  For each parents' corresponding genes (x, y), assuming that x <= y
+  it creates a new gene based on this formula:
+
+  new_gene = x + w(y - x)
+
+  where parameter w is selected by a draw from interval <0, 1>.
+
+  This implementation draws two children according to the approach
+  described above.
+  """
+  @spec intermediate(List.t(), List.t()) :: {List.t(), List.t()}
+  def intermediate(genome1, genome2) do
+    genome1
+    |> Enum.zip(genome2)
+    |> Enum.map(fn {gene1, gene2} ->
+      a = min(gene1, gene2)
+      b = max(gene1, gene2) - a
+
+      {a + :rand.uniform() * b, a + :rand.uniform() * b}
+    end)
+    |> Enum.unzip()
+  end
 end
