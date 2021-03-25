@@ -5,7 +5,7 @@ defmodule Meow.EvolutionSpec do
   The behaviour for configuring evolutionary algorithm
   in respect to a specific optimisation problem.
 
-  `EvolutionSpec` serves as an interface for the user to implement
+  `Meow.EvolutionSpec` serves as an interface for the user to implement
   in order to run a concerete evolutionary algorithm
   against the optimisation problem of choice.
 

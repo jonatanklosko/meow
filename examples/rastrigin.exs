@@ -1,4 +1,4 @@
-defmodule Examples.Rastrigin do
+defmodule Rastrigin do
   @behaviour Meow.EvolutionSpec
 
   @dimensions 100
@@ -71,3 +71,8 @@ defmodule Examples.Rastrigin do
     |> Enum.unzip()
   end
 end
+
+# Run the algorithm
+
+population = Meow.Evolution.run(Rastrigin)
+IO.inspect(population)
