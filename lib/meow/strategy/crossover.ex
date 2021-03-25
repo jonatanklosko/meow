@@ -13,7 +13,7 @@ defmodule Meow.Strategy.Crossover do
   Given two lists representing genomes, swaps the corresponding
   genes according to the given probability.
   """
-  @spec uniform(List.t(), List.t()) :: List.t()
+  @spec uniform(List.t(), List.t()) :: {List.t(), List.t()}
   def uniform(genome1, genome2, probability \\ 0.5) do
     genome1
     |> Enum.zip(genome2)
