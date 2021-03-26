@@ -4,12 +4,10 @@ defmodule Ackley do
   @dimensions 20
   @a 20
   @b 0.2
-  # 2 * PI
-  @c 6.2831853071795864769252866
-  # exp(1)
-  @e 2.71828182845904523536028747135266249775724709369995
+  @c 2 * :math.pi()
+  @e :math.exp(1)
 
-  @mutation_scale 0.04
+  @mutation_scale 60
   @parents_count 20
   @max_number_of_fitness_evals 1_000_000
 
@@ -27,8 +25,7 @@ defmodule Ackley do
   @impl true
   def evaluate(genome) do
     {sum1, sum2} =
-      genome
-      |> Enum.reduce({0, 0}, fn x, {sum1, sum2} ->
+      Enum.reduce(genome, {0, 0}, fn x, {sum1, sum2} ->
         {sum1 + x * x, sum2 + :math.cos(@c * x)}
       end)
 
@@ -47,8 +44,15 @@ defmodule Ackley do
   def mutate(genome) do
     idx = :rand.uniform(length(genome)) - 1
     existing_gene = Enum.at(genome, idx)
-    replacing_gene = existing_gene + existing_gene * (random_x() - 0.5) * @mutation_scale
+
+    replacing_gene = existing_gene + existing_gene * (:random.uniform() - 0.5) * @mutation_scale
+    replacing_gene = clamp(replacing_gene, -32.768, 32.768)
+
     List.replace_at(genome, idx, replacing_gene)
+  end
+
+  defp clamp(x, a, b) do
+    x |> max(a) |> min(b)
   end
 
   @impl true
