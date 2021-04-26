@@ -1,0 +1,3 @@
+%{
+  "nx": {:git, "https://github.com/elixir-nx/nx.git", "4d3de03e71f091c34f6e1482fa528efbc6d2d9af", [branch: "main", sparse: "nx"]},
+}
