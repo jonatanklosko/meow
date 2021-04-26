@@ -1,6 +1,16 @@
 defmodule Meow.Runner do
-  alias Meow.{Population, Pipeline}
+  @moduledoc """
+  A module responsible for running an evolutionary
+  algorithm, as defined by  `Meow.Model`.
+  """
 
+  alias Meow.{Population, Pipeline, Model}
+
+  @doc """
+  Iteratively transforms the population according to
+  the given model until the population is terminated.
+  """
+  @spec run(Model.t()) :: Population.t()
   def run(model) do
     genomes = model.initializer.()
     population = %Population{genomes: genomes, fitness: nil, generation: 1}
