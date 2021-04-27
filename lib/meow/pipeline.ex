@@ -31,7 +31,7 @@ defmodule Meow.Pipeline do
 
   The result is a new transformed population.
   The `evaluate` function is used as necessary
-  to ensure fitness is computed as needed.
+  to ensure fitness is computed if needed.
   """
   @spec apply(Population.t(), t(), Model.evaluate()) :: Population.t()
   def apply(population, pipeline, evaluate) do
