@@ -1,3 +1,3 @@
 # Meow 🐈
 
-Multipopulation evolutionary optimisation wiring
+Multipopulation evolutionary optimisation workbench
