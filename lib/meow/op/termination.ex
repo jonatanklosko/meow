@@ -3,7 +3,7 @@ defmodule Meow.Op.Termination do
 
   def max_generations(n) do
     %Op{
-      name: "Termination max populations",
+      name: "Termination: max generations",
       requires_fitness: false,
       invalidates_fitness: false,
       impl: fn population ->
