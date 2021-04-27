@@ -27,10 +27,12 @@ defmodule Rastrigin do
     )
   end
 
+  @two_pi 2 * :math.pi()
+
   @defn_compiler EXLA
   defn evaluate(genomes) do
     sums =
-      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * 2 * 3.141592653589793))
+      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
       |> Nx.sum(axes: [1])
 
     -sums
