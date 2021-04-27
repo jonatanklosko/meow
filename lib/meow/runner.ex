@@ -1,7 +1,7 @@
 defmodule Meow.Runner do
   @moduledoc """
   A module responsible for running an evolutionary
-  algorithm, as defined by  `Meow.Model`.
+  algorithm, as defined by `Meow.Model`.
   """
 
   alias Meow.{Population, Pipeline, Model}
