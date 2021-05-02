@@ -14,22 +14,23 @@ defmodule Meow.Runner do
   def run(model) do
     genomes = model.initializer.()
     population = %Population{genomes: genomes, fitness: nil, generation: 1}
+    ctx = %{evaluate: model.evaluate}
 
     # TODO: support multiple pipelines (populations)
     [pipeline] = model.pipelines
 
-    run_population(population, pipeline, model)
+    run_population(population, pipeline, ctx)
   end
 
-  defp run_population(population, pipeline, model) do
-    population = Pipeline.apply(population, pipeline, model.evaluate)
+  defp run_population(population, pipeline, ctx) do
+    population = Pipeline.apply(population, pipeline, ctx)
 
     if population.terminated do
       population
     else
       population
       |> Map.update!(:generation, &(&1 + 1))
-      |> run_population(pipeline, model)
+      |> run_population(pipeline, ctx)
     end
   end
 end

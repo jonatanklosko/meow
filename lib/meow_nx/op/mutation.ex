@@ -9,7 +9,7 @@ defmodule MeowNx.Op.Mutation do
       name: "[Nx] Mutation replace random uniform",
       requires_fitness: false,
       invalidates_fitness: true,
-      impl: fn population ->
+      impl: fn population, _ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&replace_random_uniform_impl(&1, opts), [genomes], compiler: EXLA)
         end)

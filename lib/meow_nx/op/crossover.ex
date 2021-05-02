@@ -9,7 +9,7 @@ defmodule MeowNx.Op.Crossover do
       name: "[Nx] Uniform crossover",
       requires_fitness: false,
       invalidates_fitness: true,
-      impl: fn population ->
+      impl: fn population, _ctx ->
         Op.map_genomes(population, fn genomes ->
           # TODO: make compiler (and generally other options)
           # configurable globally for the model
