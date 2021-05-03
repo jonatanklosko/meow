@@ -11,7 +11,7 @@ defmodule MeowNx.Op.Selection do
       name: "[Nx] Selection tournament",
       requires_fitness: true,
       invalidates_fitness: false,
-      impl: fn population ->
+      impl: fn population, _ctx ->
         Op.map_genomes_and_fitness(population, fn genomes, fitness ->
           Nx.Defn.jit(&tournament_impl(&1, &2, opts), [genomes, fitness], compiler: EXLA)
         end)

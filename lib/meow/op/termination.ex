@@ -6,7 +6,7 @@ defmodule Meow.Op.Termination do
       name: "Termination: max generations",
       requires_fitness: false,
       invalidates_fitness: false,
-      impl: fn population ->
+      impl: fn population, _ctx ->
         if population.generation >= n do
           %{population | terminated: true}
         else
