@@ -9,7 +9,6 @@ defmodule MeowNx.Utils do
   defn gather_rows(t, idx) do
     # n is the number of rows in the resulting 2d tensor
     {n} = Nx.shape(idx)
-    {:u, _} = Nx.type(idx)
     {x, _y} = Nx.shape(t)
 
     # Each row is a one-hot encoding of which row from `t` to choose
