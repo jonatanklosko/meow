@@ -48,19 +48,27 @@ defmodule MeowNx.Op.Crossover do
     }
   end
 
-  defnp single_point_impl(parents, _opts \\ []) do
+  defn single_point_impl(parents, _opts \\ []) do
     {n, length} = Nx.shape(parents)
     half_n = transform(n, &div(&1, 2))
 
-    slice_idx = transform(length, fn length -> :rand.uniform(length - 1) end)
-    left = parents[[0..(n - 1), 0..(slice_idx - 1)]]
-    right = parents[[0..(n - 1), slice_idx..(length - 1)]]
+    # Generate n / 2 split points (like [5, 2, 3]), and replicate them,
+    # such that they are the same for adjacent parents (like [5, 5, 2, 2, 3, 3])
+    split_idx =
+      Nx.random_uniform({half_n}, 1, n - 1)
+      |> Nx.reshape({half_n, 1})
+      |> Nx.tile([1, 2])
+      |> Nx.reshape({n, 1})
 
-    left = left
-      |> Nx.reshape({half_n, 2, slice_idx})
+    mask = Nx.iota({1, length}) |> Nx.greater_equal(split_idx)
+
+    # Swap adjacent parent pairs
+    parents_swapped =
+      parents
+      |> Nx.reshape({half_n, 2, length})
       |> Nx.reverse(axes: [1])
-      |> Nx.reshape({n, slice_idx})
+      |> Nx.reshape({n, length})
 
-    Nx.concatenate([left, right], axis: 1)
+    Nx.select(mask, parents, parents_swapped)
   end
 end
