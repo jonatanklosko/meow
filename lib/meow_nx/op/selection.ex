@@ -44,4 +44,35 @@ defmodule MeowNx.Op.Selection do
 
     {genomes, fitness}
   end
+
+  def natural(n) do
+    # TODO: support percentage, something like {:fraction, 0.2}
+    # TODO: validate that n is not larget than population's
+    opts = [n: n]
+
+    %Op{
+      name: "[Nx] Selection natural",
+      requires_fitness: true,
+      invalidates_fitness: false,
+      impl: fn population, _ctx ->
+        Op.map_genomes_and_fitness(population, fn genomes, fitness ->
+          Nx.Defn.jit(&natural_impl(&1, &2, opts), [genomes, fitness], compiler: EXLA)
+        end)
+      end
+    }
+  end
+
+  defnp natural_impl(genomes, fitness, opts \\ []) do
+    final_n = opts[:n]
+    {n, _} = Nx.shape(genomes)
+
+    best_fitness_idx = Nx.argsort(fitness, comparator: :desc)[0..(final_n - 1)]
+    best_genomes = Utils.gather_rows(genomes, best_fitness_idx)
+
+    # Reshape fitness into 2D, so our `gather_rows` works fine
+    fitness = Nx.reshape(fitness, {n, 1})
+    best_fitness = Utils.gather_rows(fitness, best_fitness_idx)
+
+    {best_genomes, best_fitness}
+  end
 end
