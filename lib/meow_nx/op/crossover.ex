@@ -48,7 +48,7 @@ defmodule MeowNx.Op.Crossover do
     }
   end
 
-  defn single_point_impl(parents, _opts \\ []) do
+  defnp single_point_impl(parents, _opts \\ []) do
     {n, length} = Nx.shape(parents)
     half_n = transform(n, &div(&1, 2))
 
