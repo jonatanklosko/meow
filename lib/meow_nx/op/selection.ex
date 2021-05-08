@@ -67,11 +67,12 @@ defmodule MeowNx.Op.Selection do
     {n, _} = Nx.shape(genomes)
 
     best_fitness_idx = Nx.argsort(fitness, comparator: :desc)[0..(final_n - 1)]
+
     best_genomes = Utils.gather_rows(genomes, best_fitness_idx)
 
     # Reshape fitness into 2D, so our `gather_rows` works fine
     fitness = Nx.reshape(fitness, {n, 1})
-    best_fitness = Utils.gather_rows(fitness, best_fitness_idx)
+    best_fitness = Utils.gather_rows(fitness, best_fitness_idx) |> Nx.reshape({final_n})
 
     {best_genomes, best_fitness}
   end
