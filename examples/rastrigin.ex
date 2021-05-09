@@ -21,7 +21,7 @@ defmodule Rastrigin do
       Pipeline.new([
         Selection.tournament(20),
         Crossover.uniform(0.5),
-        Mutation.replace_random_uniform(0.001, -5.12, 5.12),
+        Mutation.replace_uniform(0.001, -5.12, 5.12),
         Termination.max_generations(50_000)
       ])
     )
@@ -45,7 +45,7 @@ defmodule Rastrigin do
             Pipeline.new([
               Selection.tournament(16),
               Crossover.uniform(0.5),
-              Mutation.replace_random_uniform(0.001, -5.12, 5.12)
+              Mutation.replace_uniform(0.001, -5.12, 5.12)
             ])
           ],
           &Population.merge_with(&1, fn x -> Nx.concatenate(x) end)
@@ -72,7 +72,7 @@ defmodule Rastrigin do
             Crossover.uniform(0.3)
           ])
         ),
-        Mutation.replace_random_uniform(0.001, -5.12, 5.12),
+        Mutation.replace_uniform(0.001, -5.12, 5.12),
         Termination.max_generations(50_000)
       ])
     )
@@ -90,5 +90,5 @@ defmodule Rastrigin do
   end
 end
 
-model = Rastrigin.model_if()
+model = Rastrigin.model_branching()
 :timer.tc(fn -> Meow.Runner.run(model) end) |> IO.inspect()
