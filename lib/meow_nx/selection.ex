@@ -65,7 +65,7 @@ defmodule MeowNx.Selection do
   """
   defn natural(genomes, fitness, opts \\ []) do
     # TODO: support percentage, something like {:fraction, 0.2}
-    # TODO: validate that n is not larget than population size
+    # TODO: validate that n is not larger than population size
     result_n = opts[:n]
 
     sort_idx = Nx.argsort(fitness, comparator: :desc)

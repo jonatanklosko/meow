@@ -23,7 +23,7 @@ defmodule MeowNx.Crossover do
   # and the genomes tensor with swapped adjacent rows as y.
   # Consequently parent rows (a, b) in tensor x correspond
   # to rows (b, a) in tensor y, which means we perform all
-  # operaitons on every pair of parents twice.
+  # operations on every pair of parents twice.
 
   @doc """
   Performs uniform crossover.
@@ -102,10 +102,10 @@ defmodule MeowNx.Crossover do
 
     * `:alpha` - parameter controlling how far new genes
       may fall outside of the parent genes range.
-      Low values emphasise exploatation, while high values
+      Low values emphasise exploitation, while high values
       allow for exploration. Alpha of 0 is known as flat crossover,
       where new genes are drawn from the range `[x_i, y_i]`.
-      Alpha of 0.5 provides a balance between exploaration and exploatation.
+      Alpha of 0.5 provides a balance between exploration and exploitation.
       Defaults to `0.5`
 
   ## References

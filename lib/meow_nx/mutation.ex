@@ -8,7 +8,7 @@ defmodule MeowNx.Mutation do
   Mutation is used to maintain genetic diversity within the population
   as it steps from one generation to another. It effectively introduces
   a bit of additional randomness to the evolutionary algorithm, so that
-  more diversified solutions are explored. It may also helps to reduce
+  more diversified solutions are explored. It may also help to reduce
   too rapid convergence of the algorithm to a local minimum.
   """
 
