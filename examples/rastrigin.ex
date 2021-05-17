@@ -7,8 +7,8 @@ Mix.install([
 
 defmodule Rastrigin do
   import Nx.Defn
-  alias Meow.{Model, Pipeline, Population}
-  alias Meow.Op.{Termination, Flow}
+  alias Meow.{Model, Pipeline, Population, Topology}
+  alias Meow.Op.{Termination, Flow, Multi}
   alias MeowNx.Init
   alias MeowNx.Op.{Selection, Crossover, Mutation}
 
@@ -27,6 +27,24 @@ defmodule Rastrigin do
     )
   end
 
+  def model_simple_multi() do
+    Model.new(
+      Init.real_random_uniform(20, 100, -5.12, 5.12),
+      &evaluate/1
+    )
+    |> Model.add_pipeline(
+      Pipeline.new([
+        Selection.tournament(20),
+        Crossover.uniform(0.5),
+        Mutation.replace_uniform(0.001, -5.12, 5.12),
+        Multi.emigrate(Selection.tournament(2), &Topology.ring/2, interval: 10),
+        Multi.immigrate(&Selection.natural(&1), interval: 10),
+        Termination.max_generations(50)
+      ]),
+      duplicate: 3
+    )
+  end
+
   def model_branching() do
     Model.new(
       Init.real_random_uniform(20, 100, -5.12, 5.12),
@@ -35,8 +53,8 @@ defmodule Rastrigin do
     |> Model.add_pipeline(
       Pipeline.new([
         # Here the pipeline branches out into two sub-pipelines,
-        # which results are then merged into a single population.
-        Flow.split_merge(
+        # which results are then joined into a single population.
+        Flow.split_join(
           &Population.duplicate(&1, 2),
           [
             Pipeline.new([
@@ -48,7 +66,7 @@ defmodule Rastrigin do
               Mutation.replace_uniform(0.001, -5.12, 5.12)
             ])
           ],
-          &Population.merge_with(&1, fn x -> Nx.concatenate(x) end)
+          &Population.concatenate/1
         ),
         Termination.max_generations(50_000)
       ])
@@ -90,5 +108,5 @@ defmodule Rastrigin do
   end
 end
 
-model = Rastrigin.model_branching()
+model = Rastrigin.model_simple_multi()
 :timer.tc(fn -> Meow.Runner.run(model) end) |> IO.inspect()

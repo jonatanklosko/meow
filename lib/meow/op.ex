@@ -1,24 +1,34 @@
 defmodule Meow.Op do
+  @moduledoc """
+  A structure describing an evolutionary operation.
+
+  Operation is a single step in an evolutionary pipeline
+  and is responsible for transforming the population from
+  one state into another state.
+
+  The structure carries a number of operation information
+  relevant to the framework, as well as an actual implementation
+  of the operation.
+  """
+
   @enforce_keys [:name, :impl, :requires_fitness, :invalidates_fitness]
 
   defstruct [:name, :impl, :requires_fitness, :invalidates_fitness]
 
-  alias Meow.{Population, Model}
+  alias Meow.{Population, Op}
 
   @type t :: %__MODULE__{
           name: String.t(),
-          impl: (Population.t(), context() -> Population.t()),
+          impl: (Population.t(), Op.Context.t() -> Population.t()),
           requires_fitness: boolean(),
           invalidates_fitness: boolean()
         }
-
-  @type context :: %{evaluate: Model.evaluate()}
 
   @doc """
   Applies `operation` to `population` and returns
   a new transformed population.
   """
-  @spec apply(Population.t(), t(), context()) :: Population.t()
+  @spec apply(Population.t(), t(), Op.Context.t()) :: Population.t()
   def apply(population, operation, ctx)
 
   def apply(%{fitness: nil}, %{requires_fitness: true}, _ctx) do
