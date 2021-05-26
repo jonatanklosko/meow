@@ -7,11 +7,12 @@ defmodule Meow.Population do
   as well as information about the evolution progress.
   """
 
-  defstruct [:genomes, :fitness, generation: 0, terminated: false]
+  defstruct [:genomes, :fitness, :representation_spec, generation: 1, terminated: false]
 
   @type t :: %__MODULE__{
           genomes: genomes(),
           fitness: fitness(),
+          representation_spec: module(),
           generation: non_neg_integer(),
           terminated: boolean()
         }
@@ -41,6 +42,26 @@ defmodule Meow.Population do
   @type fitness :: any()
 
   @doc """
+  Initializes a population from genomes representation.
+  """
+  @spec new(genomes(), module()) :: t()
+  def new(genomes, representation_spec) do
+    %__MODULE__{
+      genomes: genomes,
+      generation: 1,
+      representation_spec: representation_spec
+    }
+  end
+
+  @doc """
+  Calculates population size based on the underlying representation.
+  """
+  @spec size(t()) :: non_neg_integer()
+  def size(population) do
+    population.representation_spec.population_size(population.genomes)
+  end
+
+  @doc """
   Returns a list of size `times` where every item is `population`.
   """
   @spec duplicate(t(), pos_integer()) :: list(t())
@@ -49,35 +70,67 @@ defmodule Meow.Population do
   end
 
   @doc """
-  Shortcut for `merge_with/3` when the same merge function
-  applies for both genomes and fitness.
+  Concatenates the given populations into a single population.
+
+  The resulting population includes genomes from all the populations
+  and is composed using `representation_spec` of the first population.
   """
-  @spec merge_with(list(t()), (genomes() | fitness() -> t())) :: t()
-  def merge_with(populations, merge_fun) do
-    merge_with(populations, merge_fun, merge_fun)
+  @spec concatenate(list(t())) :: t()
+  def concatenate(populations) do
+    representation_spec = same_representation_spec!(populations)
+
+    join_with(
+      populations,
+      &representation_spec.concatenate_genomes/1,
+      &representation_spec.concatenate_fitness/1
+    )
   end
 
   @doc """
-  Merges the given populations into a single population.
+  Shortcut for `join_with/3` when the same join function
+  applies for both genomes and fitness.
+  """
+  @spec join_with(list(t()), (genomes() | fitness() -> t())) :: t()
+  def join_with(populations, join_fun) do
+    join_with(populations, join_fun, join_fun)
+  end
 
-  Uses `genomes_merge_fun` and `fitness_merge_fun` to merge
+  @doc """
+  Joins the given populations into a single population.
+
+  Uses `genomes_join_fun` and `fitness_join_fun` to join
   genomes and fitness representations respectively.
   """
-  @spec merge_with(list(t()), (genomes() -> t()), (fitness() -> t())) :: t()
-  def merge_with(populations, genomes_merge_fun, fitness_merge_fun) do
+  @spec join_with(list(t()), (genomes() -> t()), (fitness() -> t())) :: t()
+  def join_with(populations, genomes_join_fun, fitness_join_fun) do
     %__MODULE__{
-      genomes: populations |> Enum.map(& &1.genomes) |> genomes_merge_fun.(),
-      fitness: populations |> Enum.map(& &1.fitness) |> merge_fitness(fitness_merge_fun),
+      genomes: populations |> Enum.map(& &1.genomes) |> genomes_join_fun.(),
+      fitness: populations |> Enum.map(& &1.fitness) |> join_fitness(fitness_join_fun),
       terminated: populations |> Enum.any?(& &1.terminated),
-      generation: populations |> Enum.map(& &1.generation) |> Enum.max()
+      generation: populations |> Enum.map(& &1.generation) |> Enum.max(),
+      representation_spec: same_representation_spec!(populations)
     }
   end
 
-  defp merge_fitness(fitness_list, merge_fun) do
+  defp join_fitness(fitness_list, join_fun) do
     if Enum.any?(fitness_list, &is_nil/1) do
       nil
     else
-      merge_fun.(fitness_list)
+      join_fun.(fitness_list)
+    end
+  end
+
+  defp same_representation_spec!(populations) do
+    populations
+    |> Enum.map(& &1.representation_spec)
+    |> Enum.uniq()
+    |> case do
+      [representation_spec] ->
+        representation_spec
+
+      _ ->
+        raise ArgumentError,
+              "the given populations have different representation spec, so they are not of compatible type"
     end
   end
 end

@@ -68,7 +68,7 @@ defmodule MeowNx.Selection do
     # TODO: validate that n is not larger than population size
     result_n = opts[:n]
 
-    sort_idx = Nx.argsort(fitness, comparator: :desc)
+    sort_idx = Nx.argsort(fitness, direction: :desc)
     top_idx = sort_idx[0..(result_n - 1)]
 
     best_genomes = Utils.gather_rows(genomes, top_idx)

@@ -44,9 +44,16 @@ defmodule Meow.Model do
 
   Each pipeline defines how a single population evolves,
   so multiple pipelines imply multi-population model.
+
+  ## Options
+
+    * `:duplicate` - how many copies of the pipeline to add.
+      Multiple copies imply a multi-population algorithm. Defaults to 1.
   """
   @spec add_pipeline(t(), Pipeline.t()) :: t()
-  def add_pipeline(model, pipeline) do
-    %{model | pipelines: model.pipelines ++ [pipeline]}
+  def add_pipeline(model, pipeline, opts \\ []) do
+    copies = Keyword.get(opts, :duplicate, 1)
+    new_pipelines = List.duplicate(pipeline, copies)
+    %{model | pipelines: model.pipelines ++ new_pipelines}
   end
 end

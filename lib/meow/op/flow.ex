@@ -1,16 +1,16 @@
 defmodule Meow.Op.Flow do
   alias Meow.{Op, Pipeline}
 
-  def split_merge(split_fun, pipelines, merge_fun) do
+  def split_join(split_fun, pipelines, join_fun) do
     requires_fitness = Enum.any?(pipelines, fn %{ops: [op | _]} -> op.requires_fitness end)
 
     %Op{
-      name: "Flow: split merge",
+      name: "Flow: split join",
       # This operation itself doesn't require fitness,
       # but if any pipeline does, then we eagerly do so as well.
       requires_fitness: requires_fitness,
       # This operation itself doesn't invalidate fitness,
-      # it just merges results of the underlying pipelines.
+      # it just joins results of the underlying pipelines.
       invalidates_fitness: false,
       impl: fn population, ctx ->
         population
@@ -19,7 +19,7 @@ defmodule Meow.Op.Flow do
         |> Enum.map(fn {population, pipeline} ->
           Pipeline.apply(population, pipeline, ctx)
         end)
-        |> merge_fun.()
+        |> join_fun.()
       end
     }
   end

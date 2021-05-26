@@ -106,7 +106,7 @@ defmodule MeowNx.Crossover do
       allow for exploration. Alpha of 0 is known as flat crossover,
       where new genes are drawn from the range `[x_i, y_i]`.
       Alpha of 0.5 provides a balance between exploration and exploitation.
-      Defaults to `0.5`
+      Defaults to `0.5`.
 
   ## References
 

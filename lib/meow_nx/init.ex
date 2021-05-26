@@ -3,7 +3,8 @@ defmodule MeowNx.Init do
 
   def real_random_uniform(n, length, min, max) do
     fn ->
-      real_random_uniform_impl(n: n, length: length, min: min, max: max)
+      genomes = real_random_uniform_impl(n: n, length: length, min: min, max: max)
+      {genomes, MeowNx.RepresentationSpec}
     end
   end
 
