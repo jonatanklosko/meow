@@ -70,7 +70,7 @@ defmodule Meow.Population do
   end
 
   @doc """
-  Concatenats the given populations into a single population.
+  Concatenates the given populations into a single population.
 
   The resulting population includes genomes from all the populations
   and is composed using `representation_spec` of the first population.
