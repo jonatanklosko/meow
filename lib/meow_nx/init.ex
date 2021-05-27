@@ -1,4 +1,8 @@
 defmodule MeowNx.Init do
+  @moduledoc """
+  Genomes initializers for the tensor representation.
+  """
+
   import Nx.Defn
 
   def real_random_uniform(n, length, min, max) do

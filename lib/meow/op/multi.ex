@@ -1,4 +1,8 @@
 defmodule Meow.Op.Multi do
+  @moduledoc """
+  Core operations relevant to multi-population algorithms.
+  """
+
   alias Meow.{Op, Pipeline, Population, Topology}
 
   @doc """

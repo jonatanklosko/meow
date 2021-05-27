@@ -1,7 +1,21 @@
 defmodule MeowNx.Op.Mutation do
+  @moduledoc """
+  Mutation operations backed by numerical definitions.
+
+  This module provides a compatibility layer for `Meow`,
+  while individual numerical definitions can be found
+  in `MeowNx.Mutation`.
+  """
+
   alias Meow.Op
   alias MeowNx.Mutation
 
+  @doc """
+  Builds a uniform replacement mutation operation.
+
+  See `MeowNx.Mutation.replace_uniform/2` for more details.
+  """
+  @spec replace_uniform(float(), float(), float()) :: Op.t()
   def replace_uniform(probability, min, max) do
     opts = [probability: probability, min: min, max: max]
 
@@ -17,8 +31,14 @@ defmodule MeowNx.Op.Mutation do
     }
   end
 
+  @doc """
+  Builds a Gaussian shift mutation operation.
+
+  See `MeowNx.Mutation.shift_gaussian/2` for more details.
+  """
+  @spec shift_gaussian(float(), keyword()) :: Op.t()
   def shift_gaussian(probability, opts \\ []) do
-    opts = [probability: probability, sigma: opts[:sigma] || 1]
+    opts = opts |> Keyword.take([:sigma]) |> Keyword.put(:probability, probability)
 
     %Op{
       name: "[Nx] Mutation shift Gaussian",

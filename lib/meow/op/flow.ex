@@ -1,6 +1,23 @@
 defmodule Meow.Op.Flow do
-  alias Meow.{Op, Pipeline}
+  @moduledoc """
+  Core operations relevant to pipeline flow.
+  """
 
+  alias Meow.{Op, Pipeline, Population}
+
+  @doc """
+  Builds an operation that introduces branching into the pipeline.
+
+  The operation splits population into a number of populations,
+  each of which is then passed through a corresponding pipeline
+  from the given list. Finally all populations are joined back
+  into a single population with the given join function.
+  """
+  @spec split_join(
+          (Population.t() -> list(Population.t())),
+          list(Pipeline.t()),
+          (list(Population.t()) -> Population.t())
+        ) :: Op.t()
   def split_join(split_fun, pipelines, join_fun) do
     requires_fitness = Enum.any?(pipelines, fn %{ops: [op | _]} -> op.requires_fitness end)
 
@@ -24,6 +41,15 @@ defmodule Meow.Op.Flow do
     }
   end
 
+  @doc """
+  Builds an operation that introduces conditional flow
+  into the pipeline.
+
+  The operation evaluates the given predicate function
+  and passes the population through either of the given
+  pipelines.
+  """
+  @spec if((Population.t() -> boolean()), Pipeline.t(), Pipeline.t()) :: Op.t()
   def if(pred_fun, on_true_pipeline, on_false_pipeline) do
     %Op{
       name: "Flow: if",

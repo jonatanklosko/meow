@@ -1,13 +1,18 @@
 defmodule Meow.MixProject do
   use Mix.Project
 
+  @version "0.1.0-dev"
+  @description "Elixir bindings to Vega-Lite"
+
   def project do
     [
       app: :meow,
-      version: "0.1.0",
-      elixir: "~> 1.11",
-      start_permanent: Mix.env() == :prod,
-      deps: deps()
+      version: @version,
+      description: @description,
+      name: "Meow",
+      elixir: "~> 1.12",
+      deps: deps(),
+      docs: docs()
     ]
   end
 
@@ -19,7 +24,16 @@ defmodule Meow.MixProject do
 
   defp deps do
     [
-      {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", branch: "main", sparse: "nx"}
+      {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", branch: "main", sparse: "nx"},
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false}
+    ]
+  end
+
+  defp docs do
+    [
+      source_url: "https://github.com/jonatanklosko/meow",
+      # source_ref: "v#{@version}"
+      source_ref: "main"
     ]
   end
 end

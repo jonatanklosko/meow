@@ -33,7 +33,7 @@ defmodule Meow.Pipeline do
   The `evaluate` function is used as necessary
   to ensure fitness is computed if needed.
   """
-  @spec apply(Population.t(), t(), Op.context()) :: Population.t()
+  @spec apply(Population.t(), t(), Op.Context.t()) :: Population.t()
   def apply(population, pipeline, ctx) do
     do_apply(population, pipeline.ops, ctx)
   end

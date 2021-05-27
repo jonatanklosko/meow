@@ -1,7 +1,21 @@
 defmodule MeowNx.Op.Selection do
+  @moduledoc """
+  Selection operations backed by numerical definitions.
+
+  This module provides a compatibility layer for `Meow`,
+  while individual numerical definitions can be found
+  in `MeowNx.Selection`.
+  """
+
   alias Meow.Op
   alias MeowNx.Selection
 
+  @doc """
+  Builds a tournament selection operation.
+
+  See `MeowNx.Selection.tournament/3` for more details.
+  """
+  @spec tournament(non_neg_integer()) :: Op.t()
   def tournament(n) do
     opts = [n: n]
 
@@ -17,6 +31,12 @@ defmodule MeowNx.Op.Selection do
     }
   end
 
+  @doc """
+  Builds a natural selection operation.
+
+  See `MeowNx.Selection.natural/3` for more details.
+  """
+  @spec natural(non_neg_integer()) :: Op.t()
   def natural(n) do
     opts = [n: n]
 

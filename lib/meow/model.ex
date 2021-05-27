@@ -14,10 +14,10 @@ defmodule Meow.Model do
         }
 
   @typedoc """
-  A function used to generate an initial genomes term
-  according to the chosen representation.
+  A function used to generate initial genomes according
+  to the chosen representation.
   """
-  @type initializer :: (() -> Population.genomes())
+  @type initializer :: (() -> {Population.genomes(), representation_spec :: module()})
 
   @typedoc """
   A function used to calculate the assessment of all

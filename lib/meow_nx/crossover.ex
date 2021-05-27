@@ -164,7 +164,6 @@ defmodule MeowNx.Crossover do
     beta_base =
       Nx.random_uniform({half_n, length})
       |> Nx.map(fn u ->
-        # TODO: does not work with BinaryBackend, see https://github.com/elixir-nx/nx/issues/395
         if Nx.less(u, 0.5) do
           2 * u
         else
