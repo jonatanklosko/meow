@@ -72,7 +72,7 @@ defmodule MeowNx.Mutation do
     * [Adaptive Mutation Strategies for Evolutionary Algorithms](https://www.dynardo.de/fileadmin/Material_Dynardo/WOST/Paper/wost2.0/AdaptiveMutation.pdf), Section 3.1
   """
   defn shift_gaussian(genomes, opts \\ []) do
-    opts = keyword!(opts, [:probability, sigma: 1])
+    opts = keyword!(opts, [:probability, sigma: 1.0])
     probability = opts[:probability]
     sigma = opts[:sigma]
 

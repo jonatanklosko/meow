@@ -7,14 +7,22 @@ defmodule Meow.Population do
   as well as information about the evolution progress.
   """
 
-  defstruct [:genomes, :fitness, :representation_spec, generation: 1, terminated: false]
+  defstruct [
+    :genomes,
+    :fitness,
+    :representation_spec,
+    generation: 1,
+    terminated: false,
+    metrics: %{}
+  ]
 
   @type t :: %__MODULE__{
           genomes: genomes(),
           fitness: fitness(),
           representation_spec: module(),
           generation: non_neg_integer(),
-          terminated: boolean()
+          terminated: boolean(),
+          metrics: %{}
         }
 
   @typedoc """
@@ -108,7 +116,10 @@ defmodule Meow.Population do
       fitness: populations |> Enum.map(& &1.fitness) |> join_fitness(fitness_join_fun),
       terminated: populations |> Enum.any?(& &1.terminated),
       generation: populations |> Enum.map(& &1.generation) |> Enum.max(),
-      representation_spec: same_representation_spec!(populations)
+      representation_spec: same_representation_spec!(populations),
+      # This is somehow arbitrary, but we cannot reasonably merge statistics
+      # and this approach should generally work as expected
+      metrics: Enum.max_by(populations, & &1.generation).metrics
     }
   end
 
