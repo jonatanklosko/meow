@@ -109,4 +109,5 @@ defmodule Rastrigin do
 end
 
 model = Rastrigin.model_simple_multi()
-:timer.tc(fn -> Meow.Runner.run(model) end) |> IO.inspect()
+
+Meow.Runner.run(model) |> IO.inspect()

@@ -12,6 +12,19 @@ defmodule Meow.Runner do
   """
   @spec run(Model.t()) :: list(Population.t())
   def run(model) do
+    {time, {times, populations}} = :timer.tc(&run_model/1, [model])
+
+    average_time = (Enum.sum(times) / length(times)) |> Float.round()
+
+    IO.puts("""
+    Total time: #{time / 1_000_000}s
+    Population time (average): #{average_time / 1_000_000}s\
+    """)
+
+    populations
+  end
+
+  defp run_model(model) do
     runner_pid = self()
 
     pids =
@@ -23,19 +36,21 @@ defmodule Meow.Runner do
           receive do
             {:initialize, pids} ->
               ctx = %{evaluate: model.evaluate, population_pids: pids}
-              final_population = run_population(population, pipeline, ctx)
-              send(runner_pid, {:finished, final_population})
+              {time, final_population} = :timer.tc(&run_population/3, [population, pipeline, ctx])
+              send(runner_pid, {:finished, self(), time, final_population})
           end
         end)
       end)
 
     for pid <- pids, do: send(pid, {:initialize, pids})
 
-    Enum.map(pids, fn _ ->
+    pids
+    |> Enum.map(fn pid ->
       receive do
-        {:finished, population} -> population
+        {:finished, ^pid, time, population} -> {time, population}
       end
     end)
+    |> Enum.unzip()
   end
 
   defp run_population(population, pipeline, ctx) do
