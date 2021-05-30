@@ -12,6 +12,17 @@ defmodule Meow.Runner do
   """
   @spec run(Model.t()) :: list(Population.t())
   def run(model) do
+    {time, {times, populations}} = :timer.tc(&run_model/1, [model])
+
+    IO.write([
+      format_times(time, times),
+      format_best_individual(populations)
+    ])
+
+    populations
+  end
+
+  defp run_model(model) do
     runner_pid = self()
 
     pids =
@@ -23,19 +34,21 @@ defmodule Meow.Runner do
           receive do
             {:initialize, pids} ->
               ctx = %{evaluate: model.evaluate, population_pids: pids}
-              final_population = run_population(population, pipeline, ctx)
-              send(runner_pid, {:finished, final_population})
+              {time, final_population} = :timer.tc(&run_population/3, [population, pipeline, ctx])
+              send(runner_pid, {:finished, self(), time, final_population})
           end
         end)
       end)
 
     for pid <- pids, do: send(pid, {:initialize, pids})
 
-    Enum.map(pids, fn _ ->
+    pids
+    |> Enum.map(fn pid ->
       receive do
-        {:finished, population} -> population
+        {:finished, ^pid, time, population} -> {time, population}
       end
     end)
+    |> Enum.unzip()
   end
 
   defp run_population(population, pipeline, ctx) do
@@ -47,6 +60,37 @@ defmodule Meow.Runner do
       population
       |> Map.update!(:generation, &(&1 + 1))
       |> run_population(pipeline, ctx)
+    end
+  end
+
+  defp format_times(total_time, times) do
+    average_time = (Enum.sum(times) / length(times)) |> Float.round()
+
+    """
+    \n====== Summary ======
+
+    Total time: #{total_time / 1_000_000}s
+    Population time (average): #{average_time / 1_000_000}s
+    """
+  end
+
+  defp format_best_individual(populations) do
+    populations
+    |> Enum.map(fn %{metrics: metrics} -> metrics[:best_individual] end)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.max_by(& &1.fitness, fn -> nil end)
+    |> case do
+      nil ->
+        ""
+
+      %{fitness: fitness, genome: genome, generation: generation} ->
+        """
+        \n====== Best individual ======
+
+        Fitness: #{fitness}
+        Generation: #{generation}
+        Genome: #{inspect(genome)}
+        """
     end
   end
 end
