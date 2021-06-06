@@ -99,6 +99,5 @@ You can find more examples in the [examples](https://github.com/jonatanklosko/me
 ### Interactive exploration
 
 To iterate on different versions of your algorithm in a more interactive fashion
-we recommend using [Livebook](https://github.com/elixir-nx/livebook).
-
-*Note: In the future we will provide a number of notebooks to help you get started.*
+we recommend using [Livebook](https://github.com/elixir-nx/livebook). For a quick
+introduction you can import the [Rastrigin notebook](https://github.com/jonatanklosko/meow/blob/main/notebooks/rastrigin_intro.livemd).

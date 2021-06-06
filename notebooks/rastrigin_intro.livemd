@@ -1,0 +1,215 @@
+# Rastrigin
+
+## Setup
+
+First we need to bring in the necessary dependencies. Until the first release
+Meow needs to be installed directly from GitHub. We also need
+[Nx](https://github.com/elixir-nx/nx/tree/main/nx) for numerical definitions
+and [EXLA](https://github.com/elixir-nx/nx/tree/main/exla) to compile them effectively.
+
+```elixir
+Mix.install([
+  {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
+  {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
+  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
+])
+```
+
+Let's also add some aliases to make the algorithm definitions less verbose.
+
+```elixir
+alias Meow.{Model, Pipeline, Population, Topology}
+alias Meow.Op.{Termination, Flow, Multi}
+# We are going to use the Nx Meow integration
+alias MeowNx.Init
+alias MeowNx.Op.{Selection, Crossover, Mutation, Metric}
+```
+
+## Objective
+
+The first step is defining the optimisation objective function.
+In this example we will be working with the
+[Rastrigin function](https://en.wikipedia.org/wiki/Rastrigin_function),
+which looks like so:
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Rastrigin_function.png/800px-Rastrigin_function.png)
+
+The function has its minimum in **0** and it actually has the value of 0.
+However, as you can see the function has numerous local optima, which could
+pose problems to some optimisation methods. We will see how evolutionary
+algorithms can be of help here. Rastrigin function is easily generalized
+to any number of dimensions, allowing to adjust the difficulty of the problem.
+
+### Fitness evaluation
+
+In evolutionary terms, the objective function is referred to as fitness,
+with every solution being a single individual. An evolutionary algorithm
+tries to find individuals with the highest fitness (thus the best solutions).
+
+Translating this into Meow, we need to define the fitness function,
+but instead of assessing a single solution, the function should
+assess a whole group of them. This approach gives you more freedom
+in terms of implementation. In the example we will represent the population
+as a 2-dimensional Nx tensor, and consequently we can calculate fitness for
+all individuals at once!
+
+```elixir
+defmodule Problem do
+  import Nx.Defn
+
+  @two_pi 2 * :math.pi()
+
+  @defn_compiler EXLA
+  defn evaluate_rastrigin(genomes) do
+    sums =
+      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
+      |> Nx.sum(axes: [1])
+
+    -sums
+  end
+end
+```
+
+The above numerical definition receives a 2-dimensional tensor,
+where every row is a single solution. It then calculates the value
+of Rastrigin function for each of them and returns that as
+a 1-dimensional tensor. Note that we actually flip the function
+(multiply the values by -1), so that we deal with maximisation problem.
+
+## The first algorithm
+
+In Meow an evolutionary algorithm is defined as a pipeline of operations
+that the population goes through until the termination criteria is met.
+This approach is heavily declarative and gives us much flexibility.
+You can think of it as composing the algorithm out of basic building blocks.
+
+Let's define our first algorithm. We will initialize the population with 100
+random individuals, each with 100 floating-point genomes (meaning we optimise
+100-dimensional Rastrigin function).
+
+```elixir
+model =
+  Model.new(
+    # Initialize the population with 100 random individuals
+    Init.real_random_uniform(100, 100, -5.12, 5.12),
+    # Specify the evaluation function that we are trying to maximise
+    &Problem.evaluate_rastrigin/1
+  )
+  |> Model.add_pipeline(
+    # A single pipeline corresponds to a single population
+    Pipeline.new([
+      # Define a number of evolutionary steps that the population goes through
+      Selection.tournament(100),
+      Crossover.uniform(0.5),
+      Mutation.replace_uniform(0.001, -5.12, 5.12),
+      Metric.best_individual(),
+      Termination.max_generations(5_000)
+    ])
+  )
+
+# Execute the above model
+Meow.Runner.run(model)
+```
+
+By looking at the best genome we can infer that the solution
+we are looking for is close **0**. But let's explore other algorithms!
+
+## Non-linear pipeline
+
+In the above algorithm, we replace the whole population with new
+100 individuals every generation. This means that promising solutions
+may be lost by unfortunate crossover. To overcome this, we could keep
+the best 20% individuals in the population and replace the remaining 80%
+with new ones.
+
+This can be achieved by splitting the pipeline into two branches:
+
+* one that selects the best 20% of individuals
+* one that generates 80% new individuals using the evolutionary operations
+
+Then we can just combine the results into a single population.
+
+Let's see this in practice, together with other crossover and muation types.
+
+```elixir
+alias Meow.Population
+alias Meow.Op.Flow
+
+model =
+  Model.new(
+    Init.real_random_uniform(100, 100, -5.12, 5.12),
+    &Problem.evaluate_rastrigin/1
+  )
+  |> Model.add_pipeline(
+    Pipeline.new([
+      # Here the pipeline branches out into two sub-pipelines,
+      # which results are then joined into a single population.
+      Flow.split_join(
+        &Population.duplicate(&1, 2),
+        [
+          Pipeline.new([
+            Selection.natural(20)
+          ]),
+          Pipeline.new([
+            Selection.tournament(80),
+            Crossover.blend_alpha(0.5),
+            Mutation.shift_gaussian(0.001)
+          ])
+        ],
+        &Population.concatenate/1
+      ),
+      Metric.best_individual(),
+      Termination.max_generations(5_000)
+    ])
+  )
+
+Meow.Runner.run(model)
+```
+
+This gives us a much more precise solution! The fitness is closer to 0
+by several orders of magnitude, and it's pretty clear that the solution
+is the **0** vector.
+
+## Multi-population algorithm
+
+So far we saw two different algorithms, both involving just a single population.
+Meow does not stop there and allows us to define multi-population algorithms!
+
+Introducing multiple populations is as easy as adding multiple pipelines
+to the algorithm - each for a single population. However, this alone isn't
+much different from running the algorithm several times in a row. We need
+to introduce some communication between the populations! One technique
+is called the Island Model, where each population evolves on its own island
+and once in a while some individuals migrate from one island to another.
+
+Let's modify the first algorithm to include migration steps.
+We will emigrate 5 best individuals every 10 generations
+and use the ring topology.
+
+```elixir
+alias Meow.Topology
+alias Meow.Op.Multi
+
+model =
+  Model.new(
+    Init.real_random_uniform(100, 100, -5.12, 5.12),
+    &Problem.evaluate_rastrigin/1
+  )
+  |> Model.add_pipeline(
+    Pipeline.new([
+      Selection.tournament(100),
+      Crossover.uniform(0.5),
+      Mutation.shift_gaussian(0.001),
+      Multi.emigrate(Selection.natural(5), &Topology.ring/2, interval: 10),
+      Multi.immigrate(&Selection.natural(&1), interval: 10),
+      Metric.best_individual(),
+      Termination.max_generations(5_000)
+    ]),
+    # Instead of calling Model.add_pipeline 3 times,
+    # we can just tell it to replicate the pipeline
+    # that number of times
+    duplicate: 3
+  )
+
+Meow.Runner.run(model)
+```
