@@ -1,8 +1,8 @@
 Mix.install([
-  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
+  {:meow, path: __DIR__ |> Path.join("..") |> Path.expand()},
   {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
-  {:benchee, "~> 1.0"},
-  {:meow, path: __DIR__ |> Path.join("..") |> Path.expand()}
+  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
+  {:exla_precompiled, "~> 0.1.0-dev", github: "jonatanklosko/exla_precompiled"}
 ])
 
 defmodule Rastrigin do

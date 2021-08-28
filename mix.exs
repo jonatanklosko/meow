@@ -2,7 +2,7 @@ defmodule Meow.MixProject do
   use Mix.Project
 
   @version "0.1.0-dev"
-  @description "Elixir bindings to Vega-Lite"
+  @description "Multipopulation evolutionary algorithms in Elixir"
 
   def project do
     [
