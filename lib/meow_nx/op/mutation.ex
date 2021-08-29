@@ -32,6 +32,28 @@ defmodule MeowNx.Op.Mutation do
   end
 
   @doc """
+  Builds a uniform replacement mutation operation.
+
+  See `MeowNx.Mutation.replace_uniform/2` for more details.
+  """
+  # TODO: naming/grouping of real/binary related functions
+  @spec binary_replace_uniform(float()) :: Op.t()
+  def binary_replace_uniform(probability) do
+    opts = [probability: probability]
+
+    %Op{
+      name: "[Nx] Mutation replace uniform",
+      requires_fitness: false,
+      invalidates_fitness: true,
+      impl: fn population, _ctx ->
+        Op.map_genomes(population, fn genomes ->
+          Nx.Defn.jit(&Mutation.binary_replace_uniform(&1, opts), [genomes], compiler: EXLA)
+        end)
+      end
+    }
+  end
+
+  @doc """
   Builds a Gaussian shift mutation operation.
 
   See `MeowNx.Mutation.shift_gaussian/2` for more details.
