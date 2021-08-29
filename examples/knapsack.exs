@@ -23,6 +23,8 @@ defmodule Problem do
   @object_weights Nx.tensor([23, 26, 20, 18, 32, 27, 29, 26, 30, 27])
   @weight_limit Nx.tensor(67)
 
+  def size, do: Nx.size(@profits)
+
   @defn_compiler EXLA
   defn evaluate_knapsack(genomes) do
     total_profit = Nx.dot(genomes, @profits)
@@ -36,7 +38,7 @@ alias Meow.{Model, Pipeline}
 
 model =
   Model.new(
-    MeowNx.Init.binary_random_uniform(100, 10),
+    MeowNx.Init.binary_random_uniform(100, Problem.size()),
     &Problem.evaluate_knapsack/1
   )
   |> Model.add_pipeline(

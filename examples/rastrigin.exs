@@ -15,6 +15,8 @@ defmodule Rastrigin do
   alias MeowNx.Init
   alias MeowNx.Op.{Selection, Crossover, Mutation, Metric}
 
+  def size, do: 100
+
   @two_pi 2 * :math.pi()
 
   @defn_compiler EXLA
@@ -28,7 +30,7 @@ defmodule Rastrigin do
 
   def model_simple() do
     Model.new(
-      Init.real_random_uniform(100, 100, -5.12, 5.12),
+      Init.real_random_uniform(100, size(), -5.12, 5.12),
       &evaluate/1
     )
     |> Model.add_pipeline(
@@ -44,7 +46,7 @@ defmodule Rastrigin do
 
   def model_simple_multi() do
     Model.new(
-      Init.real_random_uniform(100, 100, -5.12, 5.12),
+      Init.real_random_uniform(100, size(), -5.12, 5.12),
       &evaluate/1
     )
     |> Model.add_pipeline(
@@ -63,7 +65,7 @@ defmodule Rastrigin do
 
   def model_branching() do
     Model.new(
-      Init.real_random_uniform(100, 100, -5.12, 5.12),
+      Init.real_random_uniform(100, size(), -5.12, 5.12),
       &evaluate/1
     )
     |> Model.add_pipeline(

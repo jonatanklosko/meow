@@ -58,6 +58,8 @@ all individuals at once!
 defmodule Problem do
   import Nx.Defn
 
+  def size, do: 100
+
   @two_pi 2 * :math.pi()
 
   @defn_compiler EXLA
@@ -92,7 +94,7 @@ random individuals, each with 100 floating-point genomes (meaning we optimise
 model =
   Model.new(
     # Initialize the population with 100 random individuals
-    Init.real_random_uniform(100, 100, -5.12, 5.12),
+    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     # Specify the evaluation function that we are trying to maximise
     &Problem.evaluate_rastrigin/1
   )
@@ -138,7 +140,7 @@ alias Meow.Op.Flow
 
 model =
   Model.new(
-    Init.real_random_uniform(100, 100, -5.12, 5.12),
+    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     &Problem.evaluate_rastrigin/1
   )
   |> Model.add_pipeline(
@@ -193,7 +195,7 @@ alias Meow.Op.Multi
 
 model =
   Model.new(
-    Init.real_random_uniform(100, 100, -5.12, 5.12),
+    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     &Problem.evaluate_rastrigin/1
   )
   |> Model.add_pipeline(

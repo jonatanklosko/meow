@@ -12,6 +12,8 @@ Mix.install([
 defmodule Problem do
   import Nx.Defn
 
+  def size, do: 100
+
   @defn_compiler EXLA
   defn evaluate_one_max(genomes) do
     Nx.sum(genomes, axes: [1])
@@ -22,7 +24,7 @@ alias Meow.{Model, Pipeline}
 
 model =
   Model.new(
-    MeowNx.Init.binary_random_uniform(100, 100),
+    MeowNx.Init.binary_random_uniform(100, Problem.size()),
     &Problem.evaluate_one_max/1
   )
   |> Model.add_pipeline(
