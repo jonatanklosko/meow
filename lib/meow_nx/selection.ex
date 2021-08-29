@@ -69,9 +69,87 @@ defmodule MeowNx.Selection do
     sort_idx = Nx.argsort(fitness, direction: :desc)
     top_idx = sort_idx[0..(result_n - 1)]
 
-    best_genomes = Nx.take(genomes, top_idx)
-    best_fitness = Nx.take(fitness, top_idx)
+    take_individuals(genomes, fitness, top_idx)
+  end
 
-    {best_genomes, best_fitness}
+  @doc """
+  Performs roulette selection.
+
+  Returns a `{genomes, fitness}` tuple with the selected individuals.
+
+  Draws a random individual `n` times, such that the probability
+  of each individual being selected is proportional to their fitness.
+
+  Keep in mind that individuals with fitness less or equal to 0
+  have no chance of being selected.
+
+  ## Options
+
+    * `:n` - the number of individuals to select. Required.
+
+  ## References
+
+    * [Fitness proportionate selection](https://en.wikipedia.org/wiki/Fitness_proportionate_selection)
+  """
+  defn roulette_selection(genomes, fitness, opts \\ []) do
+    # TODO: support percentage, something like {:fraction, 0.2}
+    opts = keyword!(opts, [:n])
+    result_n = opts[:n]
+
+    fitness_cumulative = MeowNx.Utils.cumulative_sum(fitness)
+    fitness_sum = fitness_cumulative[-1]
+
+    # Random points on the cumulative ruler
+    points = Nx.random_uniform({result_n, 1}, 0, fitness_sum)
+    idx = cumulative_points_to_indices(fitness_cumulative, points)
+
+    take_individuals(genomes, fitness, idx)
+  end
+
+  @doc """
+  Performs stochastic universal sampling.
+
+  Essentially an unbiased version of `roulette_selection/3`.
+
+  Technically, this approach devides the fitness "cumulative ruler"
+  into evenly spaced intervals and uses a single random value to pick
+  one individual per interval.
+
+  ## Options
+
+    * `:n` - the number of individuals to select. Required.
+
+  ## References
+
+    * [Stochastic universal sampling](https://en.wikipedia.org/wiki/Stochastic_universal_sampling)
+  """
+  defn stochastic_universal_sampling(genomes, fitness, opts \\ []) do
+    # TODO: support percentage, something like {:fraction, 0.2}
+    opts = keyword!(opts, [:n])
+    result_n = opts[:n]
+
+    fitness_cumulative = MeowNx.Utils.cumulative_sum(fitness)
+    fitness_sum = fitness_cumulative[-1]
+
+    # Random points on the cumulative ruler, each in its own interval
+    step = Nx.divide(fitness_sum, result_n)
+    start = Nx.random_uniform({}, 0, step)
+    points = Nx.iota({result_n, 1}) |> Nx.multiply(step) |> Nx.add(start)
+    idx = cumulative_points_to_indices(fitness_cumulative, points)
+
+    take_individuals(genomes, fitness, idx)
+  end
+
+  # Converts points on a "cumulative ruler" to indices
+  defnp cumulative_points_to_indices(fitness_cumulative, points) do
+    {n} = Nx.shape(fitness_cumulative)
+
+    points
+    |> Nx.less(Nx.reshape(fitness_cumulative, {1, n}))
+    |> Nx.argmax(axis: 1)
+  end
+
+  defnp take_individuals(genomes, fitness, idx) do
+    {Nx.take(genomes, idx), Nx.take(fitness, idx)}
   end
 end
