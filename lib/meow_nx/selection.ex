@@ -9,8 +9,6 @@ defmodule MeowNx.Selection do
 
   import Nx.Defn
 
-  alias MeowNx.Utils
-
   @doc """
   Performs tournament selection with tournament size of 2.
 
@@ -33,11 +31,11 @@ defmodule MeowNx.Selection do
     idx1 = Nx.random_uniform({result_n}, 0, n, type: {:u, 32})
     idx2 = Nx.random_uniform({result_n}, 0, n, type: {:u, 32})
 
-    parents1 = Utils.gather_rows(genomes, idx1)
-    fitness1 = Utils.gather_scalars(fitness, idx1)
+    parents1 = Nx.take(genomes, idx1)
+    fitness1 = Nx.take(fitness, idx1)
 
-    parents2 = Utils.gather_rows(genomes, idx2)
-    fitness2 = Utils.gather_scalars(fitness, idx2)
+    parents2 = Nx.take(genomes, idx2)
+    fitness2 = Nx.take(fitness, idx2)
 
     wins? = Nx.greater(fitness1, fitness2)
     winning_fitness = Nx.select(wins?, fitness1, fitness2)
@@ -71,8 +69,8 @@ defmodule MeowNx.Selection do
     sort_idx = Nx.argsort(fitness, direction: :desc)
     top_idx = sort_idx[0..(result_n - 1)]
 
-    best_genomes = Utils.gather_rows(genomes, top_idx)
-    best_fitness = Utils.gather_scalars(fitness, top_idx)
+    best_genomes = Nx.take(genomes, top_idx)
+    best_fitness = Nx.take(fitness, top_idx)
 
     {best_genomes, best_fitness}
   end

@@ -3,11 +3,8 @@
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
   {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
-  # To install EXLA you need a couple prerequisites (https://github.com/elixir-nx/nx/tree/main/exla#installation).
-  # Also note that the first installation takes a long time, because it involves
-  # compiling XLA from source. This will however be streamlined in the future,
-  # once pre-compiled binaries are available as part of EXLA.
-  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
+  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
+  {:exla_precompiled, "~> 0.1.0-dev", github: "jonatanklosko/exla_precompiled"}
 ])
 
 # Define the evaluation function, in this case using Nx to work with MeowNx
