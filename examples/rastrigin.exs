@@ -1,5 +1,8 @@
+# See notebooks/rastrigin_intro.livemd for more insights
+
 Mix.install([
-  {:meow, path: __DIR__ |> Path.join("..") |> Path.expand()},
+  {:meow, path: Path.expand("..", __DIR__)},
+  # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
   {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
   {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
   {:exla_precompiled, "~> 0.1.0-dev", github: "jonatanklosko/exla_precompiled"}
@@ -11,6 +14,17 @@ defmodule Rastrigin do
   alias Meow.Op.{Termination, Flow, Multi}
   alias MeowNx.Init
   alias MeowNx.Op.{Selection, Crossover, Mutation, Metric}
+
+  @two_pi 2 * :math.pi()
+
+  @defn_compiler EXLA
+  defn evaluate(genomes) do
+    sums =
+      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
+      |> Nx.sum(axes: [1])
+
+    -sums
+  end
 
   def model_simple() do
     Model.new(
@@ -75,19 +89,12 @@ defmodule Rastrigin do
       ])
     )
   end
-
-  @two_pi 2 * :math.pi()
-
-  @defn_compiler EXLA
-  defn evaluate(genomes) do
-    sums =
-      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
-      |> Nx.sum(axes: [1])
-
-    -sums
-  end
 end
 
+# Pick one
+
+# model = Rastrigin.model_simple()
+# model = Rastrigin.model_simple_multi()
 model = Rastrigin.model_branching()
 
 Meow.Runner.run(model)
