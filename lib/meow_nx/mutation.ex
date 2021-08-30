@@ -50,6 +50,33 @@ defmodule MeowNx.Mutation do
   end
 
   @doc """
+  Performs simple uniform replacement mutation.
+
+  Same as `replace_uniform/2` adjusted for the binary
+  representation.
+
+  ## Options
+
+    * `:probability` - the probability of each gene
+      getting mutated. Required.
+
+  """
+  # TODO: naming/grouping of real/binary related functions
+  defn binary_replace_uniform(genomes, opts \\ []) do
+    opts = keyword!(opts, [:probability])
+    probability = opts[:probability]
+
+    shape = Nx.shape(genomes)
+
+    # Mutate each gene separately with the given probability
+    mutate? = Nx.random_uniform(shape) |> Nx.less(probability)
+    # EXLA requires random_uniform to generate integers at least
+    # 32 bits in size, so we cast the type afterwards
+    mutated = Nx.random_uniform(shape, 0, 2) |> Nx.as_type({:u, 8})
+    Nx.select(mutate?, mutated, genomes)
+  end
+
+  @doc """
   Performs Gaussian shift mutation.
 
   Adds a random value to every mutated gene.

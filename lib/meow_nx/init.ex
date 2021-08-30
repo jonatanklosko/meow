@@ -21,4 +21,19 @@ defmodule MeowNx.Init do
 
     Nx.random_uniform({n, length}, min, max)
   end
+
+  def binary_random_uniform(n, length) do
+    fn ->
+      genomes = binary_random_uniform_impl(n: n, length: length)
+      {genomes, MeowNx.RepresentationSpec}
+    end
+  end
+
+  defn binary_random_uniform_impl(opts \\ []) do
+    opts = keyword!(opts, [:n, :length])
+    n = opts[:n]
+    length = opts[:length]
+
+    Nx.random_uniform({n, length}, 0, 2) |> Nx.as_type({:u, 8})
+  end
 end
