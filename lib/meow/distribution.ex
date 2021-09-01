@@ -165,7 +165,7 @@ defmodule Meow.Distribution do
   Enters worker mode.
 
   Waits for the leader node to initiate a connection, then
-  it starts monitoring this that and blocks until it terminates.
+  starts monitoring this node and blocks until it terminates.
 
   Raises `RuntimeError` if the initial message is not received
   within the optional timeout.
