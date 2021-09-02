@@ -9,6 +9,7 @@ defmodule MeowNx.Op.Selection do
 
   alias Meow.Op
   alias MeowNx.Selection
+  alias MeowNx.Utils
 
   @doc """
   Builds a tournament selection operation.
@@ -23,9 +24,13 @@ defmodule MeowNx.Op.Selection do
       name: "[Nx] Selection tournament",
       requires_fitness: true,
       invalidates_fitness: false,
-      impl: fn population, _ctx ->
+      impl: fn population, ctx ->
         Op.map_genomes_and_fitness(population, fn genomes, fitness ->
-          Nx.Defn.jit(&Selection.tournament(&1, &2, opts), [genomes, fitness], compiler: EXLA)
+          Nx.Defn.jit(
+            &Selection.tournament(&1, &2, opts),
+            [genomes, fitness],
+            Utils.jit_opts(ctx)
+          )
         end)
       end
     }
@@ -44,9 +49,9 @@ defmodule MeowNx.Op.Selection do
       name: "[Nx] Selection natural",
       requires_fitness: true,
       invalidates_fitness: false,
-      impl: fn population, _ctx ->
+      impl: fn population, ctx ->
         Op.map_genomes_and_fitness(population, fn genomes, fitness ->
-          Nx.Defn.jit(&Selection.natural(&1, &2, opts), [genomes, fitness], compiler: EXLA)
+          Nx.Defn.jit(&Selection.natural(&1, &2, opts), [genomes, fitness], Utils.jit_opts(ctx))
         end)
       end
     }

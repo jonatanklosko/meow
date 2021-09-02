@@ -5,6 +5,7 @@ defmodule Meow.Runner do
   """
 
   alias Meow.{Population, Pipeline, Model}
+  alias Meow.Op.Context
 
   @doc """
   Iteratively transforms populations according to the given
@@ -35,6 +36,10 @@ defmodule Meow.Runner do
       configured via `:nodes` and every population must be
       in exactly one of the groups. By default populations
       are split into even groups.
+
+    * `:global_opts` - options available to all operations.
+      This may be useful for some integrations, for example
+      to specify JIT compilation options when using `MeowNx`.
   """
   @spec run(Model.t(), keyword()) :: list(Population.t())
   def run(model, opts \\ []) do
@@ -51,7 +56,10 @@ defmodule Meow.Runner do
 
     validate_population_groups!(population_groups, number_of_populations, number_of_nodes)
 
-    {time, {times, populations}} = :timer.tc(&run_model/3, [model, nodes, population_groups])
+    global_opts = opts[:global_opts] || []
+
+    {time, {times, populations}} =
+      :timer.tc(&run_model/4, [model, nodes, population_groups, global_opts])
 
     IO.write([
       format_times(time, times),
@@ -100,7 +108,7 @@ defmodule Meow.Runner do
     Meow.Utils.split_evenly(indices, number_of_nodes)
   end
 
-  defp run_model(model, nodes, population_groups) do
+  defp run_model(model, nodes, population_groups, global_opts) do
     runner_pid = self()
 
     population_node_mapping =
@@ -121,7 +129,12 @@ defmodule Meow.Runner do
 
           receive do
             {:initialize, pids} ->
-              ctx = %{evaluate: model.evaluate, population_pids: pids}
+              ctx = %Context{
+                evaluate: model.evaluate,
+                population_pids: pids,
+                global_opts: global_opts
+              }
+
               {time, final_population} = :timer.tc(&run_population/3, [population, pipeline, ctx])
               send(runner_pid, {:finished, self(), time, final_population})
           end

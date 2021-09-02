@@ -16,5 +16,15 @@ defmodule MeowNx do
 
   `MeowNx` provides a number of numerical definitions,
   as well as `Meow` operation definitions on top of that.
+
+  ## Configuration
+
+  When running a model using `MeoxNx` operations the following
+  global options are available (passed to runner):
+
+    * `:jit_opts` - options passed to `Nx.Defn.jit` when
+      compiling the underlying numerical definitions. This
+      defaults to `[compiler: EXLA]` if `exla` is available,
+      and to `[]` otherwise.
   """
 end
