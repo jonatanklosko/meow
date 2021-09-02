@@ -81,4 +81,55 @@ defmodule MeowNx.Utils do
       Nx.iota({n, n}, axis: 0)
     )
   end
+
+  # Macros for use in defn
+
+  @doc """
+  Normalizes the given size with respect to the base tensor.
+
+  The size may be either:
+
+    * integer - an absolute size
+
+    * float - a relative size, fraction of the base size
+
+  The base size is taken from the first dimension of the
+  given tensor.
+
+  ## Options
+
+    * `:limit_to_base` - enforces that the resulting size
+      must not exceed the base size
+  """
+  defmacro resolve_n(n, base_t, opts \\ []) do
+    quote bind_quoted: [n: n, base_t: base_t, opts: opts] do
+      base_n = base_t |> Nx.shape() |> elem(0)
+
+      Nx.Defn.Kernel.transform({n, base_n}, fn {n, base_n} ->
+        MeowNx.Utils.do_resolve_n(n, base_n, opts)
+      end)
+    end
+  end
+
+  @doc false
+  def do_resolve_n(n, base_n, opts) when is_float(n) do
+    n = round(base_n * n)
+    validate_n!(n, base_n, opts)
+    n
+  end
+
+  def do_resolve_n(n, base_n, opts) when is_integer(n) do
+    validate_n!(n, base_n, opts)
+    n
+  end
+
+  defp validate_n!(n, base_n, opts) do
+    if n < 0 do
+      raise ArgumentError, "expected size to be a positive number, but resolved to: #{n}"
+    end
+
+    if opts[:limit_to_base] && n > base_n do
+      raise ArgumentError, "expected size to not exceed the base size, but #{n} > #{base_n}"
+    end
+  end
 end

@@ -40,7 +40,7 @@ model =
   )
   |> Model.add_pipeline(
     Pipeline.new([
-      MeowNx.Op.Selection.tournament(100),
+      MeowNx.Op.Selection.tournament(1.0),
       MeowNx.Op.Crossover.uniform(0.5),
       MeowNx.Op.Mutation.shift_gaussian(0.001),
       Meow.Op.Multi.emigrate(
