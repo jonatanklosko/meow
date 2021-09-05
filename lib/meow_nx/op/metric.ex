@@ -9,6 +9,7 @@ defmodule MeowNx.Op.Metric do
 
   alias Meow.Op
   alias MeowNx.Metric
+  alias MeowNx.Utils
 
   @doc """
   Builds a metric operation loging the best individual.
@@ -21,12 +22,12 @@ defmodule MeowNx.Op.Metric do
       name: "Metric: best individual",
       requires_fitness: true,
       invalidates_fitness: false,
-      impl: fn population, _ctx ->
-        # TODO: make compiler (and generally other options)
-        # configurable globally for the model
+      impl: fn population, ctx ->
         {best_genome, best_fitness} =
-          Nx.Defn.jit(&Metric.best_individual/2, [population.genomes, population.fitness],
-            compiler: EXLA
+          Nx.Defn.jit(
+            &Metric.best_individual/2,
+            [population.genomes, population.fitness],
+            Utils.jit_opts(ctx)
           )
 
         best_individual = %{

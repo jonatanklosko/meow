@@ -9,6 +9,7 @@ defmodule MeowNx.Op.Mutation do
 
   alias Meow.Op
   alias MeowNx.Mutation
+  alias MeowNx.Utils
 
   @doc """
   Builds a uniform replacement mutation operation.
@@ -23,9 +24,9 @@ defmodule MeowNx.Op.Mutation do
       name: "[Nx] Mutation replace uniform",
       requires_fitness: false,
       invalidates_fitness: true,
-      impl: fn population, _ctx ->
+      impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
-          Nx.Defn.jit(&Mutation.replace_uniform(&1, opts), [genomes], compiler: EXLA)
+          Nx.Defn.jit(&Mutation.replace_uniform(&1, opts), [genomes], Utils.jit_opts(ctx))
         end)
       end
     }
@@ -45,9 +46,9 @@ defmodule MeowNx.Op.Mutation do
       name: "[Nx] Mutation replace uniform",
       requires_fitness: false,
       invalidates_fitness: true,
-      impl: fn population, _ctx ->
+      impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
-          Nx.Defn.jit(&Mutation.binary_replace_uniform(&1, opts), [genomes], compiler: EXLA)
+          Nx.Defn.jit(&Mutation.binary_replace_uniform(&1, opts), [genomes], Utils.jit_opts(ctx))
         end)
       end
     }
@@ -66,9 +67,9 @@ defmodule MeowNx.Op.Mutation do
       name: "[Nx] Mutation shift Gaussian",
       requires_fitness: false,
       invalidates_fitness: true,
-      impl: fn population, _ctx ->
+      impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
-          Nx.Defn.jit(&Mutation.shift_gaussian(&1, opts), [genomes], compiler: EXLA)
+          Nx.Defn.jit(&Mutation.shift_gaussian(&1, opts), [genomes], Utils.jit_opts(ctx))
         end)
       end
     }
