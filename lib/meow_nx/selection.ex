@@ -5,31 +5,37 @@ defmodule MeowNx.Selection do
   Selection is a genetic operation that picks a number
   of individuals out of a population. Oftentimes those
   individuals are then used for breeding (crossover).
+
+  All of the selection functions require selection size `:n`,
+  which can be either absolute (integer) or relative to
+  population size (float). For instance, if you want to select
+  80% of the population, you can simply specify the size as `0.8`.
   """
 
   import Nx.Defn
+
+  require MeowNx.Utils
 
   @doc """
   Performs tournament selection with tournament size of 2.
 
   Returns a `{genomes, fitness}` tuple with the selected individuals.
 
-  Randomly creates `n` groups of individuals (2 per group)
-  and picks the best individual from each group according to fitness.
+  Randomly creates `n` groups of individuals (2 per group) and picks
+  the best individual from each group according to fitness.
 
   ## Options
 
     * `:n` - the number of individuals to select. Required.
   """
   defn tournament(genomes, fitness, opts \\ []) do
-    # TODO: support percentage, something like {:fraction, 0.2}
     opts = keyword!(opts, [:n])
-    result_n = opts[:n]
+    n = MeowNx.Utils.resolve_n(opts[:n], genomes)
 
-    {n, length} = Nx.shape(genomes)
+    {base_n, length} = Nx.shape(genomes)
 
-    idx1 = Nx.random_uniform({result_n}, 0, n, type: {:u, 32})
-    idx2 = Nx.random_uniform({result_n}, 0, n, type: {:u, 32})
+    idx1 = Nx.random_uniform({n}, 0, base_n, type: {:u, 32})
+    idx2 = Nx.random_uniform({n}, 0, base_n, type: {:u, 32})
 
     parents1 = Nx.take(genomes, idx1)
     fitness1 = Nx.take(fitness, idx1)
@@ -42,8 +48,8 @@ defmodule MeowNx.Selection do
 
     winning_genomes =
       wins?
-      |> Nx.reshape({result_n, 1})
-      |> Nx.broadcast({result_n, length})
+      |> Nx.reshape({n, 1})
+      |> Nx.broadcast({n, length})
       |> Nx.select(parents1, parents2)
 
     {winning_genomes, winning_fitness}
@@ -58,16 +64,15 @@ defmodule MeowNx.Selection do
 
   ## Options
 
-    * `:n` - the number of individuals to select.
-      Must not exceed population size. Required.
+    * `:n` - the number of individuals to select. Must not exceed
+      population size. Required.
   """
   defn natural(genomes, fitness, opts \\ []) do
-    # TODO: support percentage, something like {:fraction, 0.2}
-    # TODO: validate that n is not larger than population size
-    result_n = opts[:n]
+    opts = keyword!(opts, [:n])
+    n = MeowNx.Utils.resolve_n(opts[:n], genomes, limit_to_base: true)
 
     sort_idx = Nx.argsort(fitness, direction: :desc)
-    top_idx = sort_idx[0..(result_n - 1)]
+    top_idx = sort_idx[0..(n - 1)]
 
     take_individuals(genomes, fitness, top_idx)
   end
@@ -92,15 +97,14 @@ defmodule MeowNx.Selection do
     * [Fitness proportionate selection](https://en.wikipedia.org/wiki/Fitness_proportionate_selection)
   """
   defn roulette_selection(genomes, fitness, opts \\ []) do
-    # TODO: support percentage, something like {:fraction, 0.2}
     opts = keyword!(opts, [:n])
-    result_n = opts[:n]
+    n = MeowNx.Utils.resolve_n(opts[:n], genomes)
 
     fitness_cumulative = MeowNx.Utils.cumulative_sum(fitness)
     fitness_sum = fitness_cumulative[-1]
 
     # Random points on the cumulative ruler
-    points = Nx.random_uniform({result_n, 1}, 0, fitness_sum)
+    points = Nx.random_uniform({n, 1}, 0, fitness_sum)
     idx = cumulative_points_to_indices(fitness_cumulative, points)
 
     take_individuals(genomes, fitness, idx)
@@ -124,17 +128,16 @@ defmodule MeowNx.Selection do
     * [Stochastic universal sampling](https://en.wikipedia.org/wiki/Stochastic_universal_sampling)
   """
   defn stochastic_universal_sampling(genomes, fitness, opts \\ []) do
-    # TODO: support percentage, something like {:fraction, 0.2}
     opts = keyword!(opts, [:n])
-    result_n = opts[:n]
+    n = MeowNx.Utils.resolve_n(opts[:n], genomes)
 
     fitness_cumulative = MeowNx.Utils.cumulative_sum(fitness)
     fitness_sum = fitness_cumulative[-1]
 
     # Random points on the cumulative ruler, each in its own interval
-    step = Nx.divide(fitness_sum, result_n)
+    step = Nx.divide(fitness_sum, n)
     start = Nx.random_uniform({}, 0, step)
-    points = Nx.iota({result_n, 1}) |> Nx.multiply(step) |> Nx.add(start)
+    points = Nx.iota({n, 1}) |> Nx.multiply(step) |> Nx.add(start)
     idx = cumulative_points_to_indices(fitness_cumulative, points)
 
     take_individuals(genomes, fitness, idx)

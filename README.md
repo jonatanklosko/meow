@@ -54,7 +54,7 @@ model =
     # A single pipeline corresponds to a single population
     Pipeline.new([
       # Define a number of evolutionary steps that the population goes through
-      MeowNx.Op.Selection.tournament(100),
+      MeowNx.Op.Selection.tournament(1.0),
       MeowNx.Op.Crossover.uniform(0.5),
       MeowNx.Op.Mutation.replace_uniform(0.001, -5.12, 5.12),
       MeowNx.Op.Metric.best_individual(),
