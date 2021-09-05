@@ -34,11 +34,9 @@ end
 alias Meow.{Model, Pipeline}
 
 model =
-  Model.new(
-    MeowNx.Op.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
-    &Problem.evaluate_rastrigin/1
-  )
+  Model.new(&Problem.evaluate_rastrigin/1)
   |> Model.add_pipeline(
+    MeowNx.Op.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     Pipeline.new([
       MeowNx.Op.Selection.tournament(1.0),
       MeowNx.Op.Crossover.uniform(0.5),

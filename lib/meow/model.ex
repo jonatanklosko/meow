@@ -3,14 +3,13 @@ defmodule Meow.Model do
   Definition of an evolutionary model.
   """
 
-  defstruct [:initializer, :evaluate, pipelines: []]
+  defstruct [:evaluate, pipelines: []]
 
   alias Meow.{Population, Pipeline, Op}
 
   @type t :: %__MODULE__{
-          initializer: Op.t(),
           evaluate: evaluate(),
-          pipelines: list(Pipeline.t())
+          pipelines: list({initializer :: Op.t(), pipeline :: Pipeline.t()})
         }
 
   @typedoc """
@@ -28,9 +27,9 @@ defmodule Meow.Model do
   @doc """
   Entrypoint for building a new model definition.
   """
-  @spec new(Op.t(), evaluate()) :: t()
-  def new(initializer, evaluate) do
-    %__MODULE__{initializer: initializer, evaluate: evaluate}
+  @spec new(evaluate()) :: t()
+  def new(evaluate) do
+    %__MODULE__{evaluate: evaluate}
   end
 
   @doc """
@@ -39,15 +38,19 @@ defmodule Meow.Model do
   Each pipeline defines how a single population evolves,
   so multiple pipelines imply multi-population model.
 
+  When the model is run, `initializer` is aplied to an empty
+  population, then the resulting population is repeatedly
+  passed through the pipeline until termination.
+
   ## Options
 
     * `:duplicate` - how many copies of the pipeline to add.
       Multiple copies imply a multi-population algorithm. Defaults to 1.
   """
-  @spec add_pipeline(t(), Pipeline.t()) :: t()
-  def add_pipeline(model, pipeline, opts \\ []) do
+  @spec add_pipeline(t(), Op.t(), Pipeline.t()) :: t()
+  def add_pipeline(model, initializer, pipeline, opts \\ []) do
     copies = Keyword.get(opts, :duplicate, 1)
-    new_pipelines = List.duplicate(pipeline, copies)
+    new_pipelines = List.duplicate({initializer, pipeline}, copies)
     %{model | pipelines: model.pipelines ++ new_pipelines}
   end
 end

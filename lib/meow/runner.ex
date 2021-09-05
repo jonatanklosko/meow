@@ -119,7 +119,7 @@ defmodule Meow.Runner do
     pids =
       model.pipelines
       |> Enum.with_index()
-      |> Enum.map(fn {pipeline, idx} ->
+      |> Enum.map(fn {{initializer, pipeline}, idx} ->
         node = population_node_mapping[idx]
 
         Node.spawn_link(node, fn ->
@@ -131,7 +131,7 @@ defmodule Meow.Runner do
                 global_opts: global_opts
               }
 
-              population = Op.apply(%Population{}, model.initializer, ctx)
+              population = Op.apply(%Population{}, initializer, ctx)
 
               {time, final_population} = :timer.tc(&run_population/3, [population, pipeline, ctx])
               send(runner_pid, {:finished, self(), time, final_population})

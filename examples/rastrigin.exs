@@ -28,11 +28,9 @@ defmodule Rastrigin do
   end
 
   def model_simple() do
-    Model.new(
-      Init.real_random_uniform(100, size(), -5.12, 5.12),
-      &evaluate/1
-    )
+    Model.new(&evaluate/1)
     |> Model.add_pipeline(
+      Init.real_random_uniform(100, size(), -5.12, 5.12),
       Pipeline.new([
         Selection.tournament(1.0),
         Crossover.uniform(0.5),
@@ -44,11 +42,9 @@ defmodule Rastrigin do
   end
 
   def model_simple_multi() do
-    Model.new(
-      Init.real_random_uniform(100, size(), -5.12, 5.12),
-      &evaluate/1
-    )
+    Model.new(&evaluate/1)
     |> Model.add_pipeline(
+      Init.real_random_uniform(100, size(), -5.12, 5.12),
       Pipeline.new([
         Selection.tournament(1.0),
         Crossover.uniform(0.5),
@@ -63,11 +59,9 @@ defmodule Rastrigin do
   end
 
   def model_branching() do
-    Model.new(
-      Init.real_random_uniform(100, size(), -5.12, 5.12),
-      &evaluate/1
-    )
+    Model.new(&evaluate/1)
     |> Model.add_pipeline(
+      Init.real_random_uniform(100, size(), -5.12, 5.12),
       Pipeline.new([
         # Here the pipeline branches out into two sub-pipelines,
         # which results are then joined into a single population.
