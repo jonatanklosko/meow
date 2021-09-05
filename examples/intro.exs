@@ -34,7 +34,7 @@ alias Meow.{Model, Pipeline}
 model =
   Model.new(
     # Define how the population is initialized and what representation to use
-    MeowNx.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    MeowNx.Op.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     # Specify the evaluation function that we are trying to maximise
     &Problem.evaluate_rastrigin/1
   )

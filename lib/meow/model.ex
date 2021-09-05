@@ -5,19 +5,13 @@ defmodule Meow.Model do
 
   defstruct [:initializer, :evaluate, pipelines: []]
 
-  alias Meow.{Population, Pipeline}
+  alias Meow.{Population, Pipeline, Op}
 
   @type t :: %__MODULE__{
-          initializer: initializer(),
+          initializer: Op.t(),
           evaluate: evaluate(),
           pipelines: list(Pipeline.t())
         }
-
-  @typedoc """
-  A function used to generate initial genomes according
-  to the chosen representation.
-  """
-  @type initializer :: (() -> {Population.genomes(), representation_spec :: module()})
 
   @typedoc """
   A function used to calculate the assessment of all
@@ -34,7 +28,7 @@ defmodule Meow.Model do
   @doc """
   Entrypoint for building a new model definition.
   """
-  @spec new(initializer(), evaluate()) :: t()
+  @spec new(Op.t(), evaluate()) :: t()
   def new(initializer, evaluate) do
     %__MODULE__{initializer: initializer, evaluate: evaluate}
   end

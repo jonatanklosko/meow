@@ -1,18 +1,28 @@
 defmodule MeowNx.Init do
   @moduledoc """
-  Genomes initializers for the tensor representation.
+  Numerical implementations of common initializations.
+
+  Initialization refers to the operation of generating
+  a population of individuals, generally in a random way.
   """
 
   import Nx.Defn
 
-  def real_random_uniform(n, length, min, max) do
-    fn ->
-      genomes = real_random_uniform_impl(n: n, length: length, min: min, max: max)
-      {genomes, MeowNx.RepresentationSpec}
-    end
-  end
+  @doc """
+  Generates a population, where each genome is represented
+  by a series of real numbers.
 
-  defn real_random_uniform_impl(opts \\ []) do
+  ## Options
+
+    * `:n` - the number of individuals to generate. Required.
+
+    * `:length` - the length of a single genome. Required.
+
+    * `:min` - the minimum possible value of a gene. Required.
+
+    * `:max` - the maximum possible value of a gene. Required.
+  """
+  defn real_random_uniform(opts \\ []) do
     opts = keyword!(opts, [:n, :length, :min, :max])
     n = opts[:n]
     length = opts[:length]
@@ -22,14 +32,17 @@ defmodule MeowNx.Init do
     Nx.random_uniform({n, length}, min, max)
   end
 
-  def binary_random_uniform(n, length) do
-    fn ->
-      genomes = binary_random_uniform_impl(n: n, length: length)
-      {genomes, MeowNx.RepresentationSpec}
-    end
-  end
+  @doc """
+  Generates a population, where each genome is a series of
+  zeros and ones, or in other words a binary string.
 
-  defn binary_random_uniform_impl(opts \\ []) do
+  ## Options
+
+    * `:n` - the number of individuals to generate. Required.
+
+    * `:length` - the length of a single genome. Required.
+  """
+  defn binary_random_uniform(opts \\ []) do
     opts = keyword!(opts, [:n, :length])
     n = opts[:n]
     length = opts[:length]
