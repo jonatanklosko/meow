@@ -35,7 +35,7 @@ alias Meow.{Model, Pipeline}
 
 model =
   Model.new(
-    MeowNx.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    MeowNx.Op.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     &Problem.evaluate_rastrigin/1
   )
   |> Model.add_pipeline(

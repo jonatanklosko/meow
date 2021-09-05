@@ -22,8 +22,7 @@ Let's also add some aliases to make the algorithm definitions less verbose.
 alias Meow.{Model, Pipeline, Population, Topology}
 alias Meow.Op.{Termination, Flow, Multi}
 # We are going to use the Nx Meow integration
-alias MeowNx.Init
-alias MeowNx.Op.{Selection, Crossover, Mutation, Metric}
+alias MeowNx.Op.{Init, Selection, Crossover, Mutation, Metric}
 ```
 
 ## Objective

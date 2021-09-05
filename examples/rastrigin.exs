@@ -12,8 +12,7 @@ defmodule Rastrigin do
   import Nx.Defn
   alias Meow.{Model, Pipeline, Population, Topology}
   alias Meow.Op.{Termination, Flow, Multi}
-  alias MeowNx.Init
-  alias MeowNx.Op.{Selection, Crossover, Mutation, Metric}
+  alias MeowNx.Op.{Init, Selection, Crossover, Mutation, Metric}
 
   def size, do: 100
 

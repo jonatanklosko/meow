@@ -4,8 +4,7 @@ defmodule Meow.Runner do
   as defined by `Meow.Model`.
   """
 
-  alias Meow.{Population, Pipeline, Model}
-  alias Meow.Op.Context
+  alias Meow.{Population, Pipeline, Model, Op}
 
   @doc """
   Iteratively transforms populations according to the given
@@ -124,16 +123,15 @@ defmodule Meow.Runner do
         node = population_node_mapping[idx]
 
         Node.spawn_link(node, fn ->
-          {genomes, representation_spec} = model.initializer.()
-          population = Population.new(genomes, representation_spec)
-
           receive do
             {:initialize, pids} ->
-              ctx = %Context{
+              ctx = %Op.Context{
                 evaluate: model.evaluate,
                 population_pids: pids,
                 global_opts: global_opts
               }
+
+              population = Op.apply(%Population{}, model.initializer, ctx)
 
               {time, final_population} = :timer.tc(&run_population/3, [population, pipeline, ctx])
               send(runner_pid, {:finished, self(), time, final_population})
