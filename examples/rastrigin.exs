@@ -35,7 +35,7 @@ defmodule Rastrigin do
     )
     |> Model.add_pipeline(
       Pipeline.new([
-        Selection.tournament(100),
+        Selection.tournament(1.0),
         Crossover.uniform(0.5),
         Mutation.replace_uniform(0.001, -5.12, 5.12),
         Metric.best_individual(),
@@ -51,7 +51,7 @@ defmodule Rastrigin do
     )
     |> Model.add_pipeline(
       Pipeline.new([
-        Selection.tournament(100),
+        Selection.tournament(1.0),
         Crossover.uniform(0.5),
         Mutation.shift_gaussian(0.001),
         Multi.emigrate(Selection.tournament(5), &Topology.ring/2, interval: 10),
@@ -76,10 +76,10 @@ defmodule Rastrigin do
           &Population.duplicate(&1, 2),
           [
             Pipeline.new([
-              Selection.natural(20)
+              Selection.natural(0.2)
             ]),
             Pipeline.new([
-              Selection.tournament(80),
+              Selection.tournament(0.8),
               Crossover.blend_alpha(0.5),
               Mutation.shift_gaussian(0.001)
             ])
