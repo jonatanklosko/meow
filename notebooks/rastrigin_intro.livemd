@@ -92,12 +92,12 @@ random individuals, each with 100 floating-point genomes (meaning we optimise
 ```elixir
 model =
   Model.new(
-    # Initialize the population with 100 random individuals
-    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     # Specify the evaluation function that we are trying to maximise
     &Problem.evaluate_rastrigin/1
   )
   |> Model.add_pipeline(
+    # Initialize the population with 100 random individuals
+    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     # A single pipeline corresponds to a single population
     Pipeline.new([
       # Define a number of evolutionary steps that the population goes through
@@ -138,11 +138,9 @@ alias Meow.Population
 alias Meow.Op.Flow
 
 model =
-  Model.new(
-    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
-    &Problem.evaluate_rastrigin/1
-  )
+  Model.new(&Problem.evaluate_rastrigin/1)
   |> Model.add_pipeline(
+    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     Pipeline.new([
       # Here the pipeline branches out into two sub-pipelines,
       # which results are then joined into a single population.
@@ -193,11 +191,9 @@ alias Meow.Topology
 alias Meow.Op.Multi
 
 model =
-  Model.new(
-    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
-    &Problem.evaluate_rastrigin/1
-  )
+  Model.new(&Problem.evaluate_rastrigin/1)
   |> Model.add_pipeline(
+    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
     Pipeline.new([
       Selection.tournament(1.0),
       Crossover.uniform(0.5),
