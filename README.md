@@ -16,8 +16,7 @@ You can define the algorithm in a single Elixir script file like this:
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
   {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
-  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
-  {:exla_precompiled, "~> 0.1.0-dev", github: "jonatanklosko/exla_precompiled"}
+  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
 ])
 
 # Define the evaluation function, in this case using Nx to work with MeowNx
