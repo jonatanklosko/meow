@@ -60,7 +60,7 @@ defmodule MeowNx.Op.Selection do
   @doc """
   Builds a roulette selection operation.
 
-  See `MeowNx.Selection.roulatte/3` for more details.
+  See `MeowNx.Selection.roulette/3` for more details.
   """
   @spec roulette(non_neg_integer()) :: Op.t()
   def roulette(n) do

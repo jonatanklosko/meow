@@ -33,13 +33,12 @@ defmodule MeowNx.Op.Mutation do
   end
 
   @doc """
-  Builds a uniform replacement mutation operation.
+  Builds a bit-flip mutation operation.
 
   See `MeowNx.Mutation.replace_uniform/2` for more details.
   """
-  # TODO: naming/grouping of real/binary related functions
-  @spec binary_replace_uniform(float()) :: Op.t()
-  def binary_replace_uniform(probability) do
+  @spec bit_flip(float()) :: Op.t()
+  def bit_flip(probability) do
     opts = [probability: probability]
 
     %Op{
@@ -48,7 +47,7 @@ defmodule MeowNx.Op.Mutation do
       invalidates_fitness: true,
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
-          Nx.Defn.jit(&Mutation.binary_replace_uniform(&1, opts), [genomes], Utils.jit_opts(ctx))
+          Nx.Defn.jit(&Mutation.bit_flip(&1, opts), [genomes], Utils.jit_opts(ctx))
         end)
       end
     }

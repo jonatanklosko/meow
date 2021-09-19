@@ -113,7 +113,7 @@ defmodule MeowNx.Selection do
   @doc """
   Performs stochastic universal sampling.
 
-  Essentially an unbiased version of `roulatte/3`.
+  Essentially an unbiased version of `roulette/3`.
 
   Technically, this approach devides the fitness "cumulative ruler"
   into evenly spaced intervals and uses a single random value to pick

@@ -42,7 +42,7 @@ model =
     Pipeline.new([
       MeowNx.Op.Selection.tournament(1.0),
       MeowNx.Op.Crossover.uniform(0.5),
-      MeowNx.Op.Mutation.binary_replace_uniform(0.1),
+      MeowNx.Op.Mutation.bit_flip(0.1),
       MeowNx.Op.Metric.best_individual(),
       Meow.Op.Termination.max_generations(100)
     ])

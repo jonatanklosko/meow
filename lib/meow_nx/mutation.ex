@@ -3,8 +3,9 @@ defmodule MeowNx.Mutation do
   Numerical implementations of common mutation operations.
 
   Mutation is a genetic operation that randomly alters genetic
-  information of some individuals within the population,
-  usually according to a fixed probability.
+  information of some individuals within the population, usually
+  according to a fixed probability.
+
   Mutation is used to maintain genetic diversity within the population
   as it steps from one generation to another. It effectively introduces
   a bit of additional randomness to the evolutionary algorithm, so that
@@ -33,7 +34,6 @@ defmodule MeowNx.Mutation do
 
     * `:min` - the upper bound of the range to draw from.
       Required.
-
   """
   defn replace_uniform(genomes, opts \\ []) do
     opts = keyword!(opts, [:probability, :min, :max])
@@ -50,19 +50,14 @@ defmodule MeowNx.Mutation do
   end
 
   @doc """
-  Performs simple uniform replacement mutation.
-
-  Same as `replace_uniform/2` adjusted for the binary
-  representation.
+  Performs bit-flip mutation.
 
   ## Options
 
     * `:probability` - the probability of each gene
       getting mutated. Required.
-
   """
-  # TODO: naming/grouping of real/binary related functions
-  defn binary_replace_uniform(genomes, opts \\ []) do
+  defn bit_flip(genomes, opts \\ []) do
     opts = keyword!(opts, [:probability])
     probability = opts[:probability]
 
@@ -70,9 +65,7 @@ defmodule MeowNx.Mutation do
 
     # Mutate each gene separately with the given probability
     mutate? = Nx.random_uniform(shape) |> Nx.less(probability)
-    # EXLA requires random_uniform to generate integers at least
-    # 32 bits in size, so we cast the type afterwards
-    mutated = Nx.random_uniform(shape, 0, 2) |> Nx.as_type({:u, 8})
+    mutated = Nx.subtract(1, genomes)
     Nx.select(mutate?, mutated, genomes)
   end
 
