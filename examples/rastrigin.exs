@@ -10,8 +10,6 @@ Mix.install([
 defmodule Rastrigin do
   import Nx.Defn
   alias Meow.{Model, Pipeline, Population, Topology}
-  alias Meow.Op.{Termination, Flow, Multi}
-  alias MeowNx.Op.{Init, Selection, Crossover, Mutation, Metric}
 
   def size, do: 100
 
@@ -29,13 +27,13 @@ defmodule Rastrigin do
   def model_simple() do
     Model.new(&evaluate/1)
     |> Model.add_pipeline(
-      Init.real_random_uniform(100, size(), -5.12, 5.12),
+      MeowNx.Ops.init_real_random_uniform(100, size(), -5.12, 5.12),
       Pipeline.new([
-        Selection.tournament(1.0),
-        Crossover.uniform(0.5),
-        Mutation.replace_uniform(0.001, -5.12, 5.12),
-        Metric.best_individual(),
-        Termination.max_generations(5_000)
+        MeowNx.Ops.selection_tournament(1.0),
+        MeowNx.Ops.crossover_uniform(0.5),
+        MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
+        MeowNx.Ops.metric_best_individual(),
+        Meow.Ops.max_generations(5_000)
       ])
     )
   end
@@ -43,15 +41,15 @@ defmodule Rastrigin do
   def model_simple_multi() do
     Model.new(&evaluate/1)
     |> Model.add_pipeline(
-      Init.real_random_uniform(100, size(), -5.12, 5.12),
+      MeowNx.Ops.init_real_random_uniform(100, size(), -5.12, 5.12),
       Pipeline.new([
-        Selection.tournament(1.0),
-        Crossover.uniform(0.5),
-        Mutation.shift_gaussian(0.001),
-        Multi.emigrate(Selection.tournament(5), &Topology.ring/2, interval: 10),
-        Multi.immigrate(&Selection.natural(&1), interval: 10),
-        Metric.best_individual(),
-        Termination.max_generations(5_000)
+        MeowNx.Ops.selection_tournament(1.0),
+        MeowNx.Ops.crossover_uniform(0.5),
+        MeowNx.Ops.mutation_shift_gaussian(0.001),
+        Meow.Ops.emigrate(MeowNx.Ops.selection_tournament(5), &Topology.ring/2, interval: 10),
+        Meow.Ops.immigrate(&MeowNx.Ops.selection_natural(&1), interval: 10),
+        MeowNx.Ops.metric_best_individual(),
+        Meow.Ops.max_generations(5_000)
       ]),
       duplicate: 3
     )
@@ -60,26 +58,26 @@ defmodule Rastrigin do
   def model_branching() do
     Model.new(&evaluate/1)
     |> Model.add_pipeline(
-      Init.real_random_uniform(100, size(), -5.12, 5.12),
+      MeowNx.Ops.init_real_random_uniform(100, size(), -5.12, 5.12),
       Pipeline.new([
         # Here the pipeline branches out into two sub-pipelines,
         # which results are then joined into a single population.
-        Flow.split_join(
+        Meow.Ops.split_join(
           &Population.duplicate(&1, 2),
           [
             Pipeline.new([
-              Selection.natural(0.2)
+              MeowNx.Ops.selection_natural(0.2)
             ]),
             Pipeline.new([
-              Selection.tournament(0.8),
-              Crossover.blend_alpha(0.5),
-              Mutation.shift_gaussian(0.001)
+              MeowNx.Ops.selection_tournament(0.8),
+              MeowNx.Ops.crossover_blend_alpha(0.5),
+              MeowNx.Ops.mutation_shift_gaussian(0.001)
             ])
           ],
           &Population.concatenate/1
         ),
-        Metric.best_individual(),
-        Termination.max_generations(5_000)
+        MeowNx.Ops.metric_best_individual(),
+        Meow.Ops.max_generations(5_000)
       ])
     )
   end

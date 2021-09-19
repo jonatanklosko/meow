@@ -66,7 +66,7 @@ model =
 Meow.Runner.run(model)
 ```
 
-Then you you can simply run the script
+Then you can simply run the script
 
 ```shell
 $ elixir example.exs

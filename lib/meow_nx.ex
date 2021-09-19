@@ -14,15 +14,16 @@ defmodule MeowNx do
   this "batched" approach (working on all individuals at once)
   we can leverage efficient tensor operations.
 
-  `MeowNx` provides a number of numerical definitions,
-  as well as `Meow` operation definitions on top of that.
+  `MeowNx` provides a number of numerical definitions, as well
+  as `Meow` operation builders on top of that. See `MeowNx.Ops`
+  for the list of available operations.
 
   ## Configuration
 
   When running a model using `MeoxNx` operations the following
-  global options are available (passed to runner):
+  `global_opts` are available (passed to the runner):
 
-    * `:jit_opts` - options passed to `Nx.Defn.jit` when
+    * `:jit_opts` - options passed to `Nx.Defn.jit/3` when
       compiling the underlying numerical definitions. This
       defaults to `[compiler: EXLA]` if `exla` is available,
       and to `[]` otherwise.
