@@ -56,4 +56,50 @@ defmodule MeowNx.Op.Selection do
       end
     }
   end
+
+  @doc """
+  Builds a roulette selection operation.
+
+  See `MeowNx.Selection.roulatte/3` for more details.
+  """
+  @spec roulette(non_neg_integer()) :: Op.t()
+  def roulette(n) do
+    opts = [n: n]
+
+    %Op{
+      name: "[Nx] Selection roulette",
+      requires_fitness: true,
+      invalidates_fitness: false,
+      impl: fn population, ctx ->
+        Op.map_genomes_and_fitness(population, fn genomes, fitness ->
+          Nx.Defn.jit(&Selection.roulette(&1, &2, opts), [genomes, fitness], Utils.jit_opts(ctx))
+        end)
+      end
+    }
+  end
+
+  @doc """
+  Builds a stochastic universal sampling operation.
+
+  See `MeowNx.Selection.stochastic_universal_sampling/3` for more details.
+  """
+  @spec stochastic_universal_sampling(non_neg_integer()) :: Op.t()
+  def stochastic_universal_sampling(n) do
+    opts = [n: n]
+
+    %Op{
+      name: "[Nx] Selection SUS",
+      requires_fitness: true,
+      invalidates_fitness: false,
+      impl: fn population, ctx ->
+        Op.map_genomes_and_fitness(population, fn genomes, fitness ->
+          Nx.Defn.jit(
+            &Selection.stochastic_universal_sampling(&1, &2, opts),
+            [genomes, fitness],
+            Utils.jit_opts(ctx)
+          )
+        end)
+      end
+    }
+  end
 end
