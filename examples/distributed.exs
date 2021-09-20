@@ -35,22 +35,22 @@ alias Meow.{Model, Pipeline}
 model =
   Model.new(&Problem.evaluate_rastrigin/1)
   |> Model.add_pipeline(
-    MeowNx.Op.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
     Pipeline.new([
-      MeowNx.Op.Selection.tournament(1.0),
-      MeowNx.Op.Crossover.uniform(0.5),
-      MeowNx.Op.Mutation.shift_gaussian(0.001),
-      Meow.Op.Multi.emigrate(
-        MeowNx.Op.Selection.tournament(5),
+      MeowNx.Ops.selection_tournament(1.0),
+      MeowNx.Ops.crossover_uniform(0.5),
+      MeowNx.Ops.mutation_shift_gaussian(0.001),
+      Meow.Ops.emigrate(
+        MeowNx.Ops.selection_tournament(5),
         &Meow.Topology.ring/2,
         interval: 10
       ),
-      Meow.Op.Multi.immigrate(
-        &MeowNx.Op.Selection.natural(&1),
+      Meow.Ops.immigrate(
+        &MeowNx.Ops.selection_natural(&1),
         interval: 10
       ),
-      MeowNx.Op.Metric.best_individual(),
-      Meow.Op.Termination.max_generations(1_000)
+      MeowNx.Ops.metric_best_individual(),
+      Meow.Ops.max_generations(1_000)
     ]),
     # Duplicate the pipeline, so that the model
     # describes 4 populations

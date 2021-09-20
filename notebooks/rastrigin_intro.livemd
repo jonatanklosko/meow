@@ -19,9 +19,6 @@ Let's also add some aliases to make the algorithm definitions less verbose.
 
 ```elixir
 alias Meow.{Model, Pipeline, Population, Topology}
-alias Meow.Op.{Termination, Flow, Multi}
-# We are going to use the Nx Meow integration
-alias MeowNx.Op.{Init, Selection, Crossover, Mutation, Metric}
 ```
 
 ## Objective
@@ -96,15 +93,15 @@ model =
   )
   |> Model.add_pipeline(
     # Initialize the population with 100 random individuals
-    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
     # A single pipeline corresponds to a single population
     Pipeline.new([
       # Define a number of evolutionary steps that the population goes through
-      Selection.tournament(1.0),
-      Crossover.uniform(0.5),
-      Mutation.replace_uniform(0.001, -5.12, 5.12),
-      Metric.best_individual(),
-      Termination.max_generations(5_000)
+      MeowNx.Ops.selection_tournament(1.0),
+      MeowNx.Ops.crossover_uniform(0.5),
+      MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
+      MeowNx.Ops.metric_best_individual(),
+      Meow.Ops.max_generations(5_000)
     ])
   )
 
@@ -133,32 +130,29 @@ Then we can just combine the results into a single population.
 Let's see this in practice, together with other crossover and muation types.
 
 ```elixir
-alias Meow.Population
-alias Meow.Op.Flow
-
 model =
   Model.new(&Problem.evaluate_rastrigin/1)
   |> Model.add_pipeline(
-    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
     Pipeline.new([
       # Here the pipeline branches out into two sub-pipelines,
       # which results are then joined into a single population.
-      Flow.split_join(
+      Meow.Ops.split_join(
         &Population.duplicate(&1, 2),
         [
           Pipeline.new([
-            Selection.natural(0.2)
+            MeowNx.Ops.selection_natural(0.2)
           ]),
           Pipeline.new([
-            Selection.tournament(0.8),
-            Crossover.blend_alpha(0.5),
-            Mutation.shift_gaussian(0.001)
+            MeowNx.Ops.selection_tournament(0.8),
+            MeowNx.Ops.crossover_blend_alpha(0.5),
+            MeowNx.Ops.mutation_shift_gaussian(0.001)
           ])
         ],
         &Population.concatenate/1
       ),
-      Metric.best_individual(),
-      Termination.max_generations(5_000)
+      MeowNx.Ops.metric_best_individual(),
+      Meow.Ops.max_generations(5_000)
     ])
   )
 
@@ -186,21 +180,18 @@ We will emigrate 5 best individuals every 10 generations
 and use the ring topology.
 
 ```elixir
-alias Meow.Topology
-alias Meow.Op.Multi
-
 model =
   Model.new(&Problem.evaluate_rastrigin/1)
   |> Model.add_pipeline(
-    Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
     Pipeline.new([
-      Selection.tournament(1.0),
-      Crossover.uniform(0.5),
-      Mutation.shift_gaussian(0.001),
-      Multi.emigrate(Selection.natural(5), &Topology.ring/2, interval: 10),
-      Multi.immigrate(&Selection.natural(&1), interval: 10),
-      Metric.best_individual(),
-      Termination.max_generations(5_000)
+      MeowNx.Ops.selection_tournament(1.0),
+      MeowNx.Ops.crossover_uniform(0.5),
+      MeowNx.Ops.mutation_shift_gaussian(0.001),
+      Meow.Ops.emigrate(MeowNx.Ops.selection_natural(5), &Topology.ring/2, interval: 10),
+      Meow.Ops.immigrate(&MeowNx.Ops.selection_natural(&1), interval: 10),
+      MeowNx.Ops.metric_best_individual(),
+      Meow.Ops.max_generations(5_000)
     ]),
     # Instead of calling Model.add_pipeline 3 times,
     # we can just tell it to replicate the pipeline

@@ -36,7 +36,21 @@ defmodule Meow.MixProject do
       # source_ref: "v#{@version}"
       source_ref: "main",
       extras: [
-        {:"README.md", [title: "README"]}
+        {:"README.md", [title: "Readme"]},
+        {:"notebooks/rastrigin_intro.livemd", [title: "Introduction"]}
+      ],
+      groups_for_functions: [
+        # Meow.Ops
+        "Operations: Termination": &(&1[:type] == :termination),
+        "Operations: Flow": &(&1[:type] == :flow),
+        "Operations: Multi-population": &(&1[:type] == :multi),
+
+        # MeowNx.Ops
+        "Operations: Initialization": &(&1[:type] == :init),
+        "Operations: Selection": &(&1[:type] == :selection),
+        "Operations: Crossover": &(&1[:type] == :crossover),
+        "Operations: Mutation": &(&1[:type] == :mutation),
+        "Operations: Metric": &(&1[:type] == :metric)
       ],
       before_closing_body_tag: &before_closing_body_tag/1
     ]

@@ -96,7 +96,7 @@ defmodule MeowNx.Selection do
 
     * [Fitness proportionate selection](https://en.wikipedia.org/wiki/Fitness_proportionate_selection)
   """
-  defn roulette_selection(genomes, fitness, opts \\ []) do
+  defn roulette(genomes, fitness, opts \\ []) do
     opts = keyword!(opts, [:n])
     n = MeowNx.Utils.resolve_n(opts[:n], genomes)
 
@@ -113,7 +113,7 @@ defmodule MeowNx.Selection do
   @doc """
   Performs stochastic universal sampling.
 
-  Essentially an unbiased version of `roulette_selection/3`.
+  Essentially an unbiased version of `roulette/3`.
 
   Technically, this approach devides the fitness "cumulative ruler"
   into evenly spaced intervals and uses a single random value to pick

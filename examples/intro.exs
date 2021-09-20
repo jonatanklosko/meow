@@ -37,15 +37,15 @@ model =
   )
   |> Model.add_pipeline(
     # Define how the population is initialized and what representation to use
-    MeowNx.Op.Init.real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
     # A single pipeline corresponds to a single population
     Pipeline.new([
       # Define a number of evolutionary steps that the population goes through
-      MeowNx.Op.Selection.tournament(1.0),
-      MeowNx.Op.Crossover.uniform(0.5),
-      MeowNx.Op.Mutation.replace_uniform(0.001, -5.12, 5.12),
-      MeowNx.Op.Metric.best_individual(),
-      Meow.Op.Termination.max_generations(5_000)
+      MeowNx.Ops.selection_tournament(1.0),
+      MeowNx.Ops.crossover_uniform(0.5),
+      MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
+      MeowNx.Ops.metric_best_individual(),
+      Meow.Ops.max_generations(5_000)
     ])
   )
 

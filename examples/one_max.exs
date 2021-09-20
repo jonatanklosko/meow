@@ -24,13 +24,13 @@ alias Meow.{Model, Pipeline}
 model =
   Model.new(&Problem.evaluate_one_max/1)
   |> Model.add_pipeline(
-    MeowNx.Op.Init.binary_random_uniform(100, Problem.size()),
+    MeowNx.Ops.init_binary_random_uniform(100, Problem.size()),
     Pipeline.new([
-      MeowNx.Op.Selection.tournament(1.0),
-      MeowNx.Op.Crossover.uniform(0.5),
-      MeowNx.Op.Mutation.binary_replace_uniform(0.001),
-      MeowNx.Op.Metric.best_individual(),
-      Meow.Op.Termination.max_generations(100)
+      MeowNx.Ops.selection_tournament(1.0),
+      MeowNx.Ops.crossover_uniform(0.5),
+      MeowNx.Ops.mutation_bit_flip(0.001),
+      MeowNx.Ops.metric_best_individual(),
+      Meow.Ops.max_generations(100)
     ])
   )
 

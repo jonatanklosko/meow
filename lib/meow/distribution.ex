@@ -44,13 +44,17 @@ defmodule Meow.Distribution do
 
   Start the leader node:
 
-      $ elixir --name leader@127.0.0.1 script.exs leader worker1@127.0.0.1 worker2@127.0.0.1
+  ```shell
+  $ elixir --name leader@127.0.0.1 script.exs leader worker1@127.0.0.1 worker2@127.0.0.1
+  ```
 
   Start the worker nodes:
 
-      $ elixir --name worker1@127.0.0.1 script.exs worker
+  ```shell
+  $ elixir --name worker1@127.0.0.1 script.exs worker
 
-      $ elixir --name worker2@127.0.0.1 script.exs worker
+  $ elixir --name worker2@127.0.0.1 script.exs worker
+  ```
 
   Where `script.exs` calls this function:
 
