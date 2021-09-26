@@ -73,7 +73,7 @@ defmodule MeowNx.Crossover do
     # Generate n / 2 split points (like [5, 2, 3]), and replicate
     # them for adjacent parents (like [5, 5, 2, 2, 3, 3])
     split_idx =
-      Nx.random_uniform({half_n, 1}, 1, n - 1)
+      Nx.random_uniform({half_n, 1}, 1, length - 1)
       |> Utils.duplicate_rows()
 
     swap? = Nx.iota({1, length}) |> Nx.less_equal(split_idx)
@@ -114,7 +114,7 @@ defmodule MeowNx.Crossover do
     * [Multiobjective Evolutionary Algorithms forElectric Power Dispatch Problem](https://www.researchgate.net/figure/Blend-crossover-operator-BLX_fig1_226044085), Fig. 1.
   """
   defn blend_alpha(parents, opts \\ []) do
-    opts = keyword!(opts, [:alpha])
+    opts = keyword!(opts, alpha: 0.5)
     alpha = opts[:alpha]
 
     {n, length} = Nx.shape(parents)
