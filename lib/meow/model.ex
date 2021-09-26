@@ -49,8 +49,39 @@ defmodule Meow.Model do
   """
   @spec add_pipeline(t(), Op.t(), Pipeline.t()) :: t()
   def add_pipeline(model, initializer, pipeline, opts \\ []) do
+    validate_initializer!(initializer)
+    validate_pipeline!(pipeline, initializer.out_representation)
+
     copies = Keyword.get(opts, :duplicate, 1)
     new_pipelines = List.duplicate({initializer, pipeline}, copies)
     %{model | pipelines: model.pipelines ++ new_pipelines}
+  end
+
+  defp validate_initializer!(op) do
+    # If the operation doesn't explicitly specify the output representation
+    # it's not an initializer
+    if op.out_representation == :same do
+      raise ArgumentError, "expected an initializer operation, got: #{inspect(op.name)}"
+    end
+  end
+
+  def validate_pipeline!(pipeline, representation) do
+    ops =
+      case pipeline.ops do
+        [] -> []
+        [first | ops] -> [first | ops] ++ [first]
+      end
+
+    Enum.reduce(ops, representation, fn op, representation ->
+      if op.in_representations != :any and representation not in op.in_representations do
+        raise ArgumentError,
+              "representation mismatch, #{inspect(op.name)} does not accept #{inspect(representation)}"
+      end
+
+      case op.out_representation do
+        :same -> representation
+        other -> other
+      end
+    end)
   end
 end
