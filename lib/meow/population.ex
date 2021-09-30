@@ -10,7 +10,7 @@ defmodule Meow.Population do
   defstruct [
     :genomes,
     :fitness,
-    :representation_spec,
+    :representation,
     generation: 1,
     terminated: false,
     metrics: %{}
@@ -19,7 +19,7 @@ defmodule Meow.Population do
   @type t :: %__MODULE__{
           genomes: genomes(),
           fitness: fitness(),
-          representation_spec: module(),
+          representation: representation(),
           generation: non_neg_integer(),
           terminated: boolean(),
           metrics: %{}
@@ -49,15 +49,27 @@ defmodule Meow.Population do
   """
   @type fitness :: any()
 
+  @typedoc """
+  A specification of the underlying genomes and fitness.
+
+  The `spec` must be a module implementing `Meow.RepresentationSpec`,
+  which describes how to deal with the population data.
+
+  The `namespace` may be used to distinguish different
+  representations with the same spec, for example it can
+  be the underlying data type.
+  """
+  @type representation :: {spec :: module(), namepsace :: term()}
+
   @doc """
   Initializes a population from genomes representation.
   """
-  @spec new(genomes(), module()) :: t()
-  def new(genomes, representation_spec) do
+  @spec new(genomes(), representation()) :: t()
+  def new(genomes, representation) do
     %__MODULE__{
       genomes: genomes,
       generation: 1,
-      representation_spec: representation_spec
+      representation: representation
     }
   end
 
@@ -66,7 +78,8 @@ defmodule Meow.Population do
   """
   @spec size(t()) :: non_neg_integer()
   def size(population) do
-    population.representation_spec.population_size(population.genomes)
+    {spec, _} = population.representation
+    spec.population_size(population.genomes)
   end
 
   @doc """
@@ -81,16 +94,16 @@ defmodule Meow.Population do
   Concatenates the given populations into a single population.
 
   The resulting population includes genomes from all the populations
-  and is composed using `representation_spec` of the first population.
+  and is composed using `representation` of the first population.
   """
   @spec concatenate(list(t())) :: t()
   def concatenate(populations) do
-    representation_spec = same_representation_spec!(populations)
+    {spec, _} = same_representation!(populations)
 
     join_with(
       populations,
-      &representation_spec.concatenate_genomes/1,
-      &representation_spec.concatenate_fitness/1
+      &spec.concatenate_genomes/1,
+      &spec.concatenate_fitness/1
     )
   end
 
@@ -116,7 +129,7 @@ defmodule Meow.Population do
       fitness: populations |> Enum.map(& &1.fitness) |> join_fitness(fitness_join_fun),
       terminated: populations |> Enum.any?(& &1.terminated),
       generation: populations |> Enum.map(& &1.generation) |> Enum.max(),
-      representation_spec: same_representation_spec!(populations),
+      representation: same_representation!(populations),
       # This is somehow arbitrary, but we cannot reasonably merge statistics
       # and this approach should generally work as expected
       metrics: Enum.max_by(populations, & &1.generation).metrics
@@ -131,17 +144,17 @@ defmodule Meow.Population do
     end
   end
 
-  defp same_representation_spec!(populations) do
+  defp same_representation!(populations) do
     populations
-    |> Enum.map(& &1.representation_spec)
+    |> Enum.map(& &1.representation)
     |> Enum.uniq()
     |> case do
-      [representation_spec] ->
-        representation_spec
+      [representation] ->
+        representation
 
       _ ->
         raise ArgumentError,
-              "the given populations have different representation spec, so they are not of compatible type"
+              "the given populations have different representations, so they are not compatible"
     end
   end
 end

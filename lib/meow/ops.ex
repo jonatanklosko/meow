@@ -16,6 +16,7 @@ defmodule Meow.Ops do
       name: "Termination: max generations",
       requires_fitness: false,
       invalidates_fitness: false,
+      in_representations: :any,
       impl: fn population, _ctx ->
         if population.generation >= generations do
           %{population | terminated: true}
@@ -42,6 +43,8 @@ defmodule Meow.Ops do
         ) :: Op.t()
   def split_join(split_fun, pipelines, join_fun) do
     requires_fitness = Enum.any?(pipelines, fn %{ops: [op | _]} -> op.requires_fitness end)
+    in_representations = common_in_representations(pipelines)
+    out_representation = common_out_representation(pipelines)
 
     %Op{
       name: "Flow: split join",
@@ -51,6 +54,8 @@ defmodule Meow.Ops do
       # This operation itself doesn't invalidate fitness,
       # it just joins results of the underlying pipelines.
       invalidates_fitness: false,
+      in_representations: in_representations,
+      out_representation: out_representation,
       impl: fn population, ctx ->
         population
         |> split_fun.()
@@ -61,6 +66,31 @@ defmodule Meow.Ops do
         |> join_fun.()
       end
     }
+  end
+
+  defp common_in_representations(pipelines) do
+    pipelines
+    |> Enum.map(fn %{ops: [op | _]} -> MapSet.new(op.in_representations) end)
+    |> Enum.reduce(&MapSet.intersection/2)
+    |> MapSet.to_list()
+  end
+
+  defp common_out_representation(pipelines) do
+    pipelines
+    |> Enum.map(fn pipeline -> List.last(pipeline.ops).out_representation end)
+    |> Enum.uniq()
+    |> List.delete(:same)
+    |> case do
+      [] ->
+        :same
+
+      [out_representation] ->
+        out_representation
+
+      representations ->
+        raise ArgumentError,
+              "pipelines must have the same output representation, but got: #{inspect(representations)}"
+    end
   end
 
   @doc """
@@ -74,10 +104,16 @@ defmodule Meow.Ops do
   @doc type: :flow
   @spec if((Population.t() -> boolean()), Pipeline.t(), Pipeline.t()) :: Op.t()
   def if(pred_fun, on_true_pipeline, on_false_pipeline) do
+    pipelines = [on_true_pipeline, on_false_pipeline]
+    in_representations = common_in_representations(pipelines)
+    out_representation = common_out_representation(pipelines)
+
     %Op{
       name: "Flow: if",
       requires_fitness: false,
       invalidates_fitness: false,
+      in_representations: in_representations,
+      out_representation: out_representation,
       impl: fn population, ctx ->
         pipeline = if(pred_fun.(population), do: on_true_pipeline, else: on_false_pipeline)
         Pipeline.apply(population, pipeline, ctx)
@@ -125,6 +161,7 @@ defmodule Meow.Ops do
       name: "Multi-population: emigration",
       requires_fitness: false,
       invalidates_fitness: false,
+      in_representations: :any,
       impl: fn population, ctx ->
         if length(ctx.population_pids) > 1 and rem(population.generation, interval) == 0 do
           neighbour_pids = find_neighbour_pids(ctx.population_pids, topology_fun)
@@ -197,11 +234,12 @@ defmodule Meow.Ops do
       name: "Multi-population: immigration",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: :any,
       impl: fn population, ctx ->
         with true <-
                length(ctx.population_pids) > 1 and rem(population.generation, interval) == 0,
              {:ok, immigrants} <- await_migrants(blocking, timeout) do
-          immigrants_population = Population.new(immigrants, population.representation_spec)
+          immigrants_population = Population.new(immigrants, population.representation)
 
           selection_size =
             (Population.size(population) - Population.size(immigrants_population)) |> max(0)

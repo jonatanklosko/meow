@@ -11,9 +11,22 @@ defmodule Meow.Op do
   of the operation.
   """
 
-  @enforce_keys [:name, :impl, :requires_fitness, :invalidates_fitness]
+  @enforce_keys [
+    :name,
+    :impl,
+    :requires_fitness,
+    :invalidates_fitness,
+    :in_representations
+  ]
 
-  defstruct [:name, :impl, :requires_fitness, :invalidates_fitness]
+  defstruct [
+    :name,
+    :impl,
+    :requires_fitness,
+    :invalidates_fitness,
+    :in_representations,
+    out_representation: :same
+  ]
 
   alias Meow.{Population, Op}
 
@@ -21,7 +34,9 @@ defmodule Meow.Op do
           name: String.t(),
           impl: (Population.t(), Op.Context.t() -> Population.t()),
           requires_fitness: boolean(),
-          invalidates_fitness: boolean()
+          invalidates_fitness: boolean(),
+          in_representations: :any | list(Population.representation()),
+          out_representation: :same | Population.representation()
         }
 
   @doc """
@@ -36,7 +51,12 @@ defmodule Meow.Op do
   end
 
   def apply(population, operation, ctx) do
-    operation.impl.(population, ctx)
+    new_population = operation.impl.(population, ctx)
+
+    case operation.out_representation do
+      :same -> new_population
+      representation -> %{new_population | representation: representation}
+    end
   end
 
   # Helpers to use when building custom operations

@@ -11,6 +11,10 @@ defmodule MeowNx.Ops do
   alias MeowNx.{Crossover, Init, Metric, Mutation, Selection}
   alias MeowNx.Utils
 
+  @real_representation {MeowNx.RepresentationSpec, :real}
+  @binary_representation {MeowNx.RepresentationSpec, :binary}
+  @representations [@real_representation, @binary_representation]
+
   @doc """
   Builds a random initializer for the real representation.
 
@@ -25,9 +29,12 @@ defmodule MeowNx.Ops do
       name: "[Nx] Initialization: random uniform",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: :any,
+      out_representation: @real_representation,
       impl: fn population, ctx ->
-        genomes = Nx.Defn.jit(fn -> Init.real_random_uniform(opts) end, [], Utils.jit_opts(ctx))
-        %{population | genomes: genomes, representation_spec: MeowNx.RepresentationSpec}
+        Op.map_genomes(population, fn _genomes ->
+          Nx.Defn.jit(fn -> Init.real_random_uniform(opts) end, [], Utils.jit_opts(ctx))
+        end)
       end
     }
   end
@@ -46,9 +53,12 @@ defmodule MeowNx.Ops do
       name: "[Nx] Initialization: random uniform",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: :any,
+      out_representation: @binary_representation,
       impl: fn population, ctx ->
-        genomes = Nx.Defn.jit(fn -> Init.binary_random_uniform(opts) end, [], Utils.jit_opts(ctx))
-        %{population | genomes: genomes, representation_spec: MeowNx.RepresentationSpec}
+        Op.map_genomes(population, fn _genomes ->
+          Nx.Defn.jit(fn -> Init.binary_random_uniform(opts) end, [], Utils.jit_opts(ctx))
+        end)
       end
     }
   end
@@ -67,6 +77,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Selection: tournament",
       requires_fitness: true,
       invalidates_fitness: false,
+      in_representations: @representations,
       impl: fn population, ctx ->
         Op.map_genomes_and_fitness(population, fn genomes, fitness ->
           Nx.Defn.jit(
@@ -93,6 +104,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Selection: natural",
       requires_fitness: true,
       invalidates_fitness: false,
+      in_representations: @representations,
       impl: fn population, ctx ->
         Op.map_genomes_and_fitness(population, fn genomes, fitness ->
           Nx.Defn.jit(&Selection.natural(&1, &2, opts), [genomes, fitness], Utils.jit_opts(ctx))
@@ -115,6 +127,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Selection: roulette",
       requires_fitness: true,
       invalidates_fitness: false,
+      in_representations: @representations,
       impl: fn population, ctx ->
         Op.map_genomes_and_fitness(population, fn genomes, fitness ->
           Nx.Defn.jit(&Selection.roulette(&1, &2, opts), [genomes, fitness], Utils.jit_opts(ctx))
@@ -137,6 +150,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Selection: stoachastic universal sampling",
       requires_fitness: true,
       invalidates_fitness: false,
+      in_representations: @representations,
       impl: fn population, ctx ->
         Op.map_genomes_and_fitness(population, fn genomes, fitness ->
           Nx.Defn.jit(
@@ -163,6 +177,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Crossover: uniform",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: @representations,
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&Crossover.uniform(&1, opts), [genomes], Utils.jit_opts(ctx))
@@ -183,6 +198,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Crossover: single point",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: @representations,
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&Crossover.single_point(&1), [genomes], Utils.jit_opts(ctx))
@@ -205,6 +221,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Crossover: blend-alpha",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: [@real_representation],
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&Crossover.blend_alpha(&1, opts), [genomes], Utils.jit_opts(ctx))
@@ -227,6 +244,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Crossove: simulated binary",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: [@real_representation],
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&Crossover.simulated_binary(&1, opts), [genomes], Utils.jit_opts(ctx))
@@ -249,6 +267,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Mutation: replace uniform",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: [@real_representation],
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&Mutation.replace_uniform(&1, opts), [genomes], Utils.jit_opts(ctx))
@@ -258,7 +277,7 @@ defmodule MeowNx.Ops do
   end
 
   @doc """
-  Builds a bit-flip mutation operation.
+  Builds a bit flip mutation operation.
 
   See `MeowNx.Mutation.replace_uniform/2` for more details.
   """
@@ -268,9 +287,10 @@ defmodule MeowNx.Ops do
     opts = [probability: probability]
 
     %Op{
-      name: "[Nx] Mutation: replace uniform",
+      name: "[Nx] Mutation: bit flip",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: [@binary_representation],
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&Mutation.bit_flip(&1, opts), [genomes], Utils.jit_opts(ctx))
@@ -293,6 +313,7 @@ defmodule MeowNx.Ops do
       name: "[Nx] Mutation: shift Gaussian",
       requires_fitness: false,
       invalidates_fitness: true,
+      in_representations: [@real_representation],
       impl: fn population, ctx ->
         Op.map_genomes(population, fn genomes ->
           Nx.Defn.jit(&Mutation.shift_gaussian(&1, opts), [genomes], Utils.jit_opts(ctx))
@@ -313,6 +334,7 @@ defmodule MeowNx.Ops do
       name: "Metric: best individual",
       requires_fitness: true,
       invalidates_fitness: false,
+      in_representations: @representations,
       impl: fn population, ctx ->
         {best_genome, best_fitness} =
           Nx.Defn.jit(
