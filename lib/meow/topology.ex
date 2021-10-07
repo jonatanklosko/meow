@@ -35,10 +35,7 @@ defmodule Meow.Topology do
 
   @doc """
   Represents a 2d mesh topology.
-  TODO: doc
-  0 1 2
-  3 4 5
-  6 7 8
+  A mesh doesn't have to be complete.
   """
   @spec mesh2d(number_of_populations(), population_index()) :: neighbour_population_indices()
   def mesh2d(n, idx) do
