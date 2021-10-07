@@ -73,10 +73,58 @@ defmodule MeowNx.Crossover do
     # Generate n / 2 split points (like [5, 2, 3]), and replicate
     # them for adjacent parents (like [5, 5, 2, 2, 3, 3])
     split_idx =
-      Nx.random_uniform({half_n, 1}, 1, length - 1)
+      Nx.random_uniform({half_n, 1}, 1, length)
       |> Utils.duplicate_rows()
 
-    swap? = Nx.iota({1, length}) |> Nx.less_equal(split_idx)
+    swap? = Nx.less_equal(split_idx, Nx.iota({1, length}))
+
+    Nx.select(swap?, swapped_parents, parents)
+  end
+
+  @doc """
+  Performs multi-point crossover.
+
+  A generalized version of `single_point/1` crossover that
+  splits a pair of genomes in multiple random points and
+  swaps every second chunk.
+
+  ## Options
+
+    * `:points` - the number of crossover points
+  """
+  defn multi_point(parents, opts \\ []) do
+    opts = keyword!(opts, [:points])
+    points = opts[:points]
+
+    {n, length} = Nx.shape(parents)
+    half_n = transform(n, &div(&1, 2))
+
+    transform({length, points}, fn {length, points} ->
+      unless points < length do
+        raise ArgumentError,
+              "#{points}-point crossover is not valid for genome of length #{length}"
+      end
+    end)
+
+    swapped_parents = Utils.swap_adjacent_rows(parents)
+
+    # For each pair of parents we generate k unique crossover points,
+    # then we convert each of them to 1-point crossover mask and finally
+    # combine these masks using gen-wise XOR (sum modulo 2)
+
+    split_idx =
+      Utils.random_idx_without_replacement(
+        shape: {half_n, points, 1},
+        min: 1,
+        max: length,
+        axis: 1
+      )
+
+    swap? =
+      Nx.less_equal(split_idx, Nx.iota({1, 1, length}))
+      |> Nx.sum(axes: [1])
+      |> Nx.remainder(2)
+      |> Utils.duplicate_rows()
 
     Nx.select(swap?, swapped_parents, parents)
   end
