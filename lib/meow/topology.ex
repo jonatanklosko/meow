@@ -32,4 +32,39 @@ defmodule Meow.Topology do
     next_idx = (idx + 1) |> rem(n)
     [next_idx]
   end
+
+  @doc """
+  Represents a  2-dimensional mesh topology.
+
+  The populations are arranged into a square grid, but the grid doesn't have
+  to be complete, so an arbitrary number of populations is supported.
+  """
+  @spec mesh2d(number_of_populations(), population_index()) :: neighbour_population_indices()
+  def mesh2d(n, idx) do
+    size =
+      n
+      |> :math.sqrt()
+      |> ceil()
+
+    row = div(idx, size)
+    col = rem(idx, size)
+
+    vertical_nieghbours =
+      [row - 1, row + 1]
+      |> Enum.filter(&mesh2d_in_bound?(&1, size))
+      |> Enum.map(fn neighbour_row -> size * neighbour_row + col end)
+
+    horizontal_neighbours =
+      [col - 1, col + 1]
+      |> Enum.filter(&mesh2d_in_bound?(&1, size))
+      |> Enum.map(fn neighbour_col -> size * row + neighbour_col end)
+
+    (vertical_nieghbours ++ horizontal_neighbours)
+    |> Enum.filter(fn idx -> idx < n end)
+    |> Enum.sort()
+  end
+
+  defp mesh2d_in_bound?(row_or_col_idx, size) do
+    row_or_col_idx >= 0 and row_or_col_idx < size
+  end
 end
