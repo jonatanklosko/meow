@@ -34,8 +34,10 @@ defmodule Meow.Topology do
   end
 
   @doc """
-  Represents a 2d mesh topology.
-  A mesh doesn't have to be complete.
+  Represents a  2-dimensional mesh topology.
+
+  The populations are arranged into a square grid, but the grid doesn't have
+  to be complete, so an arbitrary number of populations is supported.
   """
   @spec mesh2d(number_of_populations(), population_index()) :: neighbour_population_indices()
   def mesh2d(n, idx) do
