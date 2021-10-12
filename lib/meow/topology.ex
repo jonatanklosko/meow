@@ -34,7 +34,7 @@ defmodule Meow.Topology do
   end
 
   @doc """
-  Represents a  2-dimensional mesh topology.
+  Represents a 2-dimensional mesh topology.
 
   The populations are arranged into a square grid, but the grid doesn't have
   to be complete, so an arbitrary number of populations is supported.
@@ -66,5 +66,14 @@ defmodule Meow.Topology do
 
   defp mesh2d_in_bound?(row_or_col_idx, size) do
     row_or_col_idx >= 0 and row_or_col_idx < size
+  end
+
+  @doc """
+  Represents a fully connected topology.
+  """
+  @spec fully_connected(number_of_populations(), population_index()) ::
+          neighbour_population_indices()
+  def fully_connected(n, idx) do
+    Enum.to_list(0..(n - 1)) -- [idx]
   end
 end
