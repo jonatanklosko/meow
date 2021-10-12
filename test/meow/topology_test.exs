@@ -52,6 +52,19 @@ defmodule Meow.TopologyTest do
            }
   end
 
+  test "fully_connected/2" do
+    assert topology_to_map(&Topology.fully_connected/2, 1) == %{
+             0 => []
+           }
+
+    assert topology_to_map(&Topology.fully_connected/2, 4) == %{
+             0 => [1, 2, 3],
+             1 => [0, 2, 3],
+             2 => [0, 1, 3],
+             3 => [0, 1, 2]
+           }
+  end
+
   defp topology_to_map(topology_fun, n) do
     for idx <- 0..(n - 1), into: %{} do
       neighbour_indices = topology_fun.(n, idx)
