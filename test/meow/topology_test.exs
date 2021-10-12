@@ -66,6 +66,20 @@ defmodule Meow.TopologyTest do
            }
   end
 
+  test "star/2" do
+    assert topology_to_map(&Topology.star/2, 2) == %{
+             0 => [1],
+             1 => [0]
+           }
+
+    assert topology_to_map(&Topology.star/2, 4) == %{
+             0 => [1, 2, 3],
+             1 => [0],
+             2 => [0],
+             3 => [0]
+           }
+  end
+
   defp topology_to_map(topology_fun, n) do
     for idx <- 0..(n - 1), into: %{} do
       neighbour_indices = topology_fun.(n, idx)
