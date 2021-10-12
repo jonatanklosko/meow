@@ -53,8 +53,9 @@ defmodule Meow.TopologyTest do
   end
 
   test "fully_connected/2" do
-    assert topology_to_map(&Topology.fully_connected/2, 1) == %{
-             0 => []
+    assert topology_to_map(&Topology.fully_connected/2, 2) == %{
+             0 => [1],
+             1 => [0]
            }
 
     assert topology_to_map(&Topology.fully_connected/2, 4) == %{
