@@ -82,6 +82,34 @@ defmodule MeowNx.Utils do
     )
   end
 
+  @doc """
+  Returns a tensor of random indices on the interval `[:min, :max)`
+  without replacement (repetitions).
+
+  The resulting tensor has `:shape` with random indices `:axis`.
+  """
+  defn random_idx_without_replacement(opts \\ []) do
+    opts = keyword!(opts, [:shape, :min, :max, :axis])
+    shape = opts[:shape]
+    min = opts[:min]
+    max = opts[:max]
+    axis = opts[:axis]
+
+    # We use argsort on random numbers to generate shuffled indices
+    # and then we slice them according to the sample size
+
+    range = max - min
+
+    sample_size = transform(shape, &elem(&1, axis))
+    random_shape = transform(shape, &put_elem(&1, axis, range))
+
+    random_shape
+    |> Nx.random_uniform()
+    |> Nx.argsort(axis: axis)
+    |> Nx.slice_axis(0, sample_size, axis)
+    |> Nx.add(min)
+  end
+
   # Macros for use in defn
 
   @doc """

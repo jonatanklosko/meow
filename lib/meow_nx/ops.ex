@@ -208,6 +208,29 @@ defmodule MeowNx.Ops do
   end
 
   @doc """
+  Builds a multi point crossover operation.
+
+  See `MeowNx.Crossover.multi_point/1` for more details.
+  """
+  @doc type: :crossover
+  @spec crossover_multi_point(pos_integer()) :: Op.t()
+  def crossover_multi_point(points) do
+    opts = [points: points]
+
+    %Op{
+      name: "[Nx] Crossover: multi point",
+      requires_fitness: false,
+      invalidates_fitness: true,
+      in_representations: @representations,
+      impl: fn population, ctx ->
+        Op.map_genomes(population, fn genomes ->
+          Nx.Defn.jit(&Crossover.multi_point(&1, opts), [genomes], Utils.jit_opts(ctx))
+        end)
+      end
+    }
+  end
+
+  @doc """
   Builds a blend-alpha crossover operation.
 
   See `MeowNx.Crossover.blend_alpha/2` for more details.
