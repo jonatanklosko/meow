@@ -28,7 +28,7 @@ defmodule Meow.Topology do
   Represents unidirectional ring topology.
   """
   @spec ring(number_of_populations(), population_index()) :: neighbour_population_indices()
-  def ring(n, idx) do
+  def ring(n, idx) when n > 1 do
     next_idx = (idx + 1) |> rem(n)
     [next_idx]
   end
@@ -40,7 +40,7 @@ defmodule Meow.Topology do
   to be complete, so an arbitrary number of populations is supported.
   """
   @spec mesh2d(number_of_populations(), population_index()) :: neighbour_population_indices()
-  def mesh2d(n, idx) do
+  def mesh2d(n, idx) when n > 1 do
     size =
       n
       |> :math.sqrt()
@@ -73,7 +73,22 @@ defmodule Meow.Topology do
   """
   @spec fully_connected(number_of_populations(), population_index()) ::
           neighbour_population_indices()
-  def fully_connected(n, idx) do
+  def fully_connected(n, idx) when n > 1 do
     Enum.to_list(0..(n - 1)) -- [idx]
+  end
+
+  @doc """
+  Represents a star topology.
+
+  The populations are arranged into a star, and the one
+  with `0` index resides in the middle of it.
+  """
+  @spec star(number_of_populations(), population_index()) ::
+          neighbour_population_indices()
+  def star(n, idx) when n > 1 do
+    case idx do
+      0 -> fully_connected(n, 0)
+      _ -> [0]
+    end
   end
 end
