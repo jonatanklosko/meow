@@ -85,7 +85,10 @@ defmodule Meow.Topology do
   """
   @spec star(number_of_populations(), population_index()) ::
           neighbour_population_indices()
-  def star(n, idx) when n > 1 and idx !== 0, do: [0]
-
-  def star(n, idx) when n > 1 and idx === 0, do: fully_connected(n, 0)
+  def star(n, idx) when n > 1 do
+    case idx do
+      0 -> fully_connected(n, 0)
+      _ -> [0]
+    end
+  end
 end
