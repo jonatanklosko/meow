@@ -175,7 +175,7 @@ defmodule Meow.Runner do
 
   defp format_best_individual(populations) do
     populations
-    |> Enum.map(fn %{metrics: metrics} -> metrics[:best_individual] end)
+    |> Enum.map(fn %{log: log} -> log[:best_individual] end)
     |> Enum.reject(&is_nil/1)
     |> Enum.max_by(& &1.fitness, fn -> nil end)
     |> case do

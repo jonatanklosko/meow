@@ -346,15 +346,13 @@ defmodule MeowNx.Ops do
   end
 
   @doc """
-  Builds a metric operation loging the best individual.
-
-  See `MeowNx.Metric.best_individual/2` for more details.
+  Builds an operation keeping track of the best individual.
   """
-  @doc type: :metric
-  @spec metric_best_individual() :: Op.t()
-  def metric_best_individual() do
+  @doc type: :log
+  @spec log_best_individual() :: Op.t()
+  def log_best_individual() do
     %Op{
-      name: "Metric: best individual",
+      name: "Log: best individual",
       requires_fitness: true,
       invalidates_fitness: false,
       in_representations: @representations,
@@ -372,12 +370,90 @@ defmodule MeowNx.Ops do
           generation: population.generation
         }
 
-        update_in(population.metrics, fn metrics ->
-          Map.update(metrics, :best_individual, best_individual, fn individual ->
+        update_in(population.log, fn log ->
+          Map.update(log, :best_individual, best_individual, fn individual ->
             Enum.max_by([individual, best_individual], & &1.fitness)
           end)
         end)
       end
     }
+  end
+
+  @doc """
+  Builds an operation loging the given set of metrics.
+
+  Expects a map with metric functions as values. Each metric should
+  be a numerical function returning a scalar tensor. The values are
+  appended to the population log under the corresponding key.
+
+  See `MeowNx.Metric` for a number of built-in metric definitions.
+
+  ## Examples
+
+      MeowNx.Ops.log_metrics(
+        %{
+          fitness_max: &MeowNx.Metric.fitness_max/2,
+          fitness_mean: &MeowNx.Metric.fitness_mean/2,
+          fitness_sd: &MeowNx.Metric.fitness_sd/2
+        },
+        interval: 10
+      )
+
+  ## Options
+
+    * `:interval` - the interval (number of generations) determining
+      how often the metrics are computed. Defaults to 1.
+  """
+  @doc type: :log
+  @spec log_metrics(map(), keyword()) :: Op.t()
+  def log_metrics(metrics, opts \\ []) when is_map(metrics) and is_list(opts) do
+    interval = Keyword.get(opts, :interval, 1)
+
+    {keys, funs} = Enum.unzip(metrics)
+    fun = compile_metrics(funs)
+
+    %Op{
+      name: "Log: metrics",
+      requires_fitness: true,
+      invalidates_fitness: false,
+      in_representations: @representations,
+      impl: fn population, ctx ->
+        if rem(population.generation, interval) == 0 do
+          result = Nx.Defn.jit(fun, [population.genomes, population.fitness], Utils.jit_opts(ctx))
+
+          entries =
+            result
+            |> Tuple.to_list()
+            |> Enum.zip(keys)
+            |> Enum.map(fn {value, key} ->
+              if not is_struct(value, Nx.Tensor) or Nx.shape(value) != {} do
+                raise ArgumentError,
+                      "expected metric function to return a scalar, but #{inspect(key)} returned #{inspect(value)}"
+              end
+
+              {key, Nx.to_scalar(value)}
+            end)
+
+          update_in(population.log, fn log ->
+            Enum.reduce(entries, log, fn {key, value}, log ->
+              point = {population.generation, value}
+              Map.update(log, key, [point], &[point | &1])
+            end)
+          end)
+        else
+          population
+        end
+      end
+    }
+  end
+
+  # Combines many numerical functions into a single function
+  # that returns all values in a tuple
+  defp compile_metrics(funs) do
+    fn genomes, fitness ->
+      funs
+      |> Enum.map(fn fun -> fun.(genomes, fitness) end)
+      |> List.to_tuple()
+    end
   end
 end
