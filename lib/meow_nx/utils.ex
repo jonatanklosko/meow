@@ -110,6 +110,27 @@ defmodule MeowNx.Utils do
     |> Nx.add(min)
   end
 
+  @doc """
+  Calculates population standard deviation.
+
+  ## Examples
+
+      iex> MeowNx.Utils.sd(Nx.tensor([2, 4]))
+      #Nx.Tensor<
+        f32
+        1.0
+      >
+  """
+  defn sd(t) do
+    mean = Nx.mean(t)
+
+    t
+    |> Nx.subtract(mean)
+    |> Nx.power(2)
+    |> Nx.mean()
+    |> Nx.sqrt()
+  end
+
   # Macros for use in defn
 
   @doc """

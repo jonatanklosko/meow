@@ -43,7 +43,7 @@ model =
       MeowNx.Ops.selection_tournament(1.0),
       MeowNx.Ops.crossover_multi_point(3),
       MeowNx.Ops.mutation_bit_flip(0.1),
-      MeowNx.Ops.metric_best_individual(),
+      MeowNx.Ops.log_best_individual(),
       Meow.Ops.max_generations(100)
     ])
   )

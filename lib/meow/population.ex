@@ -13,7 +13,7 @@ defmodule Meow.Population do
     :representation,
     generation: 1,
     terminated: false,
-    metrics: %{}
+    log: %{}
   ]
 
   @type t :: %__MODULE__{
@@ -22,7 +22,7 @@ defmodule Meow.Population do
           representation: representation(),
           generation: non_neg_integer(),
           terminated: boolean(),
-          metrics: %{}
+          log: %{}
         }
 
   @typedoc """
@@ -132,7 +132,7 @@ defmodule Meow.Population do
       representation: same_representation!(populations),
       # This is somehow arbitrary, but we cannot reasonably merge statistics
       # and this approach should generally work as expected
-      metrics: Enum.max_by(populations, & &1.generation).metrics
+      log: Enum.max_by(populations, & &1.generation).log
     }
   end
 

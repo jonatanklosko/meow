@@ -1,13 +1,9 @@
-# Install Meow and Nx for numerical computing
-
 Mix.install([
   {:meow, path: Path.expand("..", __DIR__)},
   # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
   {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
   {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
 ])
-
-# Define the evaluation function, in this case using Nx to work with MeowNx
 
 defmodule Problem do
   import Nx.Defn
@@ -26,29 +22,30 @@ defmodule Problem do
   end
 end
 
-# Define the evolutionary model (algorithm)
-
 alias Meow.{Model, Pipeline}
 
 model =
-  Model.new(
-    # Specify the evaluation function that we are trying to maximise
-    &Problem.evaluate_rastrigin/1
-  )
+  Model.new(&Problem.evaluate_rastrigin/1)
   |> Model.add_pipeline(
-    # Define how the population is initialized and what representation to use
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
-    # A single pipeline corresponds to a single population
     Pipeline.new([
-      # Define a number of evolutionary steps that the population goes through
       MeowNx.Ops.selection_tournament(1.0),
       MeowNx.Ops.crossover_uniform(0.5),
-      MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
+      MeowNx.Ops.mutation_shift_gaussian(0.001),
       MeowNx.Ops.log_best_individual(),
+      MeowNx.Ops.log_metrics(
+        %{
+          fitness_max: &MeowNx.Metric.fitness_max/2,
+          fitness_mean: &MeowNx.Metric.fitness_mean/2,
+          fitness_sd: &MeowNx.Metric.fitness_sd/2
+        },
+        interval: 100
+      ),
       Meow.Ops.max_generations(5_000)
     ])
   )
 
-# Execute the above model
+[population] = Meow.Runner.run(model)
 
-Meow.Runner.run(model)
+IO.puts("\nLogged metrics:")
+IO.inspect(population.log)

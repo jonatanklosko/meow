@@ -49,7 +49,7 @@ model =
         &MeowNx.Ops.selection_natural(&1),
         interval: 10
       ),
-      MeowNx.Ops.metric_best_individual(),
+      MeowNx.Ops.log_best_individual(),
       Meow.Ops.max_generations(1_000)
     ]),
     # Duplicate the pipeline, so that the model

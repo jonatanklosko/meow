@@ -32,7 +32,7 @@ defmodule Rastrigin do
         MeowNx.Ops.selection_tournament(1.0),
         MeowNx.Ops.crossover_uniform(0.5),
         MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
-        MeowNx.Ops.metric_best_individual(),
+        MeowNx.Ops.log_best_individual(),
         Meow.Ops.max_generations(5_000)
       ])
     )
@@ -48,7 +48,7 @@ defmodule Rastrigin do
         MeowNx.Ops.mutation_shift_gaussian(0.001),
         Meow.Ops.emigrate(MeowNx.Ops.selection_tournament(5), &Topology.ring/2, interval: 10),
         Meow.Ops.immigrate(&MeowNx.Ops.selection_natural(&1), interval: 10),
-        MeowNx.Ops.metric_best_individual(),
+        MeowNx.Ops.log_best_individual(),
         Meow.Ops.max_generations(5_000)
       ]),
       duplicate: 3
@@ -76,7 +76,7 @@ defmodule Rastrigin do
           ],
           &Population.concatenate/1
         ),
-        MeowNx.Ops.metric_best_individual(),
+        MeowNx.Ops.log_best_individual(),
         Meow.Ops.max_generations(5_000)
       ])
     )
@@ -88,5 +88,4 @@ end
 # model = Rastrigin.model_simple()
 # model = Rastrigin.model_simple_multi()
 model = Rastrigin.model_branching()
-
 Meow.Runner.run(model)
