@@ -131,6 +131,67 @@ defmodule MeowNx.Utils do
     |> Nx.sqrt()
   end
 
+  @doc """
+  Calculates entropy of values in the given tensor.
+
+  That this function works with exact values. Sometimes different
+  values belong to the same group, in those cases you need to
+  preprocess the tensor beforehand. For example, when working with
+  real numbers, you most likely want to round them, so they are
+  compared with a specific precision.
+
+  Note that this function uses natural logarithm.
+
+  ## Examples
+
+      iex> MeowNx.Utils.entropy(Nx.tensor([1, 1]))
+      #Nx.Tensor<
+        f32
+        -0.0
+      >
+
+      iex> MeowNx.Utils.entropy(Nx.tensor([0.2, 0.22]))
+      #Nx.Tensor<
+        f32
+        0.6931471824645996
+      >
+
+      iex> MeowNx.Utils.entropy(Nx.tensor([2, 1, 3, 1, 2, 1]))
+      #Nx.Tensor<
+        f32
+        1.011404275894165
+      >
+  """
+  defn entropy(t) do
+    {n} = Nx.shape(t)
+
+    sorted = Nx.sort(t)
+
+    # A mask with a single 1 in every group of equal values,
+    # computed by placing 1 where an element differs from its successor
+    representative_mask =
+      Nx.concatenate([
+        Nx.not_equal(sorted[0..-2//1], sorted[1..-1//1]),
+        Nx.tensor([1])
+      ])
+
+    # Calculate frequency for every element
+    prob =
+      Nx.equal(
+        Nx.reshape(sorted, {n, 1}),
+        Nx.reshape(sorted, {1, n})
+      )
+      |> Nx.sum(axes: [0])
+      |> Nx.divide(n)
+
+    prob
+    |> Nx.log()
+    |> Nx.multiply(prob)
+    # Take the sum, but include probability for every unique value just once
+    |> Nx.dot(representative_mask)
+    |> Nx.negate()
+  end
+
   # Macros for use in defn
 
   @doc """
