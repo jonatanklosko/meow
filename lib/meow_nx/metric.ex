@@ -72,4 +72,21 @@ defmodule MeowNx.Metric do
 
     MeowNx.Utils.entropy(values)
   end
+
+  @doc """
+  Calculates the mean Euclidean distance between each pair
+  of genomes.
+  """
+  defn genomes_mean_euclidean_distance(genomes, _fitness) do
+    {n, _} = Nx.shape(genomes)
+
+    sum =
+      genomes
+      |> MeowNx.Utils.pairwise_squared_distance()
+      |> Nx.sqrt()
+      |> Nx.sum()
+
+    # Ignore diagonal elements
+    sum / (n * n - n)
+  end
 end

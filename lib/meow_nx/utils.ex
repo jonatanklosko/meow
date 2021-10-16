@@ -192,6 +192,42 @@ defmodule MeowNx.Utils do
     |> Nx.negate()
   end
 
+  @doc """
+  Calculates a square of Euclidean distance for every
+  pair of rows in the given 2-dimensional tensor.
+
+  See https://stackoverflow.com/a/37040451
+
+  ## Examples
+
+      iex> t = Nx.tensor([
+      ...>   [0, 0, 0],
+      ...>   [1, 1, 1],
+      ...>   [1, 2, -1]
+      ...> ])
+      iex> MeowNx.Utils.pairwise_squared_distance(t)
+      #Nx.Tensor<
+        s64[3][3]
+        [
+          [0, 3, 6],
+          [3, 0, 5],
+          [6, 5, 0]
+        ]
+      >
+  """
+  defn pairwise_squared_distance(t) do
+    r =
+      t
+      |> Nx.multiply(t)
+      |> Nx.sum(axes: [1])
+      |> Nx.reshape({:auto, 1})
+
+    result = r - 2 * Nx.dot(t, Nx.transpose(t)) + Nx.transpose(r)
+
+    # Make sure there are no negative values due to precision errors
+    Nx.max(result, 0)
+  end
+
   # Macros for use in defn
 
   @doc """
