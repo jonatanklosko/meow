@@ -11,6 +11,7 @@ defmodule Meow.Runner.Report do
         }
 
   @type population_report :: %{
+          node: node(),
           time_us: non_neg_integer(),
           population: Meow.Population.t()
         }

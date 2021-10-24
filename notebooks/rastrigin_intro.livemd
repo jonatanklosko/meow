@@ -18,7 +18,7 @@ Mix.install([
 Let's also add some aliases to make the algorithm definitions less verbose.
 
 ```elixir
-alias Meow.{Model, Pipeline, Population, Topology}
+alias Meow.{Model, Pipeline, Population, Topology, Runner}
 ```
 
 ## Objective
@@ -106,7 +106,8 @@ model =
   )
 
 # Execute the above model
-Meow.Runner.run(model)
+report = Runner.run(model)
+report |> Runner.Report.format_summary() |> IO.puts()
 ```
 
 By looking at the best genome we can infer that the solution
@@ -156,7 +157,8 @@ model =
     ])
   )
 
-Meow.Runner.run(model)
+report = Runner.run(model)
+report |> Runner.Report.format_summary() |> IO.puts()
 ```
 
 This gives us a much more precise solution! The fitness is closer to 0
@@ -199,5 +201,6 @@ model =
     duplicate: 3
   )
 
-Meow.Runner.run(model)
+report = Runner.run(model)
+report |> Runner.Report.format_summary() |> IO.puts()
 ```

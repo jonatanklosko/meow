@@ -17,9 +17,9 @@ defmodule Meow.Population do
   ]
 
   @type t :: %__MODULE__{
-          genomes: genomes(),
-          fitness: fitness(),
-          representation: representation(),
+          genomes: genomes() | nil,
+          fitness: fitness() | nil,
+          representation: representation() | nil,
           generation: non_neg_integer(),
           terminated: boolean(),
           log: %{}

@@ -57,15 +57,15 @@ defmodule Meow.Runner do
 
     global_opts = opts[:global_opts] || []
 
-    {time, {times, populations}} =
+    {time, result_tuples} =
       :timer.tc(&run_model/4, [model, nodes, population_groups, global_opts])
 
     %Meow.Runner.Report{
       total_time_us: time,
       population_reports:
         for(
-          {time, population} <- Enum.zip(times, populations),
-          do: %{time_us: time, population: population}
+          {node, time, population} <- result_tuples,
+          do: %{node: node, time_us: time, population: population}
         )
     }
   end
@@ -136,20 +136,18 @@ defmodule Meow.Runner do
               population = Op.apply(%Population{}, initializer, ctx)
 
               {time, final_population} = :timer.tc(&run_population/3, [population, pipeline, ctx])
-              send(runner_pid, {:finished, self(), time, final_population})
+              send(runner_pid, {:finished, self(), node, time, final_population})
           end
         end)
       end)
 
     for pid <- pids, do: send(pid, {:initialize, pids})
 
-    pids
-    |> Enum.map(fn pid ->
+    for pid <- pids do
       receive do
-        {:finished, ^pid, time, population} -> {time, population}
+        {:finished, ^pid, node, time, population} -> {node, time, population}
       end
-    end)
-    |> Enum.unzip()
+    end
   end
 
   defp run_population(population, pipeline, ctx) do
