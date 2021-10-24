@@ -51,4 +51,6 @@ model =
 
 # Execute the above model
 
-Meow.Runner.run(model)
+report = Meow.Runner.run(model)
+
+report |> Meow.Report.format_summary() |> IO.puts()

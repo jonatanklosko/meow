@@ -4,7 +4,7 @@ defmodule Meow.Runner do
   as defined by `Meow.Model`.
   """
 
-  alias Meow.{Population, Pipeline, Model, Op}
+  alias Meow.{Pipeline, Population, Model, Op}
 
   @doc """
   Iteratively transforms populations according to the given
@@ -40,7 +40,7 @@ defmodule Meow.Runner do
       This may be useful for some integrations, for example
       to specify JIT compilation options when using `MeowNx`.
   """
-  @spec run(Model.t(), keyword()) :: list(Population.t())
+  @spec run(Model.t(), keyword()) :: Meow.Report.t()
   def run(model, opts \\ []) do
     nodes = opts[:nodes] || [node()]
     validate_nodes!(nodes)
@@ -60,12 +60,14 @@ defmodule Meow.Runner do
     {time, {times, populations}} =
       :timer.tc(&run_model/4, [model, nodes, population_groups, global_opts])
 
-    IO.write([
-      format_times(time, times),
-      format_best_individual(populations)
-    ])
-
-    populations
+    %Meow.Report{
+      total_time_us: time,
+      population_reports:
+        for(
+          {time, population} <- Enum.zip(times, populations),
+          do: %{time_us: time, population: population}
+        )
+    }
   end
 
   defp validate_nodes!(nodes) do
@@ -159,37 +161,6 @@ defmodule Meow.Runner do
       population
       |> Map.update!(:generation, &(&1 + 1))
       |> run_population(pipeline, ctx)
-    end
-  end
-
-  defp format_times(total_time, times) do
-    average_time = (Enum.sum(times) / length(times)) |> Float.round()
-
-    """
-    \n====== Summary ======
-
-    Total time: #{total_time / 1_000_000}s
-    Population time (average): #{average_time / 1_000_000}s
-    """
-  end
-
-  defp format_best_individual(populations) do
-    populations
-    |> Enum.map(fn %{log: log} -> log[:best_individual] end)
-    |> Enum.reject(&is_nil/1)
-    |> Enum.max_by(& &1.fitness, fn -> nil end)
-    |> case do
-      nil ->
-        ""
-
-      %{fitness: fitness, genome: genome, generation: generation} ->
-        """
-        \n====== Best individual ======
-
-        Fitness: #{fitness}
-        Generation: #{generation}
-        Genome: #{inspect(genome)}
-        """
     end
   end
 end
