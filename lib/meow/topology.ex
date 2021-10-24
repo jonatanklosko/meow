@@ -41,23 +41,23 @@ defmodule Meow.Topology do
   """
   @spec mesh2d(number_of_populations(), population_index()) :: neighbour_population_indices()
   def mesh2d(n, idx) when n > 1 do
-    size =
+    edge_size =
       n
       |> :math.sqrt()
       |> ceil()
 
-    row = div(idx, size)
-    col = rem(idx, size)
+    row = div(idx, edge_size)
+    col = rem(idx, edge_size)
 
     vertical_nieghbours =
       [row - 1, row + 1]
-      |> Enum.filter(&mesh2d_in_bound?(&1, size))
-      |> Enum.map(fn neighbour_row -> size * neighbour_row + col end)
+      |> Enum.filter(&mesh2d_in_bound?(&1, edge_size))
+      |> Enum.map(fn neighbour_row -> edge_size * neighbour_row + col end)
 
     horizontal_neighbours =
       [col - 1, col + 1]
-      |> Enum.filter(&mesh2d_in_bound?(&1, size))
-      |> Enum.map(fn neighbour_col -> size * row + neighbour_col end)
+      |> Enum.filter(&mesh2d_in_bound?(&1, edge_size))
+      |> Enum.map(fn neighbour_col -> edge_size * row + neighbour_col end)
 
     (vertical_nieghbours ++ horizontal_neighbours)
     |> Enum.filter(fn idx -> idx < n end)
@@ -66,6 +66,47 @@ defmodule Meow.Topology do
 
   defp mesh2d_in_bound?(row_or_col_idx, size) do
     row_or_col_idx >= 0 and row_or_col_idx < size
+  end
+
+  @doc """
+  Represents a 3-dimensional mesh topology.
+
+  The populations are arranged into a collection of square grids, but such a grid doesn't have
+  to be complete, so an arbitrary number of populations is supported.
+  """
+  @spec mesh3d(number_of_populations(), population_index()) :: neighbour_population_indices()
+  def mesh3d(n, idx) when n > 1 do
+    edge_size =
+      n
+      |> :math.pow(1 / 3)
+      |> ceil()
+
+    matrix_size = edge_size * edge_size
+
+    wall_idx = div(idx, matrix_size)
+    offset = wall_idx * matrix_size
+
+    row = div(idx - offset, edge_size)
+    col = rem(idx - offset, edge_size)
+
+    # same matrix
+    vertical_nieghbours =
+      [row - 1, row + 1]
+      |> Enum.filter(&mesh2d_in_bound?(&1, edge_size))
+      |> Enum.map(fn neighbour_row -> edge_size * neighbour_row + col + offset end)
+
+    horizontal_neighbours =
+      [col - 1, col + 1]
+      |> Enum.filter(&mesh2d_in_bound?(&1, edge_size))
+      |> Enum.map(fn neighbour_col -> edge_size * row + neighbour_col + offset end)
+
+    # neighbour matrices
+    matrix_neighbours =
+      Enum.filter([idx - matrix_size, idx + matrix_size], fn idx -> idx >= 0 end)
+
+    (vertical_nieghbours ++ horizontal_neighbours ++ matrix_neighbours)
+    |> Enum.filter(fn idx -> idx < n end)
+    |> Enum.sort()
   end
 
   @doc """
