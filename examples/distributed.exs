@@ -59,5 +59,5 @@ model =
 
 Meow.Distribution.init_from_cli_args!(fn nodes ->
   report = Meow.Runner.run(model, nodes: nodes)
-  report |> Meow.Report.format_summary() |> IO.puts()
+  report |> Meow.Runner.Report.format_summary() |> IO.puts()
 end)

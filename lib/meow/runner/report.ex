@@ -1,4 +1,4 @@
-defmodule Meow.Report do
+defmodule Meow.Runner.Report do
   @moduledoc """
   Final results and information produced during a model run.
   """

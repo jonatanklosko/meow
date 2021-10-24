@@ -40,7 +40,7 @@ defmodule Meow.Runner do
       This may be useful for some integrations, for example
       to specify JIT compilation options when using `MeowNx`.
   """
-  @spec run(Model.t(), keyword()) :: Meow.Report.t()
+  @spec run(Model.t(), keyword()) :: Meow.Runner.Report.t()
   def run(model, opts \\ []) do
     nodes = opts[:nodes] || [node()]
     validate_nodes!(nodes)
@@ -60,7 +60,7 @@ defmodule Meow.Runner do
     {time, {times, populations}} =
       :timer.tc(&run_model/4, [model, nodes, population_groups, global_opts])
 
-    %Meow.Report{
+    %Meow.Runner.Report{
       total_time_us: time,
       population_reports:
         for(
