@@ -78,13 +78,13 @@ defmodule Meow.Topology do
   def mesh3d(n, idx) when n > 1 do
     edge_size =
       n
-      |> :math.pow(1/3)
+      |> :math.pow(1 / 3)
       |> ceil()
 
     matrix_size = edge_size * edge_size
 
     wall_idx = div(idx, matrix_size)
-    offset = (wall_idx) * matrix_size
+    offset = wall_idx * matrix_size
 
     row = div(idx - offset, edge_size)
     col = rem(idx - offset, edge_size)
@@ -101,7 +101,8 @@ defmodule Meow.Topology do
       |> Enum.map(fn neighbour_col -> edge_size * row + neighbour_col + offset end)
 
     # neighbour matrices
-    matrix_neighbours = [idx - offset, idx + offset]
+    matrix_neighbours =
+      Enum.filter([idx - matrix_size, idx + matrix_size], fn idx -> idx >= 0 end)
 
     (vertical_nieghbours ++ horizontal_neighbours ++ matrix_neighbours)
     |> Enum.filter(fn idx -> idx < n end)
