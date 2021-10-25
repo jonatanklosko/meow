@@ -132,4 +132,46 @@ defmodule Meow.Topology do
       _ -> [0]
     end
   end
+
+  @doc """
+  Creates an anonymous function that represents a user-defined topology.
+
+  The topology map must include keys for all of the populations, even if one doesn't have any neighbours.
+  """
+  @spec from_map(%{population_index() => neighbour_population_indices()}) :: topology_fun()
+  def from_map(topology_map) do
+    indices = Map.keys(topology_map)
+
+    max_idx = Enum.max(indices)
+    expected_indices = Enum.to_list(0..max_idx)
+
+    case expected_indices -- indices do
+      [] ->
+        :ok
+
+      missing ->
+        missing_string = missing |> Enum.map(&to_string/1) |> Enum.join(", ")
+
+        raise ArgumentError,
+              "expected #{max_idx + 1} entries in the topology map, but the following keys are missing: #{missing_string}"
+    end
+
+    for {from_idx, to_indices} <- topology_map,
+        to_idx <- to_indices,
+        to_idx not in 0..max_idx do
+      raise ArgumentError,
+            "expected population neighbours to be in [0, #{max_idx}], but found: #{to_idx} for population #{from_idx}"
+    end
+
+    fn n, idx ->
+      expected_n = max_idx + 1
+
+      unless n == expected_n do
+        raise ArgumentError,
+              "the topology was defined for #{expected_n} populations, but called with #{n}"
+      end
+
+      topology_map[idx]
+    end
+  end
 end

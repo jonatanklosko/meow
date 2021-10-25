@@ -115,6 +115,52 @@ defmodule Meow.TopologyTest do
            }
   end
 
+  describe "from_map/1" do
+    test "raises an error when the topology map is missing indices" do
+      assert_raise ArgumentError,
+                   ~s/expected 3 entries in the topology map, but the following keys are missing: 1/,
+                   fn ->
+                     Topology.from_map(%{0 => [], 2 => []})
+                   end
+    end
+
+    test "raises an error when topology map values contain population indices smaller than 0" do
+      assert_raise ArgumentError,
+                   ~s/expected population neighbours to be in [0, 2], but found: -1 for population 1/,
+                   fn ->
+                     Topology.from_map(%{0 => [1], 1 => [-1, 0], 2 => [0]})
+                   end
+    end
+
+    test "raises an error when topology map values contain population indices bigger than max_idx" do
+      assert_raise ArgumentError,
+                   ~s/expected population neighbours to be in [0, 2], but found: 3 for population 2/,
+                   fn ->
+                     Topology.from_map(%{0 => [1], 1 => [0, 2], 2 => [0, 3]})
+                   end
+    end
+
+    test "returned topology_fun raises an error if number of populations doesn't match the one in topology map" do
+      topology_fun = Topology.from_map(%{0 => [1], 1 => [0]})
+
+      assert_raise ArgumentError,
+                   ~s/the topology was defined for 2 populations, but called with 3/,
+                   fn ->
+                     topology_fun.(3, 0)
+                   end
+    end
+
+    test "returned topology_fun returns a neighbour indices list for a population with a given index" do
+      topology_fun = Topology.from_map(%{0 => [1, 2], 1 => [0], 2 => []})
+
+      assert topology_to_map(topology_fun, 3) == %{
+               0 => [1, 2],
+               1 => [0],
+               2 => []
+             }
+    end
+  end
+
   defp topology_to_map(topology_fun, n) do
     for idx <- 0..(n - 1), into: %{} do
       neighbour_indices = topology_fun.(n, idx)
