@@ -153,7 +153,7 @@ defmodule Meow.Topology do
         missing_string = missing |> Enum.map(&to_string/1) |> Enum.join(", ")
 
         raise ArgumentError,
-              "expected #{max_idx + 1} entries in the topology map, but the following keys are missing: [#{missing_string}]"
+              "expected #{max_idx + 1} entries in the topology map, but the following keys are missing: #{missing_string}"
     end
 
     for {from_idx, to_indices} <- topology_map,
