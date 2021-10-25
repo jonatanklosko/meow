@@ -168,7 +168,7 @@ defmodule Meow.Topology do
 
       unless n == expected_n do
         raise ArgumentError,
-              "expected the same number of populations as in topology map, but got different (#{n} != #{expected_n})"
+              "the topology was defined for #{expected_n} populations, but called with #{n}"
       end
 
       topology_map[idx]
