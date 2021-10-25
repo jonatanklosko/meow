@@ -118,7 +118,7 @@ defmodule Meow.TopologyTest do
   describe "from_map/1" do
     test "raises an error when the topology map is missing indices" do
       assert_raise ArgumentError,
-                   ~s/expected 3 entries in the topology map, but the following keys are missing: [1]/,
+                   ~s/expected 3 entries in the topology map, but the following keys are missing: 1/,
                    fn ->
                      Topology.from_map(%{0 => [], 2 => []})
                    end
@@ -144,7 +144,7 @@ defmodule Meow.TopologyTest do
       topology_fun = Topology.from_map(%{0 => [1], 1 => [0]})
 
       assert_raise ArgumentError,
-                   ~s/expected the same number of populations as in topology map, but got different (3 != 2)/,
+                   ~s/the topology was defined for 2 populations, but called with 3/,
                    fn ->
                      topology_fun.(3, 0)
                    end
