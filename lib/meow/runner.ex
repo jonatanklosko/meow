@@ -4,7 +4,7 @@ defmodule Meow.Runner do
   as defined by `Meow.Model`.
   """
 
-  alias Meow.{Population, Pipeline, Model, Op}
+  alias Meow.{Pipeline, Population, Model, Op}
 
   @doc """
   Iteratively transforms populations according to the given
@@ -40,7 +40,7 @@ defmodule Meow.Runner do
       This may be useful for some integrations, for example
       to specify JIT compilation options when using `MeowNx`.
   """
-  @spec run(Model.t(), keyword()) :: list(Population.t())
+  @spec run(Model.t(), keyword()) :: Meow.Runner.Report.t()
   def run(model, opts \\ []) do
     nodes = opts[:nodes] || [node()]
     validate_nodes!(nodes)
@@ -57,15 +57,17 @@ defmodule Meow.Runner do
 
     global_opts = opts[:global_opts] || []
 
-    {time, {times, populations}} =
+    {time, result_tuples} =
       :timer.tc(&run_model/4, [model, nodes, population_groups, global_opts])
 
-    IO.write([
-      format_times(time, times),
-      format_best_individual(populations)
-    ])
-
-    populations
+    %Meow.Runner.Report{
+      total_time_us: time,
+      population_reports:
+        for(
+          {node, time, population} <- result_tuples,
+          do: %{node: node, time_us: time, population: population}
+        )
+    }
   end
 
   defp validate_nodes!(nodes) do
@@ -134,20 +136,18 @@ defmodule Meow.Runner do
               population = Op.apply(%Population{}, initializer, ctx)
 
               {time, final_population} = :timer.tc(&run_population/3, [population, pipeline, ctx])
-              send(runner_pid, {:finished, self(), time, final_population})
+              send(runner_pid, {:finished, self(), node, time, final_population})
           end
         end)
       end)
 
     for pid <- pids, do: send(pid, {:initialize, pids})
 
-    pids
-    |> Enum.map(fn pid ->
+    for pid <- pids do
       receive do
-        {:finished, ^pid, time, population} -> {time, population}
+        {:finished, ^pid, node, time, population} -> {node, time, population}
       end
-    end)
-    |> Enum.unzip()
+    end
   end
 
   defp run_population(population, pipeline, ctx) do
@@ -159,37 +159,6 @@ defmodule Meow.Runner do
       population
       |> Map.update!(:generation, &(&1 + 1))
       |> run_population(pipeline, ctx)
-    end
-  end
-
-  defp format_times(total_time, times) do
-    average_time = (Enum.sum(times) / length(times)) |> Float.round()
-
-    """
-    \n====== Summary ======
-
-    Total time: #{total_time / 1_000_000}s
-    Population time (average): #{average_time / 1_000_000}s
-    """
-  end
-
-  defp format_best_individual(populations) do
-    populations
-    |> Enum.map(fn %{log: log} -> log[:best_individual] end)
-    |> Enum.reject(&is_nil/1)
-    |> Enum.max_by(& &1.fitness, fn -> nil end)
-    |> case do
-      nil ->
-        ""
-
-      %{fitness: fitness, genome: genome, generation: generation} ->
-        """
-        \n====== Best individual ======
-
-        Fitness: #{fitness}
-        Generation: #{generation}
-        Genome: #{inspect(genome)}
-        """
     end
   end
 end

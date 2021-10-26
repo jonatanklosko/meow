@@ -58,5 +58,6 @@ model =
   )
 
 Meow.Distribution.init_from_cli_args!(fn nodes ->
-  Meow.Runner.run(model, nodes: nodes)
+  report = Meow.Runner.run(model, nodes: nodes)
+  report |> Meow.Runner.Report.format_summary() |> IO.puts()
 end)

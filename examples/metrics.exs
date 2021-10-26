@@ -45,7 +45,7 @@ model =
     ])
   )
 
-[population] = Meow.Runner.run(model)
+%{population_reports: [%{population: population}]} = Meow.Runner.run(model)
 
 IO.puts("\nLogged metrics:")
-IO.inspect(population.log)
+IO.inspect(population.log.metrics)

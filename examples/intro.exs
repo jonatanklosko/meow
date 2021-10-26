@@ -28,7 +28,7 @@ end
 
 # Define the evolutionary model (algorithm)
 
-alias Meow.{Model, Pipeline}
+alias Meow.{Model, Pipeline, Runner}
 
 model =
   Model.new(
@@ -51,4 +51,6 @@ model =
 
 # Execute the above model
 
-Meow.Runner.run(model)
+report = Runner.run(model)
+
+report |> Runner.Report.format_summary() |> IO.puts()

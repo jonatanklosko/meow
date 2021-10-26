@@ -384,7 +384,8 @@ defmodule MeowNx.Ops do
 
   Expects a map with metric functions as values. Each metric should
   be a numerical function returning a scalar tensor. The values are
-  appended to the population log under the corresponding key.
+  stored in a `metrics` map in the population log under the corresponding
+  key.
 
   See `MeowNx.Metric` for a number of built-in metric definitions.
 
@@ -434,10 +435,10 @@ defmodule MeowNx.Ops do
               {key, Nx.to_scalar(value)}
             end)
 
-          update_in(population.log, fn log ->
-            Enum.reduce(entries, log, fn {key, value}, log ->
+          update_in(population.log[:metrics], fn metrics ->
+            Enum.reduce(entries, metrics || %{}, fn {key, value}, metrics ->
               point = {population.generation, value}
-              Map.update(log, key, [point], &[point | &1])
+              Map.update(metrics, key, [point], &[point | &1])
             end)
           end)
         else

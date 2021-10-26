@@ -88,4 +88,7 @@ end
 # model = Rastrigin.model_simple()
 # model = Rastrigin.model_simple_multi()
 model = Rastrigin.model_branching()
-Meow.Runner.run(model)
+
+report = Meow.Runner.run(model)
+
+report |> Meow.Runner.Report.format_summary() |> IO.puts()
