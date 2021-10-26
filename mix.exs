@@ -38,7 +38,8 @@ defmodule Meow.MixProject do
       source_ref: "main",
       extras: [
         {:"README.md", [title: "Readme"]},
-        {:"notebooks/rastrigin_intro.livemd", [title: "Introduction"]}
+        {:"notebooks/rastrigin_intro.livemd", [title: "Introduction"]},
+        {:"notebooks/metrics.livemd", [title: "Metrics and visualizations"]}
       ],
       groups_for_functions: [
         # Meow.Ops
