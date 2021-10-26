@@ -167,4 +167,53 @@ defmodule Meow.Runner.Report do
     |> Vl.encode_field(:x, "generation", type: :quantitative, title: "generation")
     |> Vl.encode_field(:y, "value", type: :quantitative, title: Atom.to_string(metric))
   end
+
+  @doc """
+  Returns a plot presenting computation times.
+  """
+  @spec plot_times(t()) :: VegaLite.t()
+  def plot_times(report) do
+    assert_vega_lite!("plot_times/1")
+
+    total_tims_s = report.total_time_us / 1_000_000
+
+    data =
+      for {%{time_us: time_us}, idx} <- Enum.with_index(report.population_reports) do
+        %{population: "population #{idx}", time_s: time_us / 1_000_000}
+      end
+
+    Vl.new(width: 300)
+    |> Vl.data_from_values(data)
+    |> Vl.layers([
+      Vl.new()
+      |> Vl.mark(:bar)
+      |> Vl.encode_field(:x, "time_s", type: :quantitative, axis: [title: "time (s)"])
+      |> Vl.encode_field(:y, "population", type: :nominal, axis: [title: nil]),
+      Vl.new()
+      |> Vl.mark(:rule)
+      |> Vl.encode(:x, datum: total_tims_s, type: :quantitative)
+      |> Vl.encode(:color, value: "red")
+      |> Vl.encode(:size, value: 2)
+    ])
+  end
+
+  @doc """
+  Returns a plot presenting the number of generations for
+  each population.
+  """
+  @spec plot_generations(t()) :: VegaLite.t()
+  def plot_generations(report) do
+    assert_vega_lite!("plot_generations/1")
+
+    data =
+      for {%{population: population}, idx} <- Enum.with_index(report.population_reports) do
+        %{population: "population #{idx}", generation: population.generation}
+      end
+
+    Vl.new(width: 300)
+    |> Vl.data_from_values(data)
+    |> Vl.mark(:bar)
+    |> Vl.encode_field(:x, "generation", type: :quantitative)
+    |> Vl.encode_field(:y, "population", type: :nominal, axis: [title: nil])
+  end
 end
