@@ -41,6 +41,34 @@ defmodule Meow.MixProject do
         {:"notebooks/rastrigin_intro.livemd", [title: "Introduction"]},
         {:"notebooks/metrics.livemd", [title: "Metrics and visualizations"]}
       ],
+      groups_for_modules: [
+        Model: [
+          Meow.Model,
+          Meow.Pipeline,
+          Meow.Topology,
+          Meow.Ops,
+          MeowNx.Ops
+        ],
+        Runtime: [
+          Meow.Runner,
+          Meow.Runner.Report,
+          Meow.Distribution
+        ],
+        "Numerical definitions": [
+          MeowNx.Init,
+          MeowNx.Selection,
+          MeowNx.Crossover,
+          MeowNx.Mutation,
+          MeowNx.Metric
+        ],
+        "Lower level": [
+          Meow.Op,
+          Meow.Op.Context,
+          Meow.Population,
+          Meow.RepresentationSpec,
+          MeowNx.RepresentationSpec
+        ]
+      ],
       groups_for_functions: [
         # Meow.Ops
         "Operations: Termination": &(&1[:type] == :termination),
