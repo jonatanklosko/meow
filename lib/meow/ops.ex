@@ -28,6 +28,22 @@ defmodule Meow.Ops do
   end
 
   @doc """
+  Builds an operation that replicates the population, passes
+  through all the given pipelines and concatenates the results.
+
+  This is a shorthand for the more specific `split_join/3`.
+  """
+  @doc type: :flow
+  @spec split_join(list(Pipeline.t())) :: Op.t()
+  def split_join(pipelines) do
+    split_join(
+      &Population.duplicate(&1, length(pipelines)),
+      pipelines,
+      &Population.concatenate/1
+    )
+  end
+
+  @doc """
   Builds an operation that introduces branching into the pipeline.
 
   The operation splits population into a number of populations,

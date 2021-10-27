@@ -171,20 +171,16 @@ model =
   |> Model.add_pipeline(
     initializer_op,
     Pipeline.new([
-      Meow.Ops.split_join(
-        &Meow.Population.duplicate(&1, 2),
-        [
-          Pipeline.new([
-            MeowNx.Ops.selection_natural(0.2)
-          ]),
-          Pipeline.new([
-            MeowNx.Ops.selection_tournament(0.8),
-            MeowNx.Ops.crossover_blend_alpha(0.5),
-            MeowNx.Ops.mutation_shift_gaussian(0.001)
-          ])
-        ],
-        &Meow.Population.concatenate/1
-      ),
+      Meow.Ops.split_join([
+        Pipeline.new([
+          MeowNx.Ops.selection_natural(0.2)
+        ]),
+        Pipeline.new([
+          MeowNx.Ops.selection_tournament(0.8),
+          MeowNx.Ops.crossover_blend_alpha(0.5),
+          MeowNx.Ops.mutation_shift_gaussian(0.001)
+        ])
+      ]),
       # Meow.Ops.emigrate(MeowNx.Ops.selection_natural(5), &Meow.Topology.ring/2, interval: 10),
       # Meow.Ops.immigrate(&MeowNx.Ops.selection_natural(&1), interval: 10),
       MeowNx.Ops.log_best_individual(),
