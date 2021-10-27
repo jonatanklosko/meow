@@ -61,21 +61,17 @@ defmodule Rastrigin do
       MeowNx.Ops.init_real_random_uniform(100, size(), -5.12, 5.12),
       Pipeline.new([
         # Here the pipeline branches out into two sub-pipelines,
-        # which results are then joined into a single population.
-        Meow.Ops.split_join(
-          &Population.duplicate(&1, 2),
-          [
-            Pipeline.new([
-              MeowNx.Ops.selection_natural(0.2)
-            ]),
-            Pipeline.new([
-              MeowNx.Ops.selection_tournament(0.8),
-              MeowNx.Ops.crossover_blend_alpha(0.5),
-              MeowNx.Ops.mutation_shift_gaussian(0.001)
-            ])
-          ],
-          &Population.concatenate/1
-        ),
+        # which results are then concatenation into a single population.
+        Meow.Ops.split_join([
+          Pipeline.new([
+            MeowNx.Ops.selection_natural(0.2)
+          ]),
+          Pipeline.new([
+            MeowNx.Ops.selection_tournament(0.8),
+            MeowNx.Ops.crossover_blend_alpha(0.5),
+            MeowNx.Ops.mutation_shift_gaussian(0.001)
+          ])
+        ]),
         MeowNx.Ops.log_best_individual(),
         Meow.Ops.max_generations(5_000)
       ])

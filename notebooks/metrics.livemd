@@ -1,0 +1,214 @@
+# Metrics and visualizations
+
+## Setup
+
+As before, we first install the necessary dependencies. This time we
+also add [VegaLite](https://hexdocs.pm/vega_lite/VegaLite.html) for
+plotting our data and [Kino](https://hexdocs.pm/kino) to automatically
+render those plots in Livebook. In fact, Meow provides a number of
+predefined plots that we will explore!
+
+```elixir
+Mix.install([
+  {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
+  {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
+  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
+  {:vega_lite, "~> 0.1.1"},
+  {:kino, "~> 0.3.0"}
+])
+```
+
+```elixir
+alias Meow.{Model, Pipeline, Population, Topology, Runner}
+```
+
+## Recording metrics
+
+In the [introduction notebook](./rastrigin_intro.livemd) we worked with
+the Rastrigin function. We will continue that story, this time having a
+closer look on how the models behave over time. Again, we will work in
+100 dimensions.
+
+```elixir
+defmodule Problem do
+  import Nx.Defn
+
+  def size, do: 100
+
+  @two_pi 2 * :math.pi()
+
+  @defn_compiler EXLA
+  defn evaluate_rastrigin(genomes) do
+    sums =
+      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
+      |> Nx.sum(axes: [1])
+
+    -sums
+  end
+end
+```
+
+Let's start with a simple model with four populations evolving independently.
+
+Note that we use the `log_metrics` operation to calculate all of the listed
+metrics as the population evolves. The `MeowNx.Metric` module already comes
+with a number of metrics, but those are just simple numerical definitions,
+so you can easily plug in your own!
+
+```elixir
+model =
+  Model.new(&Problem.evaluate_rastrigin/1)
+  |> Model.add_pipeline(
+    MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
+    Pipeline.new([
+      MeowNx.Ops.selection_tournament(1.0),
+      MeowNx.Ops.crossover_uniform(0.5),
+      MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
+      MeowNx.Ops.log_best_individual(),
+      MeowNx.Ops.log_metrics(
+        %{
+          fitness_max: &MeowNx.Metric.fitness_max/2,
+          fitness_min: &MeowNx.Metric.fitness_min/2,
+          fitness_sd: &MeowNx.Metric.fitness_sd/2,
+          genomes_mean_distance: &MeowNx.Metric.genomes_mean_euclidean_distance/2
+        },
+        interval: 10
+      ),
+      Meow.Ops.max_generations(500)
+    ]),
+    duplicate: 4
+  )
+
+# And run the model
+report = Runner.run(model)
+
+:ok
+```
+
+After running the model we get a bunch of information that we store in the
+`report` variable. We already know how to extract a brief summary out of it:
+
+```elixir
+report |> Runner.Report.format_summary() |> IO.puts()
+```
+
+So this tells us what the best individual is, but we collected a bunch
+of metrics along the way, let's see them!
+
+```elixir
+Runner.Report.plot_metrics(report)
+```
+
+There we go, all metrics ready to analyze. The plots are interactive
+so we can zoom in and out freely!
+
+This plots all the metrics in one shot, but we can also explicitly
+pick a metric to visualize.
+
+```elixir
+Runner.Report.plot_metric(report, :fitness_max)
+```
+
+Or alternatively
+
+```elixir
+Runner.Report.plot_metric(report, :fitness_max, arrange: :grid)
+```
+
+Finally, we can see how long each population took, both time-wise and generation-wise.
+
+```elixir
+Runner.Report.plot_times(report)
+```
+
+```elixir
+Runner.Report.plot_generations(report)
+```
+
+This is not particularly useful for our simple, homogenous model, but can provide some
+insights in more complex cases or when running in distributed setup!
+
+## Heterogenous models
+
+With these new tools under the belt, let's try out a more interesting model.
+To take it one step at a time, we will keep the populations independent, but
+we will use two different pipelines, two populations per each.
+
+The pipelines itself should look familiar, since we used these in the introductory
+notebook. Also note that we keep the limit of generations at `1000`, so we can
+iterate on the algorithm more quickly.
+
+```elixir
+# The pipelines are composable, so we can share the common pieces
+
+initializer_op = MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12)
+
+metrics_op =
+  MeowNx.Ops.log_metrics(
+    %{
+      fitness_max: &MeowNx.Metric.fitness_max/2,
+      fitness_sd: &MeowNx.Metric.fitness_sd/2
+    },
+    interval: 10
+  )
+
+model =
+  Model.new(&Problem.evaluate_rastrigin/1)
+  |> Model.add_pipeline(
+    initializer_op,
+    Pipeline.new([
+      MeowNx.Ops.selection_tournament(1.0),
+      MeowNx.Ops.crossover_uniform(0.5),
+      MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
+      MeowNx.Ops.log_best_individual(),
+      # Meow.Ops.emigrate(MeowNx.Ops.selection_natural(5), &Meow.Topology.ring/2, interval: 10),
+      # Meow.Ops.immigrate(&MeowNx.Ops.selection_natural(&1), interval: 10),
+      metrics_op,
+      Meow.Ops.max_generations(1000)
+    ]),
+    duplicate: 2
+  )
+  |> Model.add_pipeline(
+    initializer_op,
+    Pipeline.new([
+      Meow.Ops.split_join([
+        Pipeline.new([
+          MeowNx.Ops.selection_natural(0.2)
+        ]),
+        Pipeline.new([
+          MeowNx.Ops.selection_tournament(0.8),
+          MeowNx.Ops.crossover_blend_alpha(0.5),
+          MeowNx.Ops.mutation_shift_gaussian(0.001)
+        ])
+      ]),
+      # Meow.Ops.emigrate(MeowNx.Ops.selection_natural(5), &Meow.Topology.ring/2, interval: 10),
+      # Meow.Ops.immigrate(&MeowNx.Ops.selection_natural(&1), interval: 10),
+      MeowNx.Ops.log_best_individual(),
+      metrics_op,
+      Meow.Ops.max_generations(1000)
+    ]),
+    duplicate: 2
+  )
+
+# Execute the above model
+
+report = Runner.run(model)
+report |> Runner.Report.format_summary() |> IO.puts()
+```
+
+*Note: populations are ordered in the same manner as pipelines, so in this
+case populations 0 and 1 evolve according to the first one, while populations
+2 and 3 according to the second one.*
+
+```elixir
+Runner.Report.plot_metrics(report)
+```
+
+The populations evolve independently, so we can see that both
+pipelines are similarly effective and gradually improve over
+time. With two solid sub-models at hand we can try introducing
+a migration step, so that populations can benefit from each other!
+
+Take a note of what the best fitness is, then uncomment the
+migration steps in both pipelines and see how the final model
+performs!

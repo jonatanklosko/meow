@@ -65,7 +65,7 @@ defmodule Meow.Model do
     end
   end
 
-  def validate_pipeline!(pipeline, representation) do
+  defp validate_pipeline!(pipeline, representation) do
     ops =
       case pipeline.ops do
         [] -> []
