@@ -40,18 +40,16 @@ end
 
 # Define the evolutionary model (algorithm)
 
-alias Meow.{Model, Pipeline, Runner}
-
 model =
-  Model.new(
+  Meow.objective(
     # Specify the evaluation function that we are trying to maximise
     &Problem.evaluate_rastrigin/1
   )
-  |> Model.add_pipeline(
+  |> Meow.add_pipeline(
     # Define how the population is initialized and what representation to use
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
     # A single pipeline corresponds to a single population
-    Pipeline.new([
+    Meow.pipeline([
       # Define a number of evolutionary steps that the population goes through
       MeowNx.Ops.selection_tournament(1.0),
       MeowNx.Ops.crossover_uniform(0.5),
@@ -61,14 +59,15 @@ model =
     ])
   )
 
+
 # Execute the above model
 
-report = Runner.run(model)
+report = Meow.run(model)
 
-report |> Runner.Report.format_summary() |> IO.puts()
+report |> Meow.Report.format_summary() |> IO.puts()
 ```
 
-Then you can simply run the script
+Then you simply run the script
 
 ```shell
 $ elixir example.exs
@@ -90,7 +89,7 @@ Genome: #Nx.Tensor<
 >
 ```
 
-You can find more examples in the [examples](https://github.com/jonatanklosko/meow/tree/main/examples) directory.
+Check out more examples in the [examples](https://github.com/jonatanklosko/meow/tree/main/examples) directory.
 
 ### Interactive exploration
 

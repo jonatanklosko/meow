@@ -18,10 +18,8 @@ defmodule Meow.Pipeline do
           ops: list(Op.t())
         }
 
-  @doc """
-  Builds a new pipeline from a list of operations.
-  """
-  @spec new(list(Op.t())) :: t()
+  @doc false
+  # See `Meow.pipeline/1`
   def new(ops) do
     %__MODULE__{ops: ops}
   end

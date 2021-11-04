@@ -18,10 +18,6 @@ Mix.install([
 ])
 ```
 
-```elixir
-alias Meow.{Model, Pipeline, Population, Topology, Runner}
-```
-
 ## Recording metrics
 
 In the [introduction notebook](./rastrigin_intro.livemd) we worked with
@@ -57,10 +53,10 @@ so you can easily plug in your own!
 
 ```elixir
 model =
-  Model.new(&Problem.evaluate_rastrigin/1)
-  |> Model.add_pipeline(
+  Meow.objective(&Problem.evaluate_rastrigin/1)
+  |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
-    Pipeline.new([
+    Meow.pipeline([
       MeowNx.Ops.selection_tournament(1.0),
       MeowNx.Ops.crossover_uniform(0.5),
       MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
@@ -80,7 +76,7 @@ model =
   )
 
 # And run the model
-report = Runner.run(model)
+report = Meow.run(model)
 
 :ok
 ```
@@ -89,14 +85,14 @@ After running the model we get a bunch of information that we store in the
 `report` variable. We already know how to extract a brief summary out of it:
 
 ```elixir
-report |> Runner.Report.format_summary() |> IO.puts()
+report |> Meow.Report.format_summary() |> IO.puts()
 ```
 
 So this tells us what the best individual is, but we collected a bunch
 of metrics along the way, let's see them!
 
 ```elixir
-Runner.Report.plot_metrics(report)
+Meow.Report.plot_metrics(report)
 ```
 
 There we go, all metrics ready to analyze. The plots are interactive
@@ -106,23 +102,23 @@ This plots all the metrics in one shot, but we can also explicitly
 pick a metric to visualize.
 
 ```elixir
-Runner.Report.plot_metric(report, :fitness_max)
+Meow.Report.plot_metric(report, :fitness_max)
 ```
 
 Or alternatively
 
 ```elixir
-Runner.Report.plot_metric(report, :fitness_max, arrange: :grid)
+Meow.Report.plot_metric(report, :fitness_max, arrange: :grid)
 ```
 
 Finally, we can see how long each population took, both time-wise and generation-wise.
 
 ```elixir
-Runner.Report.plot_times(report)
+Meow.Report.plot_times(report)
 ```
 
 ```elixir
-Runner.Report.plot_generations(report)
+Meow.Report.plot_generations(report)
 ```
 
 This is not particularly useful for our simple, homogenous model, but can provide some
@@ -153,10 +149,10 @@ metrics_op =
   )
 
 model =
-  Model.new(&Problem.evaluate_rastrigin/1)
-  |> Model.add_pipeline(
+  Meow.objective(&Problem.evaluate_rastrigin/1)
+  |> Meow.add_pipeline(
     initializer_op,
-    Pipeline.new([
+    Meow.pipeline([
       MeowNx.Ops.selection_tournament(1.0),
       MeowNx.Ops.crossover_uniform(0.5),
       MeowNx.Ops.mutation_replace_uniform(0.001, -5.12, 5.12),
@@ -168,14 +164,14 @@ model =
     ]),
     duplicate: 2
   )
-  |> Model.add_pipeline(
+  |> Meow.add_pipeline(
     initializer_op,
-    Pipeline.new([
+    Meow.pipeline([
       Meow.Ops.split_join([
-        Pipeline.new([
+        Meow.pipeline([
           MeowNx.Ops.selection_natural(0.2)
         ]),
-        Pipeline.new([
+        Meow.pipeline([
           MeowNx.Ops.selection_tournament(0.8),
           MeowNx.Ops.crossover_blend_alpha(0.5),
           MeowNx.Ops.mutation_shift_gaussian(0.001)
@@ -192,8 +188,8 @@ model =
 
 # Execute the above model
 
-report = Runner.run(model)
-report |> Runner.Report.format_summary() |> IO.puts()
+report = Meow.run(model)
+report |> Meow.Report.format_summary() |> IO.puts()
 ```
 
 *Note: populations are ordered in the same manner as pipelines, so in this
@@ -201,7 +197,7 @@ case populations 0 and 1 evolve according to the first one, while populations
 2 and 3 according to the second one.*
 
 ```elixir
-Runner.Report.plot_metrics(report)
+Meow.Report.plot_metrics(report)
 ```
 
 The populations evolve independently, so we can see that both
