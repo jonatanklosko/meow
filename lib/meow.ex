@@ -13,14 +13,14 @@ defmodule Meow do
 
   A single pipeline describes the evolution of one population,
   and by defining multiple pipelines we effectively get a
-  multi-population algorithm. Also, if we there are multiple
+  multi-population algorithm. Also, if there are multiple
   populations, we generally want them to communicate, which
   can be achieved by including a migration step in the pipelines.
 
   ## Example
 
   We will start with an easy and predictable example. Let's
-  consider a simple multivariable function that takes the sum of
+  consider a simple multivariable function that takes a sum of
   all the arguments.
 
   $$
@@ -42,12 +42,12 @@ defmodule Meow do
   \end{bmatrix} \\\\
   $$
 
-  So now our objcetive is to **maximise** this function.
+  Our objective is to **maximise** this function.
 
   In evolutionary terms $x_0$ is an individual genome with each gene
   being either $0$ or $1$, whereas $f$ is the **fitness** function that
   tells us how good the given individual is. Consequently our objective
-  is to generate an individual with highest possible fitness.
+  is to generate an individual with the highest fitness possible.
 
   There's not much we can do with a single individual, so we get more
   of these and form a **population**:
@@ -98,7 +98,7 @@ defmodule Meow do
   Also, note that the function above calculates fitness for the whole population,
   so the returned value is a vector of fitness values.
 
-  At this point we already defined what problem we are trying to solve, the
+  At this point we have already defined what problem we are trying to solve, the
   only missing piece is an algorithm to solve it.
 
       model =
@@ -116,7 +116,7 @@ defmodule Meow do
 
   Let's break down what we just did. We start modeling our algorithm by
   specifying the objective function `f`. Then we specify how the population
-  should be iniaizlied, in this case we generate 100 individuals, each with
+  should be initialised, in this case we generate 100 individuals, each with
   `Problem.size()` genes. Finally, we list the operations that should be
   applied to the population on every iteration.
 
@@ -130,7 +130,7 @@ defmodule Meow do
 
   By its nature, those algorithms are random in nature and fall under
   the category of heuristics. Nonetheless for a number of problems heuristics
-  are best we have and Meow attempts at making experimentation easy and
+  are the best we have and Meow attempts to make experimentation easy and
   efficient.
 
   ## Learn more
@@ -162,7 +162,7 @@ defmodule Meow do
   Each pipeline defines how a single population evolves,
   so multiple pipelines imply multi-population model.
 
-  When the model is run, `initializer` is aplied to an empty
+  When the model is run, `initializer` is applied to an empty
   population, then the resulting population is repeatedly
   passed through the pipeline until termination.
 
@@ -192,7 +192,7 @@ defmodule Meow do
   ## Options
 
     * `:nodes` - a list of nodes available for running the
-      algorithm. Note that all of the nodes must already be
+      algorithm. Note that all of the nodes must be already
       connected and all relevant modules must be available
       for every node. Defaults to `[node()]`.
 
