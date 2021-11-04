@@ -24,30 +24,14 @@ defmodule Meow.Model do
   """
   @type evaluate :: (Population.genomes() -> Population.fitness())
 
-  @doc """
-  Entrypoint for building a new model definition.
-  """
-  @spec new(evaluate()) :: t()
+  @doc false
+  # See `Meow.objective/1`
   def new(evaluate) do
     %__MODULE__{evaluate: evaluate}
   end
 
-  @doc """
-  Adds an evolutionary pipeline to the model definition.
-
-  Each pipeline defines how a single population evolves,
-  so multiple pipelines imply multi-population model.
-
-  When the model is run, `initializer` is aplied to an empty
-  population, then the resulting population is repeatedly
-  passed through the pipeline until termination.
-
-  ## Options
-
-    * `:duplicate` - how many copies of the pipeline to add.
-      Multiple copies imply a multi-population algorithm. Defaults to 1.
-  """
-  @spec add_pipeline(t(), Op.t(), Pipeline.t()) :: t()
+  @doc false
+  # See `Meow.add_pipeline/4`
   def add_pipeline(model, initializer, pipeline, opts \\ []) do
     validate_initializer!(initializer)
     validate_pipeline!(pipeline, initializer.out_representation)

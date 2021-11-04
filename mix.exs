@@ -32,7 +32,7 @@ defmodule Meow.MixProject do
 
   defp docs do
     [
-      main: "readme",
+      main: "Meow",
       source_url: "https://github.com/jonatanklosko/meow",
       # source_ref: "v#{@version}"
       source_ref: "main",
@@ -41,17 +41,15 @@ defmodule Meow.MixProject do
         {:"notebooks/rastrigin_intro.livemd", [title: "Introduction"]},
         {:"notebooks/metrics.livemd", [title: "Metrics and visualizations"]}
       ],
+      extra_section: "GUIDES",
       groups_for_modules: [
-        Model: [
-          Meow.Model,
-          Meow.Pipeline,
+        "Building blocks": [
           Meow.Topology,
           Meow.Ops,
           MeowNx.Ops
         ],
         Runtime: [
-          Meow.Runner,
-          Meow.Runner.Report,
+          Meow.Report,
           Meow.Distribution
         ],
         "Numerical definitions": [
@@ -62,6 +60,8 @@ defmodule Meow.MixProject do
           MeowNx.Metric
         ],
         "Lower level": [
+          Meow.Model,
+          Meow.Pipeline,
           Meow.Op,
           Meow.Op.Context,
           Meow.Population,

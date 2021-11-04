@@ -1,46 +1,12 @@
 defmodule Meow.Runner do
-  @moduledoc """
-  A module responsible for running an evolutionary algorithm,
-  as defined by `Meow.Model`.
-  """
+  @moduledoc false
 
-  alias Meow.{Pipeline, Population, Model, Op}
+  # A module responsible for running an evolutionary algorithm,
+  # as defined by `Meow.Model`.
 
-  @doc """
-  Iteratively transforms populations according to the given
-  model until all populations are terminated.
+  alias Meow.{Pipeline, Population, Op}
 
-  ## Distribution
-
-  In case of a multi-population algorithm the populations
-  evolve in parallel, by default within the current runtime.
-
-  If multiple runtime nodes are available, the algorithm may
-  be run in a distributed setup by specifying the `:nodes`
-  option. In that case the populations are distributed among
-  said nodes, which can be further controlled with the
-  `:population_groups` option.
-
-  ## Options
-
-    * `:nodes` - a list of nodes available for running the
-      algorithm. Note that all of the nodes must already be
-      connected and all relevant modules must be available
-      for every node. Defaults to `[node()]`.
-
-    * `:population_groups` - a list of groups, where each
-      group is a list of population indices. Populations
-      from the same group will be run on the same node.
-      The number of groups should match the number of nodes
-      configured via `:nodes` and every population must be
-      in exactly one of the groups. By default populations
-      are split into even groups.
-
-    * `:global_opts` - options available to all operations.
-      This may be useful for some integrations, for example
-      to specify JIT compilation options when using `MeowNx`.
-  """
-  @spec run(Model.t(), keyword()) :: Meow.Runner.Report.t()
+  # See `Meow.run/2`
   def run(model, opts \\ []) do
     nodes = opts[:nodes] || [node()]
     validate_nodes!(nodes)
@@ -60,7 +26,7 @@ defmodule Meow.Runner do
     {time, result_tuples} =
       :timer.tc(&run_model/4, [model, nodes, population_groups, global_opts])
 
-    %Meow.Runner.Report{
+    %Meow.Report{
       total_time_us: time,
       population_reports:
         for(

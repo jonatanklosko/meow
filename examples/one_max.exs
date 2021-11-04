@@ -19,13 +19,11 @@ defmodule Problem do
   end
 end
 
-alias Meow.{Model, Pipeline}
-
 model =
-  Model.new(&Problem.evaluate_one_max/1)
-  |> Model.add_pipeline(
+  Meow.objective(&Problem.evaluate_one_max/1)
+  |> Meow.add_pipeline(
     MeowNx.Ops.init_binary_random_uniform(100, Problem.size()),
-    Pipeline.new([
+    Meow.pipeline([
       MeowNx.Ops.selection_tournament(1.0),
       MeowNx.Ops.crossover_uniform(0.5),
       MeowNx.Ops.mutation_bit_flip(0.001),
@@ -34,6 +32,6 @@ model =
     ])
   )
 
-report = Meow.Runner.run(model)
+report = Meow.run(model)
 
-report |> Meow.Runner.Report.format_summary() |> IO.puts()
+report |> Meow.Report.format_summary() |> IO.puts()

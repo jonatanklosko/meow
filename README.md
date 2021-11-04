@@ -65,10 +65,10 @@ model =
 
 report = Runner.run(model)
 
-report |> Runner.Report.format_summary() |> IO.puts()
+report |> Report.format_summary() |> IO.puts()
 ```
 
-Then you can simply run the script
+Then you simply run the script
 
 ```shell
 $ elixir example.exs
@@ -90,7 +90,7 @@ Genome: #Nx.Tensor<
 >
 ```
 
-You can find more examples in the [examples](https://github.com/jonatanklosko/meow/tree/main/examples) directory.
+Check out more examples in the [examples](https://github.com/jonatanklosko/meow/tree/main/examples) directory.
 
 ### Interactive exploration
 

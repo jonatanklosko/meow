@@ -22,13 +22,11 @@ defmodule Problem do
   end
 end
 
-alias Meow.{Model, Pipeline}
-
 model =
-  Model.new(&Problem.evaluate_rastrigin/1)
-  |> Model.add_pipeline(
+  Meow.objective(&Problem.evaluate_rastrigin/1)
+  |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
-    Pipeline.new([
+    Meow.pipeline([
       MeowNx.Ops.selection_tournament(1.0),
       MeowNx.Ops.crossover_uniform(0.5),
       MeowNx.Ops.mutation_shift_gaussian(0.001),
@@ -45,7 +43,7 @@ model =
     ])
   )
 
-%{population_reports: [%{population: population}]} = Meow.Runner.run(model)
+%{population_reports: [%{population: population}]} = Meow.run(model)
 
 IO.puts("\nLogged metrics:")
 IO.inspect(population.log.metrics)
