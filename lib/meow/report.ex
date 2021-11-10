@@ -105,17 +105,6 @@ defmodule Meow.Report do
 
   alias VegaLite, as: Vl
 
-  @spec metrics_plots(t()) :: list(VegaLite.t())
-  defp metrics_plots(report) do
-    metrics =
-      for %{population: population} <- report.population_reports,
-          {metric, _} <- population.log.metrics,
-          uniq: true,
-          do: metric
-
-    Enum.map(metrics, &plot_metric(report, &1))
-  end
-
   @doc """
   Returns concatenated plots for all metrics.
 
@@ -125,8 +114,18 @@ defmodule Meow.Report do
   def plot_metrics(report) do
     assert_vega_lite!("plot_metrics/1")
 
-    plots = metrics_plots(report)
+    plots = metric_plots(report)
     Vl.concat(Vl.new(), plots, :vertical)
+  end
+
+  defp metric_plots(report) do
+    metrics =
+      for %{population: population} <- report.population_reports,
+          {metric, _} <- population.log.metrics,
+          uniq: true,
+          do: metric
+
+    Enum.map(metrics, &plot_metric(report, &1))
   end
 
   @doc """
@@ -156,11 +155,11 @@ defmodule Meow.Report do
     vl =
       case arrange do
         :color ->
-          Vl.new(title: "Metric {#{Atom.to_string(metric)}}", width: 500, height: 500)
+          Vl.new(title: "Metric {#{metric}}", width: 500, height: 500)
           |> Vl.encode_field(:color, "population", type: :nominal)
 
         :grid ->
-          Vl.new(title: "Metric {#{Atom.to_string(metric)}}", width: 240, height: 240)
+          Vl.new(title: "Metric {#{metric}}", width: 240, height: 240)
           |> Vl.encode_field(:facet, "population", type: :nominal, columns: 3)
       end
 
@@ -187,7 +186,7 @@ defmodule Meow.Report do
         %{population: "population #{idx}", time_s: time_us / 1_000_000}
       end
 
-    Vl.new(title: "Times", width: 300)
+    Vl.new(title: "Population run times", width: 300)
     |> Vl.data_from_values(data)
     |> Vl.layers([
       Vl.new()
@@ -225,13 +224,13 @@ defmodule Meow.Report do
   @doc """
   Saves an HTML report including the summary and plots to a specified path.
   """
-  @spec to_html(t(), Path.t()) :: :ok | {:error, File.posix()}
-  def to_html(report, path) do
+  @spec export_html(t(), Path.t()) :: :ok | {:error, File.posix()}
+  def export_html(report, path) do
     assert_vega_lite!("to_html/2")
 
     summary = format_summary(report)
 
-    plots = metrics_plots(report) ++ [plot_times(report)] ++ [plot_generations(report)]
+    plots = metric_plots(report) ++ [plot_times(report), plot_generations(report)]
 
     plot_divs =
       1..length(plots)
@@ -261,12 +260,13 @@ defmodule Meow.Report do
           padding: 1rem;
         }
 
-        .header {
-          width: 100%;
+        .container > * {
+          margin-bottom: 64px;
         }
 
-        .plot:not(:first-of-type) {
-          margin-top: 32px;
+        .header {
+          width: 100%;
+          margin-bottom: 21px;
         }
 
         .summary {
@@ -292,23 +292,17 @@ defmodule Meow.Report do
   defp plots_script(plots) do
     plots_json = Enum.map(plots, &VegaLite.Export.to_json/1)
 
-    vars =
+    script =
       plots_json
       |> Enum.with_index()
       |> Enum.map(fn {json, idx} ->
-        ~s{var spec#{idx + 1} = JSON.parse("#{escape_double_quotes(json)}");}
+        ~s{vegaEmbed("#plot-#{idx + 1}", JSON.parse("#{escape_double_quotes(json)}"));}
       end)
-      |> Enum.join("\n")
-
-    embeds =
-      1..length(plots_json)
-      |> Enum.map(fn i -> ~s{vegaEmbed("#plot-#{i}", spec#{i});} end)
       |> Enum.join("\n")
 
     """
     <script type="text/javascript">
-      #{vars}
-      #{embeds}
+      #{script}
     </script>
     """
   end
