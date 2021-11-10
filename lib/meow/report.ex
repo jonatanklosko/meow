@@ -155,11 +155,11 @@ defmodule Meow.Report do
     vl =
       case arrange do
         :color ->
-          Vl.new(title: "Metric {#{metric}}", width: 500, height: 500)
+          Vl.new(title: "Metric #{metric}", width: 500, height: 500)
           |> Vl.encode_field(:color, "population", type: :nominal)
 
         :grid ->
-          Vl.new(title: "Metric {#{metric}}", width: 240, height: 240)
+          Vl.new(title: "Metric #{metric}", width: 240, height: 240)
           |> Vl.encode_field(:facet, "population", type: :nominal, columns: 3)
       end
 
