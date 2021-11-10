@@ -105,6 +105,17 @@ defmodule Meow.Report do
 
   alias VegaLite, as: Vl
 
+  @spec metrics_plots(t()) :: list(VegaLite.t())
+  defp metrics_plots(report) do
+    metrics =
+      for %{population: population} <- report.population_reports,
+          {metric, _} <- population.log.metrics,
+          uniq: true,
+          do: metric
+
+    Enum.map(metrics, &plot_metric(report, &1))
+  end
+
   @doc """
   Returns concatenated plots for all metrics.
 
@@ -114,13 +125,7 @@ defmodule Meow.Report do
   def plot_metrics(report) do
     assert_vega_lite!("plot_metrics/1")
 
-    metrics =
-      for %{population: population} <- report.population_reports,
-          {metric, _} <- population.log.metrics,
-          uniq: true,
-          do: metric
-
-    plots = Enum.map(metrics, &plot_metric(report, &1))
+    plots = metrics_plots(report)
     Vl.concat(Vl.new(), plots, :vertical)
   end
 
@@ -151,11 +156,11 @@ defmodule Meow.Report do
     vl =
       case arrange do
         :color ->
-          Vl.new(width: 500, height: 500)
+          Vl.new(title: "Metric {#{Atom.to_string(metric)}}", width: 500, height: 500)
           |> Vl.encode_field(:color, "population", type: :nominal)
 
         :grid ->
-          Vl.new(width: 240, height: 240)
+          Vl.new(title: "Metric {#{Atom.to_string(metric)}}", width: 240, height: 240)
           |> Vl.encode_field(:facet, "population", type: :nominal, columns: 3)
       end
 
@@ -182,7 +187,7 @@ defmodule Meow.Report do
         %{population: "population #{idx}", time_s: time_us / 1_000_000}
       end
 
-    Vl.new(width: 300)
+    Vl.new(title: "Times", width: 300)
     |> Vl.data_from_values(data)
     |> Vl.layers([
       Vl.new()
@@ -210,10 +215,105 @@ defmodule Meow.Report do
         %{population: "population #{idx}", generation: population.generation}
       end
 
-    Vl.new(width: 300)
+    Vl.new(title: "Generations", width: 300)
     |> Vl.data_from_values(data)
     |> Vl.mark(:bar)
     |> Vl.encode_field(:x, "generation", type: :quantitative)
     |> Vl.encode_field(:y, "population", type: :nominal, axis: [title: nil])
+  end
+
+  @doc """
+  Saves an HTML report including the summary and plots to a specified path.
+  """
+  @spec to_html(t(), Path.t()) :: :ok | {:error, File.posix()}
+  def to_html(report, path) do
+    assert_vega_lite!("to_html/2")
+
+    summary = format_summary(report)
+
+    plots = metrics_plots(report) ++ [plot_times(report)] ++ [plot_generations(report)]
+
+    plot_divs =
+      1..length(plots)
+      |> Enum.map(fn i -> ~s{<div id="plot-#{i}" class="plot"></div>} end)
+      |> Enum.join("\n")
+
+    script = plots_script(plots)
+
+    html = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Meow Report</title>
+      <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+      <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+      <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+
+      <style>
+        .container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 1rem;
+        }
+
+        .header {
+          width: 100%;
+        }
+
+        .plot:not(:first-of-type) {
+          margin-top: 32px;
+        }
+
+        .summary {
+          white-space: pre-line;
+          width: 100%;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1 class="header">Meow Report</h1>
+        <pre class="summary">#{summary}</pre>
+        #{plot_divs}
+      </div>
+      #{script}
+    </body>
+    </html>
+    """
+
+    File.write(path, html)
+  end
+
+  defp plots_script(plots) do
+    plots_json = Enum.map(plots, &VegaLite.Export.to_json/1)
+
+    vars =
+      plots_json
+      |> Enum.with_index()
+      |> Enum.map(fn {json, idx} ->
+        ~s{var spec#{idx + 1} = JSON.parse("#{escape_double_quotes(json)}");}
+      end)
+      |> Enum.join("\n")
+
+    embeds =
+      1..length(plots_json)
+      |> Enum.map(fn i -> ~s{vegaEmbed("#plot-#{i}", spec#{i});} end)
+      |> Enum.join("\n")
+
+    """
+    <script type="text/javascript">
+      #{vars}
+      #{embeds}
+    </script>
+    """
+  end
+
+  defp escape_double_quotes(json) do
+    String.replace(json, ~s{"}, ~s{\\"})
   end
 end
