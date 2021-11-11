@@ -2,7 +2,9 @@ Mix.install([
   {:meow, path: Path.expand("..", __DIR__)},
   # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
   {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
-  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
+  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
+  {:vega_lite, "~> 0.1.1", optional: true},
+  {:jason, "~> 1.2", optional: true}
 ])
 
 defmodule Problem do
@@ -43,7 +45,13 @@ model =
     ])
   )
 
-%{population_reports: [%{population: population}]} = Meow.run(model)
+report = Meow.run(model)
+%{population_reports: [%{population: population}]} = report
 
 IO.puts("\nLogged metrics:")
 IO.inspect(population.log.metrics)
+
+report_path = Path.expand("tmp/report.html")
+report_path |> Path.dirname() |> File.mkdir_p!()
+:ok = Meow.Report.export_html(report, report_path)
+IO.puts("Report saved to #{report_path}")
