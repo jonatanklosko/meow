@@ -21,10 +21,7 @@ defmodule Meow.Runner do
 
     validate_population_groups!(population_groups, number_of_populations, number_of_nodes)
 
-    global_opts = opts[:global_opts] || []
-
-    {time, result_tuples} =
-      :timer.tc(&run_model/4, [model, nodes, population_groups, global_opts])
+    {time, result_tuples} = :timer.tc(&run_model/3, [model, nodes, population_groups])
 
     %Meow.Report{
       total_time_us: time,
@@ -75,7 +72,7 @@ defmodule Meow.Runner do
     Meow.Utils.split_evenly(indices, number_of_nodes)
   end
 
-  defp run_model(model, nodes, population_groups, global_opts) do
+  defp run_model(model, nodes, population_groups) do
     runner_pid = self()
 
     population_node_mapping =
@@ -95,8 +92,7 @@ defmodule Meow.Runner do
             {:initialize, pids} ->
               ctx = %Op.Context{
                 evaluate: model.evaluate,
-                population_pids: pids,
-                global_opts: global_opts
+                population_pids: pids
               }
 
               population = Op.apply(%Population{}, initializer, ctx)

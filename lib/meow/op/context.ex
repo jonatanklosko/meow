@@ -5,13 +5,12 @@ defmodule Meow.Op.Context do
   population.
   """
 
-  defstruct [:evaluate, :population_pids, :global_opts]
+  defstruct [:evaluate, :population_pids]
 
   alias Meow.Model
 
   @type t :: %__MODULE__{
           evaluate: Model.evaluate(),
-          population_pids: list(pid()),
-          global_opts: keyword()
+          population_pids: list(pid())
         }
 end
