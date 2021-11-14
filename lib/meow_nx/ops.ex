@@ -7,7 +7,7 @@ defmodule MeowNx.Ops do
   in their respective modules.
   """
 
-  alias Meow.Op
+  alias Meow.{Op, Population}
   alias MeowNx.{Crossover, Init, Metric, Mutation, Selection}
 
   @representations [MeowNx.real_representation(), MeowNx.binary_representation()]
@@ -29,7 +29,7 @@ defmodule MeowNx.Ops do
       in_representations: :any,
       out_representation: MeowNx.real_representation(),
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn _genomes ->
+        Population.map_genomes(population, fn _genomes ->
           MeowNx.jit(&Init.real_random_uniform/1, [opts])
         end)
       end
@@ -53,7 +53,7 @@ defmodule MeowNx.Ops do
       in_representations: :any,
       out_representation: MeowNx.binary_representation(),
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn _genomes ->
+        Population.map_genomes(population, fn _genomes ->
           MeowNx.jit(&Init.binary_random_uniform/1, [opts])
         end)
       end
@@ -76,7 +76,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: false,
       in_representations: @representations,
       impl: fn population, _ctx ->
-        Op.map_genomes_and_fitness(population, fn genomes, fitness ->
+        Population.map_genomes_and_fitness(population, fn genomes, fitness ->
           MeowNx.jit(&Selection.tournament/3, [genomes, fitness, opts])
         end)
       end
@@ -99,7 +99,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: false,
       in_representations: @representations,
       impl: fn population, _ctx ->
-        Op.map_genomes_and_fitness(population, fn genomes, fitness ->
+        Population.map_genomes_and_fitness(population, fn genomes, fitness ->
           MeowNx.jit(&Selection.natural/3, [genomes, fitness, opts])
         end)
       end
@@ -122,7 +122,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: false,
       in_representations: @representations,
       impl: fn population, _ctx ->
-        Op.map_genomes_and_fitness(population, fn genomes, fitness ->
+        Population.map_genomes_and_fitness(population, fn genomes, fitness ->
           MeowNx.jit(&Selection.roulette/3, [genomes, fitness, opts])
         end)
       end
@@ -145,7 +145,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: false,
       in_representations: @representations,
       impl: fn population, _ctx ->
-        Op.map_genomes_and_fitness(population, fn genomes, fitness ->
+        Population.map_genomes_and_fitness(population, fn genomes, fitness ->
           MeowNx.jit(&Selection.stochastic_universal_sampling/3, [genomes, fitness, opts])
         end)
       end
@@ -168,7 +168,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: @representations,
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Crossover.uniform/2, [genomes, opts])
         end)
       end
@@ -189,7 +189,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: @representations,
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Crossover.single_point/1, [genomes])
         end)
       end
@@ -212,7 +212,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: @representations,
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Crossover.multi_point/2, [genomes, opts])
         end)
       end
@@ -235,7 +235,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Crossover.blend_alpha/2, [genomes, opts])
         end)
       end
@@ -258,7 +258,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Crossover.simulated_binary/2, [genomes, opts])
         end)
       end
@@ -281,7 +281,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Mutation.replace_uniform/2, [genomes, opts])
         end)
       end
@@ -304,7 +304,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: [MeowNx.binary_representation()],
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Mutation.bit_flip/2, [genomes, opts])
         end)
       end
@@ -327,7 +327,7 @@ defmodule MeowNx.Ops do
       invalidates_fitness: true,
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
-        Op.map_genomes(population, fn genomes ->
+        Population.map_genomes(population, fn genomes ->
           MeowNx.jit(&Mutation.shift_gaussian/2, [genomes, opts])
         end)
       end

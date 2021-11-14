@@ -58,28 +58,4 @@ defmodule Meow.Op do
       representation -> %{new_population | representation: representation}
     end
   end
-
-  # Helpers to use when building custom operations
-
-  @doc """
-  Updates population genomes with the given function.
-  """
-  @spec map_genomes(Population.t(), (Population.genomes() -> Population.genomes())) ::
-          Population.t()
-  def map_genomes(population, fun) do
-    update_in(population.genomes, fun)
-  end
-
-  @doc """
-  Updates both population genomes and fitness with the given function.
-  """
-  @spec map_genomes_and_fitness(
-          Population.t(),
-          (Population.genomes(), Population.fitness() ->
-             {Population.genomes(), Population.fitness()})
-        ) :: Population.t()
-  def map_genomes_and_fitness(population, fun) do
-    {genomes, fitness} = fun.(population.genomes, population.fitness)
-    %{population | genomes: genomes, fitness: fitness}
-  end
 end

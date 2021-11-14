@@ -157,4 +157,21 @@ defmodule Meow.Population do
               "the given populations have different representations, so they are not compatible"
     end
   end
+
+  @doc """
+  Updates population genomes with the given function.
+  """
+  @spec map_genomes(t(), (genomes() -> genomes())) :: t()
+  def map_genomes(population, fun) do
+    update_in(population.genomes, fun)
+  end
+
+  @doc """
+  Updates both population genomes and fitness with the given function.
+  """
+  @spec map_genomes_and_fitness(t(), (genomes(), fitness() -> {genomes(), fitness()})) :: t()
+  def map_genomes_and_fitness(population, fun) do
+    {genomes, fitness} = fun.(population.genomes, population.fitness)
+    %{population | genomes: genomes, fitness: fitness}
+  end
 end
