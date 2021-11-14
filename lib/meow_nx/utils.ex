@@ -278,23 +278,4 @@ defmodule MeowNx.Utils do
       raise ArgumentError, "expected size to not exceed the base size, but #{n} > #{base_n}"
     end
   end
-
-  # Other
-
-  @doc """
-  Returns `Nx.Defn.jit/3` options based on the global
-  configuration in context.
-  """
-  @spec jit_opts(Meow.Op.Context.t()) :: keyword()
-  def jit_opts(ctx) do
-    if opts = ctx.global_opts[:jit_opts] do
-      opts
-    else
-      if Code.ensure_loaded?(EXLA) do
-        [compiler: EXLA]
-      else
-        []
-      end
-    end
-  end
 end

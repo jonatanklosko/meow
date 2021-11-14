@@ -12,11 +12,11 @@ defmodule MeowNx.RepresentationSpec do
 
   @impl true
   def concatenate_genomes(genomes_list) do
-    Nx.concatenate(genomes_list)
+    MeowNx.jit(&Nx.concatenate/1, [genomes_list])
   end
 
   @impl true
   def concatenate_fitness(fitness_list) do
-    Nx.concatenate(fitness_list)
+    MeowNx.jit(&Nx.concatenate/1, [fitness_list])
   end
 end

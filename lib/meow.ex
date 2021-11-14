@@ -203,10 +203,6 @@ defmodule Meow do
       configured via `:nodes` and every population must be
       in exactly one of the groups. By default populations
       are split into even groups.
-
-    * `:global_opts` - options available to all operations.
-      This may be useful for some integrations, for example
-      to specify JIT compilation options when using `MeowNx`.
   """
   @spec run(Meow.Model.t(), keyword()) :: Meow.Report.t()
   defdelegate run(model, opts \\ []), to: Meow.Runner
