@@ -102,6 +102,7 @@ defmodule Meow.Report do
   end
 
   @compile {:no_warn_undefined, VegaLite}
+  @compile {:no_warn_undefined, VegaLite.Export}
 
   alias VegaLite, as: Vl
 
