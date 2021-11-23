@@ -26,6 +26,18 @@ defmodule MeowNx.RepresentationSpec do
     |> concatenate_tuple()
   end
 
+  @impl true
+  def encode_genomes(genomes) do
+    # Ensure we have access to the data rather than
+    # a device reference
+    Nx.backend_transfer(genomes)
+  end
+
+  @impl true
+  def decode_genomes(genomes) do
+    genomes
+  end
+
   defn concatenate_tuple(populations) do
     populations
     |> transform(&Tuple.to_list/1)

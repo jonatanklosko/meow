@@ -187,6 +187,8 @@ defmodule Meow.Ops do
             target_pids = Enum.take_random(neighbour_pids, number_of_targets)
 
             %{genomes: emigrants} = pipe_through_operation(population, selection_op, ctx)
+            {spec, _} = population.representation
+            emigrants = spec.encode_genomes(emigrants)
 
             for target_pid <- target_pids do
               send(target_pid, {:migrants, emigrants})
@@ -255,6 +257,8 @@ defmodule Meow.Ops do
         with true <-
                length(ctx.population_pids) > 1 and rem(population.generation, interval) == 0,
              {:ok, immigrants} <- await_migrants(blocking, timeout) do
+          {spec, _} = population.representation
+          immigrants = spec.decode_genomes(immigrants)
           immigrants_population = Population.new(immigrants, population.representation)
 
           selection_size =
