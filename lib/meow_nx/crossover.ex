@@ -100,7 +100,7 @@ defmodule MeowNx.Crossover do
     half_n = transform(n, &div(&1, 2))
 
     transform({length, points}, fn {length, points} ->
-      unless points < length do
+      unless Elixir.Kernel.<(points, length) do
         raise ArgumentError,
               "#{points}-point crossover is not valid for genome of length #{length}"
       end
