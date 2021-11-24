@@ -5,6 +5,8 @@ Mix.install([
   {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
 ])
 
+Nx.Defn.global_default_options(compiler: EXLA)
+
 # In "0-1 knapsnack problem" the objective is to pick a subset
 # of objects, such that the total weight is within limit and the
 # profit is maximised.
@@ -24,7 +26,6 @@ defmodule Problem do
 
   def size, do: Nx.size(@profits)
 
-  @defn_compiler EXLA
   defn evaluate_knapsack(genomes) do
     total_profit = Nx.dot(genomes, @profits)
     total_weight = Nx.dot(genomes, @object_weights)

@@ -151,8 +151,8 @@ defmodule Meow.Ops do
       determining how often emigration takes place. Defaults to 1.
 
     * `:number_of_targets` - the number of neighbours to send
-      the selected individuals to. Must be either a number
-      or a range, in which case the number is randomly
+      the selected individuals to. Must be either `:all`, an exact
+      number or a range, in which case the number is randomly
       drawn every time. Defaults to 1.
   """
   @doc type: :multi
@@ -162,6 +162,9 @@ defmodule Meow.Ops do
 
     targets_range =
       case Keyword.get(opts, :number_of_targets, 1) do
+        :all ->
+          :all
+
         n when is_integer(n) ->
           n..n
 
@@ -170,7 +173,7 @@ defmodule Meow.Ops do
 
         other ->
           raise ArgumentError,
-                "expected :number_of_targets to be either a number or a range, got: #{inspect(other)}"
+                "expected :number_of_targets to be either :all, a number or a range, got: #{inspect(other)}"
       end
 
     %Op{
@@ -181,12 +184,21 @@ defmodule Meow.Ops do
       impl: fn population, ctx ->
         if length(ctx.population_pids) > 1 and rem(population.generation, interval) == 0 do
           neighbour_pids = find_neighbour_pids(ctx.population_pids, topology_fun)
-          number_of_targets = Enum.random(targets_range)
 
-          if number_of_targets > 0 and length(neighbour_pids) >= number_of_targets do
-            target_pids = Enum.take_random(neighbour_pids, number_of_targets)
+          target_pids =
+            case targets_range do
+              :all ->
+                neighbour_pids
 
+              range ->
+                number_of_targets = Enum.random(range)
+                Enum.take_random(neighbour_pids, number_of_targets)
+            end
+
+          if target_pids != [] do
             %{genomes: emigrants} = pipe_through_operation(population, selection_op, ctx)
+            {spec, _} = population.representation
+            emigrants = spec.encode_genomes(emigrants)
 
             for target_pid <- target_pids do
               send(target_pid, {:migrants, emigrants})
@@ -232,7 +244,9 @@ defmodule Meow.Ops do
     * `:blocking` - whether to wait for immigration message
       if not already in the process mailbox. Setting this
       to `false` improves efficiency, but makes the algorithm
-      less deterministic. Defaults to `true`.
+      less deterministic. If the migration is configured to
+      happen randomly, set this to `false` to avoid deadlocks
+      (which reslut in timeout). Defaults to `true`.
 
     * `:timeout` - the number of milliseconds to await immigrants for.
       Reaching the timeout results in `RuntimeError` as it most likely
@@ -255,6 +269,8 @@ defmodule Meow.Ops do
         with true <-
                length(ctx.population_pids) > 1 and rem(population.generation, interval) == 0,
              {:ok, immigrants} <- await_migrants(blocking, timeout) do
+          {spec, _} = population.representation
+          immigrants = spec.decode_genomes(immigrants)
           immigrants_population = Population.new(immigrants, population.representation)
 
           selection_size =

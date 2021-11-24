@@ -15,6 +15,10 @@ Mix.install([
 ])
 ```
 
+```elixir
+Nx.Defn.global_default_options(compiler: EXLA)
+```
+
 ## Objective
 
 The first step is defining the optimisation objective function.
@@ -51,7 +55,6 @@ defmodule Problem do
 
   @two_pi 2 * :math.pi()
 
-  @defn_compiler EXLA
   defn evaluate_rastrigin(genomes) do
     sums =
       (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))

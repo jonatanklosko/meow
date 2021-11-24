@@ -29,7 +29,7 @@ defmodule MeowNx.Init do
     min = opts[:min]
     max = opts[:max]
 
-    Nx.random_uniform({n, length}, min, max)
+    Nx.random_uniform({n, length}, min, max, type: {:f, 64})
   end
 
   @doc """

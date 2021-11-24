@@ -13,6 +13,8 @@ Mix.install([
   {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
 ])
 
+Nx.Defn.global_default_options(compiler: EXLA)
+
 defmodule Problem do
   import Nx.Defn
 
@@ -20,7 +22,6 @@ defmodule Problem do
 
   @two_pi 2 * :math.pi()
 
-  @defn_compiler EXLA
   defn evaluate_rastrigin(genomes) do
     sums =
       (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))

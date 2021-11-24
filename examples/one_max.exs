@@ -5,6 +5,8 @@ Mix.install([
   {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
 ])
 
+Nx.Defn.global_default_options(compiler: EXLA)
+
 # In "one max" problem the objective is simply to maximise
 # the number of ones in a binary string.
 
@@ -13,7 +15,6 @@ defmodule Problem do
 
   def size, do: 100
 
-  @defn_compiler EXLA
   defn evaluate_one_max(genomes) do
     Nx.sum(genomes, axes: [1])
   end

@@ -25,4 +25,14 @@ defmodule Meow.RepresentationSpec do
   The order of individuals should match the one from `concatenate_genomes/1`.
   """
   @callback concatenate_fitness(list(Population.fitness())) :: Population.fitness()
+
+  @doc """
+  Prepares genomes for transfer to another node if necessary.
+  """
+  @callback encode_genomes(Population.genomes()) :: term()
+
+  @doc """
+  Unpacks genomes received from another node if necessary.
+  """
+  @callback decode_genomes(term()) :: Population.genomes()
 end
