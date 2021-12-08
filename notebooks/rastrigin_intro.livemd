@@ -83,7 +83,7 @@ random individuals, each with 100 floating-point genomes (meaning we optimise
 100-dimensional Rastrigin function).
 
 ```elixir
-model =
+algorithm =
   Meow.objective(
     # Specify the evaluation function that we are trying to maximise
     &Problem.evaluate_rastrigin/1
@@ -102,8 +102,8 @@ model =
     ])
   )
 
-# Execute the above model
-report = Meow.run(model)
+# Execute the above algorithm
+report = Meow.run(algorithm)
 report |> Meow.Report.format_summary() |> IO.puts()
 ```
 
@@ -128,7 +128,7 @@ Then we can just combine the results into a single population.
 Let's see this in practice, together with other crossover and muation types.
 
 ```elixir
-model =
+algorithm =
   Meow.objective(&Problem.evaluate_rastrigin/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -150,7 +150,7 @@ model =
     ])
   )
 
-report = Meow.run(model)
+report = Meow.run(algorithm)
 report |> Meow.Report.format_summary() |> IO.puts()
 ```
 
@@ -175,7 +175,7 @@ We will emigrate 5 best individuals every 10 generations
 and use the ring topology.
 
 ```elixir
-model =
+algorithm =
   Meow.objective(&Problem.evaluate_rastrigin/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -188,12 +188,12 @@ model =
       MeowNx.Ops.log_best_individual(),
       Meow.Ops.max_generations(5_000)
     ]),
-    # Instead of calling Model.add_pipeline 3 times,
+    # Instead of calling Meow.add_pipeline 3 times,
     # we can just tell it to replicate the pipeline
     # that number of times
     duplicate: 3
   )
 
-report = Meow.run(model)
+report = Meow.run(algorithm)
 report |> Meow.Report.format_summary() |> IO.puts()
 ```

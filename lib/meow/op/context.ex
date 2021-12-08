@@ -7,10 +7,10 @@ defmodule Meow.Op.Context do
 
   defstruct [:evaluate, :population_pids]
 
-  alias Meow.Model
+  alias Meow.Algorithm
 
   @type t :: %__MODULE__{
-          evaluate: Model.evaluate(),
+          evaluate: Algorithm.evaluate(),
           population_pids: list(pid())
         }
 end

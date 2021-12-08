@@ -25,7 +25,7 @@ defmodule Problem do
   end
 end
 
-model =
+algorithm =
   Meow.objective(&Problem.evaluate_rastrigin/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -46,7 +46,7 @@ model =
     ])
   )
 
-report = Meow.run(model)
+report = Meow.run(algorithm)
 %{population_reports: [%{population: population}]} = report
 
 IO.puts("\nLogged metrics:")

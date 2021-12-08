@@ -7,6 +7,8 @@ defmodule MeowNx.Ops do
   in their respective modules.
   """
 
+  import Nx.Defn
+
   alias Meow.{Op, Population}
   alias MeowNx.{Crossover, Init, Metric, Mutation, Selection}
 
@@ -341,7 +343,7 @@ defmodule MeowNx.Ops do
   @spec log_best_individual() :: Op.t()
   def log_best_individual() do
     %Op{
-      name: "Log: best individual",
+      name: "[Nx] Log: best individual",
       requires_fitness: true,
       invalidates_fitness: false,
       in_representations: @representations,
@@ -352,7 +354,7 @@ defmodule MeowNx.Ops do
 
         best_individual = %{
           genome: best_genome,
-          fitness: Nx.to_scalar(best_fitness),
+          fitness: Nx.to_number(best_fitness),
           generation: population.generation
         }
 
@@ -400,7 +402,7 @@ defmodule MeowNx.Ops do
     fun = compile_metrics(funs)
 
     %Op{
-      name: "Log: metrics",
+      name: "[Nx] Log: metrics",
       requires_fitness: true,
       invalidates_fitness: false,
       in_representations: @representations,
@@ -421,7 +423,7 @@ defmodule MeowNx.Ops do
                       "expected metric function to return a scalar, but #{inspect(key)} returned #{inspect(value)}"
               end
 
-              {key, Nx.to_scalar(value)}
+              {key, Nx.to_number(value)}
             end)
 
           update_in(population.log[:metrics], fn metrics ->
@@ -445,5 +447,28 @@ defmodule MeowNx.Ops do
       |> Enum.map(fn fun -> fun.(genomes, fitness) end)
       |> List.to_tuple()
     end
+  end
+
+  @doc """
+  Clips every gene value to the closed interval `[min, max]`.
+  """
+  @doc type: :other
+  @spec clip(number(), number()) :: Op.t()
+  def clip(min, max) do
+    %Op{
+      name: "[Nx] Other: clip",
+      requires_fitness: false,
+      invalidates_fitness: true,
+      in_representations: [MeowNx.real_representation()],
+      impl: fn population, _ctx ->
+        Population.map_genomes(population, fn genomes ->
+          clip(genomes, min, max)
+        end)
+      end
+    }
+  end
+
+  defnp clip(genomes, min, max) do
+    Nx.clip(genomes, min, max)
   end
 end

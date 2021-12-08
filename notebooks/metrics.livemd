@@ -24,9 +24,9 @@ Nx.Defn.global_default_options(compiler: EXLA)
 
 ## Recording metrics
 
-In the [introduction notebook](./rastrigin_intro.livemd) we worked with
+In the [introductory notebook](./rastrigin_intro.livemd) we worked with
 the Rastrigin function. We will continue that story, this time having a
-closer look on how the models behave over time. Again, we will work in
+closer look on how the algorithms behave over time. Again, we will work in
 100 dimensions.
 
 ```elixir
@@ -47,7 +47,7 @@ defmodule Problem do
 end
 ```
 
-Let's start with a simple model with four populations evolving independently.
+Let's start with a simple algorithm with four populations evolving independently.
 
 Note that we use the `log_metrics` operation to calculate all of the listed
 metrics as the population evolves. The `MeowNx.Metric` module already comes
@@ -55,7 +55,7 @@ with a number of metrics, but those are just simple numerical definitions,
 so you can easily plug in your own!
 
 ```elixir
-model =
+algorithm =
   Meow.objective(&Problem.evaluate_rastrigin/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -78,13 +78,13 @@ model =
     duplicate: 4
   )
 
-# And run the model
-report = Meow.run(model)
+# And run the algorithm
+report = Meow.run(algorithm)
 
 :ok
 ```
 
-After running the model we get a bunch of information that we store in the
+After running the algorithm we get a bunch of information that we store in the
 `report` variable. We already know how to extract a brief summary out of it:
 
 ```elixir
@@ -124,12 +124,12 @@ Meow.Report.plot_times(report)
 Meow.Report.plot_generations(report)
 ```
 
-This is not particularly useful for our simple, homogenous model, but can provide some
+This is not particularly useful for our simple, homogenous algorithm, but can provide some
 insights in more complex cases or when running in distributed setup!
 
-## Heterogenous models
+## Heterogenous algorithms
 
-With these new tools under the belt, let's try out a more interesting model.
+With these new tools under the belt, let's try out a more interesting algorithm.
 To take it one step at a time, we will keep the populations independent, but
 we will use two different pipelines, two populations per each.
 
@@ -151,7 +151,7 @@ metrics_op =
     interval: 10
   )
 
-model =
+algorithm =
   Meow.objective(&Problem.evaluate_rastrigin/1)
   |> Meow.add_pipeline(
     initializer_op,
@@ -189,9 +189,9 @@ model =
     duplicate: 2
   )
 
-# Execute the above model
+# Execute the above algorithm
 
-report = Meow.run(model)
+report = Meow.run(algorithm)
 report |> Meow.Report.format_summary() |> IO.puts()
 ```
 
@@ -205,9 +205,9 @@ Meow.Report.plot_metrics(report)
 
 The populations evolve independently, so we can see that both
 pipelines are similarly effective and gradually improve over
-time. With two solid sub-models at hand we can try introducing
+time. With two solid sub-algorithms at hand we can try introducing
 a migration step, so that populations can benefit from each other!
 
 Take a note of what the best fitness is, then uncomment the
-migration steps in both pipelines and see how the final model
+migration steps in both pipelines and see how the final algorithm
 performs!

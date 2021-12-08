@@ -31,7 +31,7 @@ defmodule Problem do
   end
 end
 
-model =
+algorithm =
   Meow.objective(&Problem.evaluate_rastrigin/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -51,12 +51,12 @@ model =
       MeowNx.Ops.log_best_individual(),
       Meow.Ops.max_generations(1_000)
     ]),
-    # Duplicate the pipeline, so that the model
-    # describes 4 populations
+    # Duplicate the pipeline, so that the algorithm
+    # involves 4 populations
     duplicate: 4
   )
 
 Meow.Distribution.init_from_cli_args!(fn nodes ->
-  report = Meow.run(model, nodes: nodes)
+  report = Meow.run(algorithm, nodes: nodes)
   report |> Meow.Report.format_summary() |> IO.puts()
 end)

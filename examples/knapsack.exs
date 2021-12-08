@@ -34,7 +34,7 @@ defmodule Problem do
   end
 end
 
-model =
+algorithm =
   Meow.objective(&Problem.evaluate_knapsack/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_binary_random_uniform(100, Problem.size()),
@@ -47,5 +47,5 @@ model =
     ])
   )
 
-report = Meow.run(model)
+report = Meow.run(algorithm)
 report |> Meow.Report.format_summary() |> IO.puts()

@@ -39,9 +39,9 @@ defmodule Problem do
   end
 end
 
-# Define the evolutionary model (algorithm)
+# Define the evolutionary algorithm
 
-model =
+algorithm =
   Meow.objective(
     # Specify the evaluation function that we are trying to maximise
     &Problem.evaluate_rastrigin/1
@@ -61,9 +61,9 @@ model =
   )
 
 
-# Execute the above model
+# Execute the above algorithm
 
-report = Meow.run(model)
+report = Meow.run(algorithm)
 
 report |> Meow.Report.format_summary() |> IO.puts()
 ```

@@ -25,7 +25,7 @@ defmodule Problem do
   end
 end
 
-model_linear =
+alg_linear =
   Meow.objective(&Problem.evaluate/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -38,7 +38,7 @@ model_linear =
     ])
   )
 
-model_multi =
+alg_multi =
   Meow.objective(&Problem.evaluate/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -54,7 +54,7 @@ model_multi =
     duplicate: 3
   )
 
-model_branching =
+alg_branching =
   Meow.objective(&Problem.evaluate/1)
   |> Meow.add_pipeline(
     MeowNx.Ops.init_real_random_uniform(100, Problem.size(), -5.12, 5.12),
@@ -76,8 +76,8 @@ model_branching =
     ])
   )
 
-for {model, idx} <- Enum.with_index([model_linear, model_multi, model_branching]) do
-  report = Meow.run(model)
-  IO.puts("\n# Model #{idx + 1}\n")
+for {algorithm, idx} <- Enum.with_index([alg_linear, alg_multi, alg_branching]) do
+  report = Meow.run(algorithm)
+  IO.puts("\n# Algorithm #{idx + 1}\n")
   report |> Meow.Report.format_summary() |> IO.puts()
 end
