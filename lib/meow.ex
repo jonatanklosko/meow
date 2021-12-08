@@ -101,7 +101,7 @@ defmodule Meow do
   At this point we have already defined what problem we are trying to solve, the
   only missing piece is an algorithm to solve it.
 
-      model =
+      algorithm =
         Meow.objective(&Problem.f/1)
         |> Meow.add_pipeline(
           MeowNx.Ops.init_binary_random_uniform(100, Problem.size()),
@@ -114,7 +114,7 @@ defmodule Meow do
           ])
         )
 
-  Let's break down what we just did. We start modeling our algorithm by
+  Let's break down what we just did. We start defining our algorithm by
   specifying the objective function `f`. Then we specify how the population
   should be initialised, in this case we generate 100 individuals, each with
   `Problem.size()` genes. Finally, we list the operations that should be
@@ -122,7 +122,7 @@ defmodule Meow do
 
   Now we just need to run our algorithm:
 
-      report = Meow.run(model)
+      report = Meow.run(algorithm)
       report |> Meow.Report.format_summary() |> IO.puts()
 
   Hopefully this gives us a good solution to our problem, in this case an
@@ -135,20 +135,20 @@ defmodule Meow do
 
   ## Learn more
 
-  The above example presents a simple single-population model, but there's
+  The above example presents a simple single-population algorithm, but there's
   much more you can do with Meow. Check out the Guides section for interactive
   notebooks that you can easily try out yourself. Additionally, there's a number
   of examples in the GitHub repository, so feel free explore those too.
   """
 
   @doc """
-  Entry point for building a new evolutionary model.
+  Entry point for building a new evolutionary algorithm.
 
   The given function becomes the optimisation objective
   that the algorithm will try to maximise.
   """
-  @spec objective(Meow.Model.evaluate()) :: Meow.Model.t()
-  defdelegate objective(evaluate), to: Meow.Model, as: :new
+  @spec objective(Meow.Algorithm.evaluate()) :: Meow.Algorithm.t()
+  defdelegate objective(evaluate), to: Meow.Algorithm, as: :new
 
   @doc """
   Builds a new pipeline from a list of operations.
@@ -157,26 +157,28 @@ defmodule Meow do
   defdelegate pipeline(ops), to: Meow.Pipeline, as: :new
 
   @doc """
-  Adds an evolutionary pipeline to the model definition.
+  Adds an evolutionary pipeline to the algorithm definition.
 
   Each pipeline defines how a single population evolves,
-  so multiple pipelines imply multi-population model.
+  so multiple pipelines imply multi-population algorithm.
 
-  When the model is run, `initializer` is applied to an empty
-  population, then the resulting population is repeatedly
+  When the algorithm is run, `initializer` is applied to an
+  empty population, then the resulting population is repeatedly
   passed through the pipeline until termination.
 
   ## Options
 
     * `:duplicate` - how many copies of the pipeline to add.
-      Multiple copies imply a multi-population algorithm. Defaults to 1.
+      Multiple copies imply a multi-population algorithm.
+      Defaults to 1.
   """
-  @spec add_pipeline(Meow.Model.t(), Meow.Op.t(), Meow.Pipeline.t(), keyword()) :: Meow.Model.t()
-  defdelegate add_pipeline(model, initializer, pipeline, opts \\ []), to: Meow.Model
+  @spec add_pipeline(Meow.Algorithm.t(), Meow.Op.t(), Meow.Pipeline.t(), keyword()) ::
+          Meow.Algorithm.t()
+  defdelegate add_pipeline(algorithm, initializer, pipeline, opts \\ []), to: Meow.Algorithm
 
   @doc """
   Iteratively transforms populations according to the given
-  model until all populations are terminated.
+  algorithm until all populations are terminated.
 
   ## Distribution
 
@@ -204,6 +206,6 @@ defmodule Meow do
       in exactly one of the groups. By default populations
       are split into even groups.
   """
-  @spec run(Meow.Model.t(), keyword()) :: Meow.Report.t()
-  defdelegate run(model, opts \\ []), to: Meow.Runner
+  @spec run(Meow.Algorithm.t(), keyword()) :: Meow.Report.t()
+  defdelegate run(algorithm, opts \\ []), to: Meow.Runner
 end

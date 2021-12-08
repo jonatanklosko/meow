@@ -61,7 +61,7 @@ defmodule Meow.MixProject do
           MeowNx.Metric
         ],
         "Lower level": [
-          Meow.Model,
+          Meow.Algorithm,
           Meow.Pipeline,
           Meow.Op,
           Meow.Op.Context,

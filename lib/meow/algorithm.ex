@@ -1,6 +1,6 @@
-defmodule Meow.Model do
+defmodule Meow.Algorithm do
   @moduledoc """
-  Definition of an evolutionary model.
+  Definition of an evolutionary algorithm.
   """
 
   defstruct [:evaluate, pipelines: []]
@@ -32,13 +32,13 @@ defmodule Meow.Model do
 
   @doc false
   # See `Meow.add_pipeline/4`
-  def add_pipeline(model, initializer, pipeline, opts \\ []) do
+  def add_pipeline(algorithm, initializer, pipeline, opts \\ []) do
     validate_initializer!(initializer)
     validate_pipeline!(pipeline, initializer.out_representation)
 
     copies = Keyword.get(opts, :duplicate, 1)
     new_pipelines = List.duplicate({initializer, pipeline}, copies)
-    %{model | pipelines: model.pipelines ++ new_pipelines}
+    %{algorithm | pipelines: algorithm.pipelines ++ new_pipelines}
   end
 
   defp validate_initializer!(op) do

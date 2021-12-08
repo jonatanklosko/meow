@@ -2,17 +2,17 @@ defmodule Meow.Runner do
   @moduledoc false
 
   # A module responsible for running an evolutionary algorithm,
-  # as defined by `Meow.Model`.
+  # as defined by `Meow.Algorithm`.
 
   alias Meow.{Pipeline, Population, Op}
 
   # See `Meow.run/2`
-  def run(model, opts \\ []) do
+  def run(algorithm, opts \\ []) do
     nodes = opts[:nodes] || [node()]
     validate_nodes!(nodes)
 
     number_of_nodes = length(nodes)
-    number_of_populations = length(model.pipelines)
+    number_of_populations = length(algorithm.pipelines)
 
     population_groups =
       Keyword.get_lazy(opts, :population_groups, fn ->
@@ -21,7 +21,7 @@ defmodule Meow.Runner do
 
     validate_population_groups!(population_groups, number_of_populations, number_of_nodes)
 
-    {time, result_tuples} = :timer.tc(&run_model/3, [model, nodes, population_groups])
+    {time, result_tuples} = :timer.tc(&run_algorithm/3, [algorithm, nodes, population_groups])
 
     %Meow.Report{
       total_time_us: time,
@@ -72,7 +72,7 @@ defmodule Meow.Runner do
     Meow.Utils.split_evenly(indices, number_of_nodes)
   end
 
-  defp run_model(model, nodes, population_groups) do
+  defp run_algorithm(algorithm, nodes, population_groups) do
     runner_pid = self()
 
     population_node_mapping =
@@ -82,7 +82,7 @@ defmodule Meow.Runner do
           do: {idx, node}
 
     pids =
-      model.pipelines
+      algorithm.pipelines
       |> Enum.with_index()
       |> Enum.map(fn {{initializer, pipeline}, idx} ->
         node = population_node_mapping[idx]
@@ -91,7 +91,7 @@ defmodule Meow.Runner do
           receive do
             {:initialize, pids} ->
               ctx = %Op.Context{
-                evaluate: model.evaluate,
+                evaluate: algorithm.evaluate,
                 population_pids: pids
               }
 

@@ -1,6 +1,6 @@
 defmodule Meow.Report do
   @moduledoc """
-  Final results and information produced during a model run.
+  Final results and information produced during a algorithm run.
   """
 
   defstruct [:total_time_us, :population_reports]

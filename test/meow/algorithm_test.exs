@@ -1,11 +1,11 @@
-defmodule Meow.ModelTest do
+defmodule Meow.AlgorithmTest do
   use ExUnit.Case, async: true
 
-  alias Meow.{Model, Op, Pipeline}
+  alias Meow.{Algorithm, Op, Pipeline}
 
   describe "add_pipeline/4" do
     test "raises an error when initializer operation doesn't have explicit output representation" do
-      model = Model.new(fn _, _ -> :ok end)
+      algorithm = Algorithm.new(fn _, _ -> :ok end)
 
       non_initializer = %Op{
         name: "Non-initializer",
@@ -19,12 +19,12 @@ defmodule Meow.ModelTest do
       assert_raise ArgumentError,
                    ~s/expected an initializer operation, got: "Non-initializer"/,
                    fn ->
-                     Model.add_pipeline(model, non_initializer, Pipeline.new([]))
+                     Algorithm.add_pipeline(algorithm, non_initializer, Pipeline.new([]))
                    end
     end
 
     test "raises an error on representation mismatch within the pipeline" do
-      model = Model.new(fn _, _ -> :ok end)
+      algorithm = Algorithm.new(fn _, _ -> :ok end)
 
       real_initializer = %Op{
         name: "Real initializer",
@@ -56,8 +56,8 @@ defmodule Meow.ModelTest do
       assert_raise ArgumentError,
                    ~s/representation mismatch, "Binary crossover" does not accept {Meow.TestRepresentationSpec, :real}/,
                    fn ->
-                     Model.add_pipeline(
-                       model,
+                     Algorithm.add_pipeline(
+                       algorithm,
                        real_initializer,
                        Pipeline.new([real_selection, binary_crossover])
                      )
