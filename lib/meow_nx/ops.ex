@@ -352,7 +352,7 @@ defmodule MeowNx.Ops do
 
         best_individual = %{
           genome: best_genome,
-          fitness: Nx.to_scalar(best_fitness),
+          fitness: Nx.to_number(best_fitness),
           generation: population.generation
         }
 
@@ -421,7 +421,7 @@ defmodule MeowNx.Ops do
                       "expected metric function to return a scalar, but #{inspect(key)} returned #{inspect(value)}"
               end
 
-              {key, Nx.to_scalar(value)}
+              {key, Nx.to_number(value)}
             end)
 
           update_in(population.log[:metrics], fn metrics ->
