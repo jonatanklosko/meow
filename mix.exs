@@ -81,7 +81,8 @@ defmodule Meow.MixProject do
         "Operations: Selection": &(&1[:type] == :selection),
         "Operations: Crossover": &(&1[:type] == :crossover),
         "Operations: Mutation": &(&1[:type] == :mutation),
-        "Operations: Logging": &(&1[:type] == :log)
+        "Operations: Logging": &(&1[:type] == :log),
+        "Operations: Other": &(&1[:type] == :other)
       ],
       before_closing_body_tag: &before_closing_body_tag/1
     ]
