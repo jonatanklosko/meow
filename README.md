@@ -4,7 +4,7 @@
 
 > **Disclaimer:** this is currently a work in progress.
 
-Multipopulation evolutionary optimisation workbench
+Multi-population evolutionary optimisation workbench
 
 ## Usage
 
@@ -97,3 +97,17 @@ Check out more examples in the [examples](https://github.com/jonatanklosko/meow/
 To iterate on different versions of your algorithm in a more interactive fashion
 we recommend using [Livebook](https://github.com/elixir-nx/livebook). For a quick
 introduction you can import the [Rastrigin notebook](https://github.com/jonatanklosko/meow/blob/main/notebooks/rastrigin_intro.livemd).
+
+## License
+
+Copyright (C) 2021 Jonatan Kłosko and Mateusz Benecki
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
