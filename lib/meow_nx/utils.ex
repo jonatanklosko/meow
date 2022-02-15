@@ -106,7 +106,7 @@ defmodule MeowNx.Utils do
     random_shape
     |> Nx.random_uniform()
     |> Nx.argsort(axis: axis)
-    |> Nx.slice_axis(0, sample_size, axis)
+    |> Nx.slice_along_axis(0, sample_size, axis: axis)
     |> Nx.add(min)
   end
 
