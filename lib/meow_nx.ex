@@ -55,4 +55,10 @@ defmodule MeowNx do
   """
   @spec binary_representation() :: Meow.Population.representation()
   def binary_representation(), do: {MeowNx.RepresentationSpec, :binary}
+
+  @doc """
+  Returns the permutation representation descriptor.
+  """
+  @spec permutation_representation() :: Meow.Population.representation()
+  def permutation_representation(), do: {MeowNx.RepresentationSpec, :permutation}
 end

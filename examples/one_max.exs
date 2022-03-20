@@ -1,3 +1,6 @@
+# In "one max" problem the objective is simply to maximise the number
+# of ones in a binary string.
+
 Mix.install([
   {:meow, path: Path.expand("..", __DIR__)},
   # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
@@ -6,9 +9,6 @@ Mix.install([
 ])
 
 Nx.Defn.global_default_options(compiler: EXLA)
-
-# In "one max" problem the objective is simply to maximise
-# the number of ones in a binary string.
 
 defmodule Problem do
   import Nx.Defn

@@ -12,7 +12,11 @@ defmodule MeowNx.Ops do
   alias Meow.{Op, Population}
   alias MeowNx.{Crossover, Init, Metric, Mutation, Selection}
 
-  @representations [MeowNx.real_representation(), MeowNx.binary_representation()]
+  @representations [
+    MeowNx.real_representation(),
+    MeowNx.binary_representation(),
+    MeowNx.permutation_representation()
+  ]
 
   @doc """
   Builds a random initializer for the real representation.
@@ -25,7 +29,7 @@ defmodule MeowNx.Ops do
     opts = [n: n, length: length, min: min, max: max]
 
     %Op{
-      name: "[Nx] Initialization: random uniform",
+      name: "[Nx] Initialization: real random uniform",
       requires_fitness: false,
       invalidates_fitness: true,
       in_representations: :any,
@@ -49,7 +53,7 @@ defmodule MeowNx.Ops do
     opts = [n: n, length: length]
 
     %Op{
-      name: "[Nx] Initialization: random uniform",
+      name: "[Nx] Initialization: binary random uniform",
       requires_fitness: false,
       invalidates_fitness: true,
       in_representations: :any,

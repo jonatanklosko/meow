@@ -228,6 +228,151 @@ defmodule MeowNx.Utils do
     Nx.max(result, 0)
   end
 
+  @doc """
+  Sorts permutations along the given axis.
+
+  Each sorted sequence must be a permuation of indices and therefore
+  it already includes the order information, which means that argsort
+  can be computed in linear time.
+
+  This gives the same value as `Nx.argsort/2` with `:axis`, however
+  it is more efficient by levaraging the outlined properties.
+
+  ## Examples
+
+      iex> MeowNx.Utils.permutation_argsort(Nx.tensor([3, 1, 0, 2]), axis: 0)
+      #Nx.Tensor<
+        s64[4]
+        [2, 1, 3, 0]
+      >
+  """
+  defn permutation_argsort(permutations, opts \\ []) do
+    opts = keyword!(opts, [:axis])
+    axis = opts[:axis]
+
+    type = Nx.type(permutations)
+
+    empty = Nx.broadcast(Nx.tensor(0, type: type), permutations)
+
+    indices =
+      transform({permutations, axis}, fn {permutations, axis} ->
+        permutations
+        |> Nx.axes()
+        |> Enum.map(fn
+          ^axis -> permutations
+          axis -> Nx.iota(permutations, axis: axis)
+        end)
+        |> Nx.stack(axis: -1)
+        |> Nx.reshape({:auto, Nx.rank(permutations)})
+      end)
+
+    iota = permutations |> Nx.iota(type: type, axis: axis) |> Nx.flatten()
+
+    # We use each permutation as indexing for 1-dimensional iota
+    Nx.indexed_add(empty, indices, iota)
+  end
+
+  @doc """
+  Shifts elements in `tensor` along the given axis.
+
+  The `offsets` tensor must include an integer for every sequence
+  of elements along the given axis, hence it has one dimension
+  less than `tensor`.
+
+  A positive offset shifts elements to higher indices, while a
+  negative one does the reverse. The behaviour for invalid offset
+  values is undefined.
+
+  ## Options
+
+    * `:axis` - the axis to shift elements along. Defaults to `0`
+
+  ## Examples
+
+      iex> MeowNx.Utils.shift(Nx.iota({4}), 2)
+      #Nx.Tensor<
+        s64[4]
+        [2, 3, 0, 1]
+      >
+
+      iex> MeowNx.Utils.shift(Nx.iota({4}), -1)
+      #Nx.Tensor<
+        s64[4]
+        [1, 2, 3, 0]
+      >
+
+      iex> MeowNx.Utils.shift(Nx.iota({3, 3}), Nx.tensor([-1, 0, 1]), axis: 1)
+      #Nx.Tensor<
+        s64[3][3]
+        [
+          [1, 2, 0],
+          [3, 4, 5],
+          [8, 6, 7]
+        ]
+      >
+
+      iex> MeowNx.Utils.shift(Nx.iota({2, 2, 2}), Nx.tensor([[1, 0], [0, 1]]), axis: 0)
+      #Nx.Tensor<
+        s64[2][2][2]
+        [
+          [
+            [4, 1],
+            [2, 7]
+          ],
+          [
+            [0, 5],
+            [6, 3]
+          ]
+        ]
+      >
+  """
+  defn shift(tensor, offsets, opts \\ []) do
+    opts = keyword!(opts, axis: 0)
+    axis = opts[:axis]
+
+    transform({tensor, offsets, axis}, &validate_shift!/1)
+
+    axis_size = Nx.axis_size(tensor, axis)
+    offsets = Nx.new_axis(offsets, axis)
+
+    idx = Nx.iota(tensor, axis: axis)
+    shifted_idx = Nx.remainder(idx - offsets + axis_size, axis_size)
+    Nx.take_along_axis(tensor, shifted_idx, axis: axis)
+  end
+
+  defp validate_shift!({tensor, offsets, axis}) do
+    shape = Nx.shape(tensor)
+    offsets_type = Nx.type(offsets)
+    offsets_shape = Nx.shape(offsets)
+    axis_idx = Nx.axis_index(tensor, axis)
+
+    unless Nx.Type.integer?(offsets_type) do
+      raise ArgumentError, "offsets must be an integer tensor, got #{inspect(offsets_type)}"
+    end
+
+    expected_offsets_shape = Tuple.delete_at(shape, axis_idx)
+
+    unless offsets_shape == expected_offsets_shape do
+      raise ArgumentError,
+            "expected offsets to have shape #{inspect(expected_offsets_shape)}, got: #{inspect(offsets_shape)}"
+    end
+  end
+
+  @doc """
+  Asserts `left` has same shape as `right`.
+  """
+  defn assert_shape!(left, right) do
+    transform({left, right}, fn {left, right} ->
+      left_shape = Nx.shape(left)
+      right_shape = Nx.shape(right)
+
+      unless Elixir.Kernel.==(left_shape, right_shape) do
+        raise ArgumentError,
+              "expected tensor shapes to match, but got #{inspect(left_shape)} and #{inspect(right_shape)}"
+      end
+    end)
+  end
+
   # Macros for use in defn
 
   @doc """
