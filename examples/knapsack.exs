@@ -1,12 +1,3 @@
-Mix.install([
-  {:meow, path: Path.expand("..", __DIR__)},
-  # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
-  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
-])
-
-Nx.Defn.global_default_options(compiler: EXLA)
-
 # In "0-1 knapsnack problem" the objective is to pick a subset
 # of objects, such that the total weight is within limit and the
 # profit is maximised.
@@ -16,6 +7,15 @@ Nx.Defn.global_default_options(compiler: EXLA)
 
 # We use the binary representation, where n-th gene indicates whether
 # n-th object is in the subset.
+
+Mix.install([
+  {:meow, path: Path.expand("..", __DIR__)},
+  # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
+  {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
+  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
+])
+
+Nx.Defn.global_default_options(compiler: EXLA)
 
 defmodule Problem do
   import Nx.Defn
