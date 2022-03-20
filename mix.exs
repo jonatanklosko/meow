@@ -47,7 +47,8 @@ defmodule Meow.MixProject do
         "Building blocks": [
           Meow.Topology,
           Meow.Ops,
-          MeowNx.Ops
+          MeowNx.Ops,
+          MeowNx.Ops.Permutation
         ],
         Runtime: [
           Meow.Report,
@@ -58,7 +59,8 @@ defmodule Meow.MixProject do
           MeowNx.Selection,
           MeowNx.Crossover,
           MeowNx.Mutation,
-          MeowNx.Metric
+          MeowNx.Metric,
+          MeowNx.Permutation
         ],
         "Lower level": [
           Meow.Algorithm,

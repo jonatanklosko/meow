@@ -9,7 +9,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds a random initializer for the permutation representation.
 
-  See `MeowNx.Init.permutation_random/1` for more details.
+  See `MeowNx.Permutation.init_random/1` for more details.
   """
   @doc type: :init
   @spec init_permutation_random(non_neg_integer(), non_neg_integer()) :: Op.t()
