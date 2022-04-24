@@ -17,17 +17,13 @@ defmodule Meow.MixProject do
   end
 
   def application do
-    [
-      extra_applications: [:logger]
-    ]
+    [extra_applications: [:logger]]
   end
 
   defp deps do
     [
       {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", branch: "main", sparse: "nx"},
-      {:vega_lite, "~> 0.1.1", optional: true},
-      {:jason, "~> 1.2", optional: true},
-      {:ex_doc, "~> 0.24", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.28", only: :dev, runtime: false}
     ]
   end
 
@@ -37,55 +33,6 @@ defmodule Meow.MixProject do
       source_url: "https://github.com/jonatanklosko/meow",
       # source_ref: "v#{@version}"
       source_ref: "main",
-      extras: [
-        {:"README.md", [title: "Readme"]},
-        {:"notebooks/rastrigin_intro.livemd", [title: "Introduction"]},
-        {:"notebooks/metrics.livemd", [title: "Metrics and visualizations"]}
-      ],
-      extra_section: "GUIDES",
-      groups_for_modules: [
-        "Building blocks": [
-          Meow.Topology,
-          Meow.Ops,
-          MeowNx.Ops,
-          MeowNx.Ops.Permutation
-        ],
-        Runtime: [
-          Meow.Report,
-          Meow.Distribution
-        ],
-        "Numerical definitions": [
-          MeowNx.Init,
-          MeowNx.Selection,
-          MeowNx.Crossover,
-          MeowNx.Mutation,
-          MeowNx.Metric,
-          MeowNx.Permutation
-        ],
-        "Lower level": [
-          Meow.Algorithm,
-          Meow.Pipeline,
-          Meow.Op,
-          Meow.Op.Context,
-          Meow.Population,
-          Meow.RepresentationSpec,
-          MeowNx.RepresentationSpec
-        ]
-      ],
-      groups_for_functions: [
-        # Meow.Ops
-        "Operations: Termination": &(&1[:type] == :termination),
-        "Operations: Flow": &(&1[:type] == :flow),
-        "Operations: Multi-population": &(&1[:type] == :multi),
-
-        # MeowNx.Ops
-        "Operations: Initialization": &(&1[:type] == :init),
-        "Operations: Selection": &(&1[:type] == :selection),
-        "Operations: Crossover": &(&1[:type] == :crossover),
-        "Operations: Mutation": &(&1[:type] == :mutation),
-        "Operations: Logging": &(&1[:type] == :log),
-        "Operations: Other": &(&1[:type] == :other)
-      ],
       before_closing_body_tag: &before_closing_body_tag/1
     ]
   end

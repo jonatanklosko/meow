@@ -22,6 +22,5 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 meow-*.tar
 
-
 # Temporary files for e.g. tests
 /tmp
