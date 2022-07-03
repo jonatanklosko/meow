@@ -3,8 +3,8 @@
 Mix.install([
   {:meow, path: Path.expand("..", __DIR__)},
   # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
-  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"}
+  {:nx, "~> 0.2.1"},
+  {:exla, "~> 0.2.2"}
 ])
 
 Nx.Defn.global_default_options(compiler: EXLA)

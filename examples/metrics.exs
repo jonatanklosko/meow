@@ -1,8 +1,8 @@
 Mix.install([
   {:meow, path: Path.expand("..", __DIR__)},
   # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "nx", override: true},
-  {:exla, "~> 0.1.0-dev", github: "elixir-nx/nx", sparse: "exla"},
+  {:nx, "~> 0.2.1"},
+  {:exla, "~> 0.2.2"},
   {:vega_lite, "~> 0.1.1", optional: true},
   {:jason, "~> 1.2", optional: true}
 ])
