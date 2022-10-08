@@ -126,7 +126,7 @@ defmodule MeowNx.Permutation do
   """
   defn crossover_single_point(genomes) do
     {n, length} = Nx.shape(genomes)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     positions = permutations_to_positions(genomes)
     split_position = Nx.random_uniform({half_n, 1}, 1, length) |> Utils.duplicate_rows()
@@ -185,7 +185,7 @@ defmodule MeowNx.Permutation do
   """
   defn crossover_position_based(genomes) do
     {n, length} = Nx.shape(genomes)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     fix_position? = Nx.random_uniform({half_n, length}, 0, 2) |> Utils.duplicate_rows()
     split_position = Nx.sum(fix_position?, axes: [1], keep_axes: true)

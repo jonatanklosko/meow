@@ -14,8 +14,6 @@ defmodule MeowNx.Selection do
 
   import Nx.Defn
 
-  require MeowNx.Utils
-
   @doc """
   Performs tournament selection with tournament size of 2.
 

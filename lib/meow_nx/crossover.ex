@@ -45,7 +45,7 @@ defmodule MeowNx.Crossover do
     probability = opts[:probability]
 
     {n, length} = Nx.shape(parents)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     swapped_parents = Utils.swap_adjacent_rows(parents)
 
@@ -66,7 +66,7 @@ defmodule MeowNx.Crossover do
   """
   defn single_point(parents) do
     {n, length} = Nx.shape(parents)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     swapped_parents = Utils.swap_adjacent_rows(parents)
 
@@ -97,7 +97,7 @@ defmodule MeowNx.Crossover do
     points = opts[:points]
 
     {n, length} = Nx.shape(parents)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     transform({length, points}, fn {length, points} ->
       unless Elixir.Kernel.<(points, length) do
@@ -166,7 +166,7 @@ defmodule MeowNx.Crossover do
     alpha = opts[:alpha]
 
     {n, length} = Nx.shape(parents)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     {x, y} = {parents, Utils.swap_adjacent_rows(parents)}
 
@@ -205,7 +205,7 @@ defmodule MeowNx.Crossover do
     eta = opts[:eta]
 
     {n, length} = Nx.shape(parents)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     {x, y} = {parents, Utils.swap_adjacent_rows(parents)}
 

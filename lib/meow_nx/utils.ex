@@ -23,7 +23,7 @@ defmodule MeowNx.Utils do
   """
   defn swap_adjacent_rows(t) do
     {n, m} = Nx.shape(t)
-    half_n = transform(n, &div(&1, 2))
+    half_n = div(n, 2)
 
     t
     |> Nx.reshape({half_n, 2, m})
@@ -373,8 +373,6 @@ defmodule MeowNx.Utils do
     end)
   end
 
-  # Macros for use in defn
-
   @doc """
   Normalizes the given size with respect to the base tensor.
 
@@ -392,29 +390,16 @@ defmodule MeowNx.Utils do
     * `:limit_to_base` - enforces that the resulting size
       must not exceed the base size
   """
-  defmacro resolve_n(n, base_t, opts \\ []) do
-    quote bind_quoted: [n: n, base_t: base_t, opts: opts] do
-      base_n = base_t |> Nx.shape() |> elem(0)
+  deftransform resolve_n(n, base_t, opts \\ []) do
+    base_n = base_t |> Nx.shape() |> elem(0)
 
-      Nx.Defn.Kernel.transform({n, base_n}, fn {n, base_n} ->
-        MeowNx.Utils.do_resolve_n(n, base_n, opts)
-      end)
-    end
-  end
+    n =
+      cond do
+        is_float(n) -> round(base_n * n)
+        is_integer(n) -> n
+        true -> raise ArgumentError, "expected n to be a float or an integer, got: #{inspect(n)}"
+      end
 
-  @doc false
-  def do_resolve_n(n, base_n, opts) when is_float(n) do
-    n = round(base_n * n)
-    validate_n!(n, base_n, opts)
-    n
-  end
-
-  def do_resolve_n(n, base_n, opts) when is_integer(n) do
-    validate_n!(n, base_n, opts)
-    n
-  end
-
-  defp validate_n!(n, base_n, opts) do
     if n < 0 do
       raise ArgumentError, "expected size to be a positive number, but resolved to: #{n}"
     end
@@ -422,5 +407,7 @@ defmodule MeowNx.Utils do
     if opts[:limit_to_base] && n > base_n do
       raise ArgumentError, "expected size to not exceed the base size, but #{n} > #{base_n}"
     end
+
+    n
   end
 end

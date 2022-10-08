@@ -31,11 +31,7 @@ defmodule MeowNx do
 
   Or when targeting the GPU:
 
-      Nx.Defn.global_default_options(
-        compiler: EXLA,
-        client: :cuda,
-        run_options: [keep_on_device: true]
-      )
+      Nx.Defn.global_default_options(compiler: EXLA, client: :cuda)
 
   Keep in mind that your XLA compilation must support the target
   platform, which may involve setting some environment variables

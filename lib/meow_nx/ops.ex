@@ -412,10 +412,7 @@ defmodule MeowNx.Ops do
       in_representations: @representations,
       impl: fn population, _ctx ->
         if rem(population.generation, interval) == 0 do
-          result =
-            fun
-            |> Nx.Defn.jit([population.genomes, population.fitness])
-            |> Nx.backend_transfer()
+          result = fun.(population.genomes, population.fitness)
 
           entries =
             result

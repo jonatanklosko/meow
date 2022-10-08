@@ -1,23 +1,21 @@
 # Rastrigin
 
-## Setup
-
-First we need to bring in the necessary dependencies. Until the first release
-Meow needs to be installed directly from GitHub. We also need
-[Nx](https://github.com/elixir-nx/nx/tree/main/nx) for numerical definitions
-and [EXLA](https://github.com/elixir-nx/nx/tree/main/exla) to compile them effectively.
-
 ```elixir
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.2.1"},
-  {:exla, "~> 0.2.2"}
+  {:nx, "~> 0.3.0"},
+  {:exla, "~> 0.3.0"}
 ])
-```
 
-```elixir
 Nx.Defn.global_default_options(compiler: EXLA)
 ```
+
+## Setup
+
+In the above cell we bring in the necessary dependencies. Until the first release
+Meow needs to be installed directly from GitHub. We also need
+[Nx](https://github.com/elixir-nx/nx/tree/main/nx) for numerical definitions
+and [EXLA](https://github.com/elixir-nx/nx/tree/main/exla) to compile them effectively.
 
 ## Objective
 

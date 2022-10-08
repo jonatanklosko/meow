@@ -1,10 +1,9 @@
 Mix.install([
-  {:meow, path: Path.expand("..", __DIR__)},
-  # or in a standalone script: {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.2.1"},
-  {:exla, "~> 0.2.2"},
-  {:vega_lite, "~> 0.1.1", optional: true},
-  {:jason, "~> 1.2", optional: true}
+  {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
+  {:nx, "~> 0.3.0"},
+  {:exla, "~> 0.3.0"},
+  {:vega_lite, "~> 0.1.1"},
+  {:jason, "~> 1.4"}
 ])
 
 Nx.Defn.global_default_options(compiler: EXLA)

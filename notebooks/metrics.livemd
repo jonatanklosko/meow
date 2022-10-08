@@ -1,26 +1,23 @@
 # Metrics and visualizations
 
-## Setup
-
-As before, we first install the necessary dependencies. This time we
-also add [VegaLite](https://hexdocs.pm/vega_lite/VegaLite.html) for
-plotting our data and [Kino](https://hexdocs.pm/kino) to automatically
-render those plots in Livebook. In fact, Meow provides a number of
-predefined plots that we will explore!
-
 ```elixir
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.2.1"},
-  {:exla, "~> 0.2.2"},
-  {:vega_lite, "~> 0.1.2"},
-  {:kino, "~> 0.5.0"}
+  {:nx, "~> 0.3.0"},
+  {:exla, "~> 0.3.0"},
+  {:vega_lite, "~> 0.1.6"},
+  {:kino_vega_lite, "~> 0.1.4"}
 ])
-```
 
-```elixir
 Nx.Defn.global_default_options(compiler: EXLA)
 ```
+
+## Setup
+
+As before, we first install the necessary dependencies. This time we
+also add [VegaLite](https://github.com/livebook-dev/vega_lite) for plotting
+our data and the corresponding Livebook integration - [KinoVegaLite](https://github.com/livebook-dev/kino_vega_lite).
+In fact, Meow provides a number of predefined plots that we will explore!
 
 ## Recording metrics
 
