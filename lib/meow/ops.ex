@@ -86,9 +86,18 @@ defmodule Meow.Ops do
 
   defp common_in_representations(pipelines) do
     pipelines
-    |> Enum.map(fn %{ops: [op | _]} -> MapSet.new(op.in_representations) end)
-    |> Enum.reduce(&MapSet.intersection/2)
-    |> MapSet.to_list()
+    |> Enum.map(fn pipeline -> List.first(pipeline.ops).in_representations end)
+    |> List.delete(:any)
+    |> case do
+      [] ->
+        :any
+
+      in_representations ->
+        in_representations
+        |> Enum.map(&MapSet.new/1)
+        |> Enum.reduce(&MapSet.intersection/2)
+        |> MapSet.to_list()
+    end
   end
 
   defp common_out_representation(pipelines) do
