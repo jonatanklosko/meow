@@ -23,7 +23,7 @@ defmodule Problem do
 
   defn evaluate_rastrigin(genomes) do
     sums =
-      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
+      (10 + Nx.pow(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
       |> Nx.sum(axes: [1])
 
     -sums
