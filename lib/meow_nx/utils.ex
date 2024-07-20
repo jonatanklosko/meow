@@ -266,7 +266,7 @@ defmodule MeowNx.Utils do
         |> Nx.reshape({:auto, Nx.rank(permutations)})
       end)
 
-    iota = permutations |> Nx.iota(type: type, axis: axis) |> Nx.flatten()
+    iota = permutations |> Nx.shape() |> Nx.iota(type: type, axis: axis) |> Nx.flatten()
 
     # We use each permutation as indexing for 1-dimensional iota
     Nx.indexed_add(empty, indices, iota)
@@ -335,7 +335,7 @@ defmodule MeowNx.Utils do
     axis_size = Nx.axis_size(tensor, axis)
     offsets = Nx.new_axis(offsets, axis)
 
-    idx = Nx.iota(tensor, axis: axis)
+    idx = tensor |> Nx.shape() |> Nx.iota(axis: axis)
     shifted_idx = Nx.remainder(idx - offsets + axis_size, axis_size)
     Nx.take_along_axis(tensor, shifted_idx, axis: axis)
   end
