@@ -104,7 +104,7 @@ defmodule MeowNx.Utils do
     random_shape = transform(shape, &put_elem(&1, axis, range))
 
     random_shape
-    |> Nx.random_uniform()
+    |> MeowNx.Utils.random_uniform()
     |> Nx.argsort(axis: axis)
     |> Nx.slice_along_axis(0, sample_size, axis: axis)
     |> Nx.add(min)
@@ -409,5 +409,25 @@ defmodule MeowNx.Utils do
     end
 
     n
+  end
+
+  @doc """
+  """
+  defn random_seed do
+    0
+  end
+
+  @doc """
+  Produce a random tensor with the given shape.
+
+  Mirrors the deprecated `MeowNx.Utils.random_uniform` so it's easier to upgrade.
+  """
+  defn random_uniform(shape, min \\ 0, max \\ 1) do
+    {result, _seed} =
+      random_seed()
+      |> Nx.Random.key()
+      |> Nx.Random.uniform(min, max, shape: shape)
+
+    result
   end
 end

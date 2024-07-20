@@ -50,7 +50,7 @@ defmodule MeowNx.Crossover do
     swapped_parents = Utils.swap_adjacent_rows(parents)
 
     swap? =
-      Nx.random_uniform({half_n, length})
+      MeowNx.Utils.random_uniform({half_n, length})
       |> Nx.less_equal(probability)
       |> Utils.duplicate_rows()
 
@@ -73,7 +73,7 @@ defmodule MeowNx.Crossover do
     # Generate n / 2 split points (like [5, 2, 3]), and replicate
     # them for adjacent parents (like [5, 5, 2, 2, 3, 3])
     split_idx =
-      Nx.random_uniform({half_n, 1}, 1, length)
+      MeowNx.Utils.random_uniform({half_n, 1}, 1, length)
       |> Utils.duplicate_rows()
 
     swap? = Nx.less_equal(split_idx, Nx.iota({1, length}))
@@ -175,7 +175,7 @@ defmodule MeowNx.Crossover do
     # may be negative (for y < x), but then we shift from x
     # in the opposite direction, so it works as expected.
 
-    gamma = (1 + 2 * alpha) * Nx.random_uniform({half_n, length}) - alpha
+    gamma = (1 + 2 * alpha) * MeowNx.Utils.random_uniform({half_n, length}) - alpha
     gamma = Utils.duplicate_rows(gamma)
 
     x + gamma * (y - x)
@@ -210,7 +210,7 @@ defmodule MeowNx.Crossover do
     {x, y} = {parents, Utils.swap_adjacent_rows(parents)}
 
     beta_base =
-      Nx.random_uniform({half_n, length})
+      MeoxNx.Utils.random_uniform({half_n, length})
       |> Nx.map(fn u ->
         if Nx.less(u, 0.5) do
           2 * u

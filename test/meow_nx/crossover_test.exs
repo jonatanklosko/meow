@@ -31,7 +31,11 @@ defmodule MeowNx.CrossoverTest do
     end
 
     test "property: the number of crossover points matches the specified one" do
-      genomes = Nx.random_uniform({100, 100})
+      {genomes, _seed} =
+        0
+        |> Nx.Random.key()
+        |> Nx.Random.uniform(shape: {100,100})
+
       points = 10
 
       offsprings = Crossover.multi_point(genomes, points: points)

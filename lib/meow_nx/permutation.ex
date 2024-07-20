@@ -107,7 +107,7 @@ defmodule MeowNx.Permutation do
     n = opts[:n]
     length = opts[:length]
 
-    Nx.random_uniform({n, length})
+    MeowNx.Utils.random_uniform({n, length})
     |> Nx.argsort(axis: 1)
     |> Nx.as_type({:u, 16})
   end
@@ -129,7 +129,7 @@ defmodule MeowNx.Permutation do
     half_n = div(n, 2)
 
     positions = permutations_to_positions(genomes)
-    split_position = Nx.random_uniform({half_n, 1}, 1, length) |> Utils.duplicate_rows()
+    split_position = MeowNx.Utils.random_uniform({half_n, 1}, 1, length) |> Utils.duplicate_rows()
 
     positions_single_point(positions, positions, split_position)
   end
@@ -187,7 +187,7 @@ defmodule MeowNx.Permutation do
     {n, length} = Nx.shape(genomes)
     half_n = div(n, 2)
 
-    fix_position? = Nx.random_uniform({half_n, length}, 0, 2) |> Utils.duplicate_rows()
+    fix_position? = MeowNx.Utils.random_uniform({half_n, length}, 0, 2) |> Utils.duplicate_rows()
     split_position = Nx.sum(fix_position?, axes: [1], keep_axes: true)
 
     mapping =
@@ -289,8 +289,8 @@ defmodule MeowNx.Permutation do
     {n, length} = Nx.shape(genomes)
 
     # Randomly generate two distinct positions
-    swap_position1 = Nx.random_uniform({n}, 0, length)
-    swap_position2 = Nx.random_uniform({n}, 0, length - 1)
+    swap_position1 = MeowNx.Utils.random_uniform({n}, 0, length)
+    swap_position2 = MeowNx.Utils.random_uniform({n}, 0, length - 1)
     swap_position2 = swap_position2 + (swap_position2 >= swap_position1)
     swap_positions = Nx.stack([swap_position1, swap_position2], axis: -1)
 
@@ -312,7 +312,7 @@ defmodule MeowNx.Permutation do
   defnp incorporate_mutated(genomes, mutated_genomes, probability) do
     {n, length} = Nx.shape(genomes)
 
-    mutate? = Nx.random_uniform({n, 1}) |> Nx.less(probability)
+    mutate? = MeowNx.Utils.random_uniform({n, 1}) |> Nx.less(probability)
 
     mutate?
     |> Nx.broadcast({n, length})
@@ -367,8 +367,8 @@ defmodule MeowNx.Permutation do
     n = opts[:n]
     length = opts[:length]
 
-    idx1 = Nx.random_uniform({n, 1}, 0, length)
-    idx2 = Nx.random_uniform({n, 1}, 0, length)
+    idx1 = MeowNx.Utils.random_uniform({n, 1}, 0, length)
+    idx2 = MeowNx.Utils.random_uniform({n, 1}, 0, length)
 
     a = Nx.min(idx1, idx2)
     b = Nx.max(idx1, idx2)

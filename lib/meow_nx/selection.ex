@@ -32,8 +32,8 @@ defmodule MeowNx.Selection do
 
     {base_n, length} = Nx.shape(genomes)
 
-    idx1 = Nx.random_uniform({n}, 0, base_n, type: {:u, 32})
-    idx2 = Nx.random_uniform({n}, 0, base_n, type: {:u, 32})
+    idx1 = MeowNx.Utils.random_uniform({n}, 0, base_n, type: {:u, 32})
+    idx2 = MeowNx.Utils.random_uniform({n}, 0, base_n, type: {:u, 32})
 
     parents1 = Nx.take(genomes, idx1)
     fitness1 = Nx.take(fitness, idx1)
@@ -102,7 +102,7 @@ defmodule MeowNx.Selection do
     fitness_sum = fitness_cumulative[-1]
 
     # Random points on the cumulative ruler
-    points = Nx.random_uniform({n, 1}, 0, fitness_sum)
+    points = MeoxNx.Utils.random_uniform({n, 1}, 0, fitness_sum)
     idx = cumulative_points_to_indices(fitness_cumulative, points)
 
     take_individuals(genomes, fitness, idx)
@@ -134,7 +134,7 @@ defmodule MeowNx.Selection do
 
     # Random points on the cumulative ruler, each in its own interval
     step = Nx.divide(fitness_sum, n)
-    start = Nx.random_uniform({}, 0, step)
+    start = MeowNx.Utils.random_uniform({}, 0, step)
     points = Nx.iota({n, 1}) |> Nx.multiply(step) |> Nx.add(start)
     idx = cumulative_points_to_indices(fitness_cumulative, points)
 

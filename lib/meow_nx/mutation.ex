@@ -44,8 +44,8 @@ defmodule MeowNx.Mutation do
     shape = Nx.shape(genomes)
 
     # Mutate each gene separately with the given probability
-    mutate? = Nx.random_uniform(shape) |> Nx.less(probability)
-    mutated = Nx.random_uniform(shape, min, max)
+    mutate? = MeowNx.Utils.random_uniform(shape) |> Nx.less(probability)
+    mutated = MeowNx.Utils.random_uniform(min, max, shape)
     Nx.select(mutate?, mutated, genomes)
   end
 
@@ -64,7 +64,7 @@ defmodule MeowNx.Mutation do
     shape = Nx.shape(genomes)
 
     # Mutate each gene separately with the given probability
-    mutate? = Nx.random_uniform(shape) |> Nx.less(probability)
+    mutate? = MeowNx.Utils.random_uniform(shape) |> Nx.less(probability)
     mutated = Nx.subtract(1, genomes)
     Nx.select(mutate?, mutated, genomes)
   end
@@ -99,8 +99,8 @@ defmodule MeowNx.Mutation do
     shape = Nx.shape(genomes)
 
     # Mutate each gene separately with the given probability
-    mutate? = Nx.random_uniform(shape) |> Nx.less(probability)
-    mutated = genomes + Nx.random_normal(shape, 0.0, sigma)
+    mutate? = MeowNx.Utils.random_uniform(shape) |> Nx.less(probability)
+    mutated = genomes + MeowNx.Utils.random_normal(shape, 0.0, sigma)
     Nx.select(mutate?, mutated, genomes)
   end
 end
