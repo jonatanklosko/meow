@@ -219,7 +219,7 @@ defmodule MeowNx.Crossover do
         end
       end)
 
-    beta = Nx.power(beta_base, 1 / (eta + 1))
+    beta = Nx.pow(beta_base, 1 / (eta + 1))
     beta = Utils.duplicate_rows(beta)
 
     0.5 * ((1 + beta) * x + (1 - beta) * y)

@@ -126,7 +126,7 @@ defmodule MeowNx.Utils do
 
     t
     |> Nx.subtract(mean)
-    |> Nx.power(2)
+    |> Nx.pow(2)
     |> Nx.mean()
     |> Nx.sqrt()
   end
