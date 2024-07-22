@@ -99,12 +99,7 @@ defmodule MeowNx.Crossover do
     {n, length} = Nx.shape(parents)
     half_n = div(n, 2)
 
-    transform({length, points}, fn {length, points} ->
-      unless Elixir.Kernel.<(points, length) do
-        raise ArgumentError,
-              "#{points}-point crossover is not valid for genome of length #{length}"
-      end
-    end)
+    validate_crossover(length, points)
 
     swapped_parents = Utils.swap_adjacent_rows(parents)
 
@@ -127,6 +122,13 @@ defmodule MeowNx.Crossover do
       |> Utils.duplicate_rows()
 
     Nx.select(swap?, swapped_parents, parents)
+  end
+
+  deftransformp validate_crossover(length, points) do
+    unless Elixir.Kernel.<(points, length) do
+      raise ArgumentError,
+            "#{points}-point crossover is not valid for genome of length #{length}"
+    end
   end
 
   @doc """

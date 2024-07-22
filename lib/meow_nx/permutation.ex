@@ -350,17 +350,20 @@ defmodule MeowNx.Permutation do
 
   defnp random_genome_blocks(genomes, opts \\ []) do
     opts = keyword!(opts, paired: false)
+    generate_blocks(genomes, opts[:paired])
+  end
 
-    transform({genomes, opts[:paired]}, fn
-      {genomes, false} ->
+  deftransformp generate_blocks(genomes, paired) do
+    case paired do
+      false ->
         {n, length} = Nx.shape(genomes)
         random_blocks(n: n, length: length)
 
-      {genomes, true} ->
+      true ->
         {n, length} = Nx.shape(genomes)
         {offset, block_length} = random_blocks(n: div(n, 2), length: length)
         {Utils.duplicate_rows(offset), Utils.duplicate_rows(block_length)}
-    end)
+    end
   end
 
   defnp random_blocks(opts \\ []) do

@@ -51,11 +51,15 @@ defmodule MeowNx.Utils do
   """
   defn duplicate_rows(t) do
     {n, m} = Nx.shape(t)
-    twice_n = transform(n, &(&1 * 2))
+    twice_n = double_n(n)
 
     t
     |> Nx.tile([1, 2])
     |> Nx.reshape({twice_n, m})
+  end
+
+  deftransformp double_n(n) do
+    n * 2
   end
 
   @doc """
@@ -100,14 +104,22 @@ defmodule MeowNx.Utils do
 
     range = max - min
 
-    sample_size = transform(shape, &elem(&1, axis))
-    random_shape = transform(shape, &put_elem(&1, axis, range))
+    sample_size = get_sample_size(shape, axis)
+    random_shape = get_random_shape(shape, axis, range)
 
     random_shape
     |> MeowNx.Utils.random_uniform()
     |> Nx.argsort(axis: axis)
     |> Nx.slice_along_axis(0, sample_size, axis: axis)
     |> Nx.add(min)
+  end
+
+  deftransformp get_sample_size(shape, axis) do
+    elem(shape, axis)
+  end
+
+  deftransformp get_random_shape(shape, axis, range) do
+    put_elem(shape, axis, range)
   end
 
   @doc """
@@ -254,22 +266,23 @@ defmodule MeowNx.Utils do
 
     empty = Nx.broadcast(Nx.tensor(0, type: type), permutations)
 
-    indices =
-      transform({permutations, axis}, fn {permutations, axis} ->
-        permutations
-        |> Nx.axes()
-        |> Enum.map(fn
-          ^axis -> permutations
-          axis -> Nx.iota(permutations, axis: axis)
-        end)
-        |> Nx.stack(axis: -1)
-        |> Nx.reshape({:auto, Nx.rank(permutations)})
-      end)
+    indices = create_indices(permutations, axis)
 
     iota = permutations |> Nx.shape() |> Nx.iota(type: type, axis: axis) |> Nx.flatten()
 
     # We use each permutation as indexing for 1-dimensional iota
     Nx.indexed_add(empty, indices, iota)
+  end
+
+  deftransformp create_indices(permutations, axis) do
+    permutations
+    |> Nx.axes()
+    |> Enum.map(fn
+      ^axis -> permutations
+      axis -> Nx.iota(permutations, axis: axis)
+    end)
+    |> Nx.stack(axis: -1)
+    |> Nx.reshape({:auto, Nx.rank(permutations)})
   end
 
   @doc """
@@ -330,7 +343,7 @@ defmodule MeowNx.Utils do
     opts = keyword!(opts, axis: 0)
     axis = opts[:axis]
 
-    transform({tensor, offsets, axis}, &validate_shift!/1)
+    validate_shift!(tensor, offsets, axis)
 
     axis_size = Nx.axis_size(tensor, axis)
     offsets = Nx.new_axis(offsets, axis)
@@ -340,7 +353,7 @@ defmodule MeowNx.Utils do
     Nx.take_along_axis(tensor, shifted_idx, axis: axis)
   end
 
-  defp validate_shift!({tensor, offsets, axis}) do
+  deftransformp validate_shift!(tensor, offsets, axis) do
     shape = Nx.shape(tensor)
     offsets_type = Nx.type(offsets)
     offsets_shape = Nx.shape(offsets)
@@ -362,15 +375,18 @@ defmodule MeowNx.Utils do
   Asserts `left` has same shape as `right`.
   """
   defn assert_shape!(left, right) do
-    transform({left, right}, fn {left, right} ->
-      left_shape = Nx.shape(left)
-      right_shape = Nx.shape(right)
+    do_assert_shape!(left, right)
+    {left, right}
+  end
 
-      unless Elixir.Kernel.==(left_shape, right_shape) do
-        raise ArgumentError,
-              "expected tensor shapes to match, but got #{inspect(left_shape)} and #{inspect(right_shape)}"
-      end
-    end)
+  deftransformp do_assert_shape!(left, right) do
+    left_shape = Nx.shape(left)
+    right_shape = Nx.shape(right)
+
+    unless Elixir.Kernel.==(left_shape, right_shape) do
+      raise ArgumentError,
+            "expected tensor shapes to match, but got #{inspect(left_shape)} and #{inspect(right_shape)}"
+    end
   end
 
   @doc """
