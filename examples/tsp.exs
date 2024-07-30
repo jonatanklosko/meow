@@ -7,7 +7,7 @@
 # distance of 937.
 
 Mix.install([
-  {:meow, "~> 0.1.0-dev", path: Path.expand("..", __DIR__)},
+  {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
   {:nx, "~> 0.7.0"},
   {:exla, "~> 0.7.0"},
   {:req, "~> 0.5.0"}
