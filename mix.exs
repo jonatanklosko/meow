@@ -25,7 +25,7 @@ defmodule Meow.MixProject do
   defp deps do
     [
       {:nx, "~> 0.7"},
-      {:vega_lite, "~> 0.1", optional: true},
+      {:vega_lite, "~> 0.1.1", optional: true},
       {:jason, "~> 1.2", optional: true},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false}
     ]

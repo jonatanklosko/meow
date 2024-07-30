@@ -428,19 +428,13 @@ defmodule MeowNx.Utils do
   end
 
   @doc """
-  """
-  defn random_seed do
-    0
-  end
-
-  @doc """
   Produce a random tensor with the given shape.
 
   Mirrors the deprecated `MeowNx.Utils.random_uniform` so it's easier to upgrade.
   """
   defn random_uniform(shape, min \\ 0, max \\ 1) do
     {result, _seed} =
-      random_seed()
+      0
       |> Nx.Random.key()
       |> Nx.Random.uniform(min, max, shape: shape)
 
