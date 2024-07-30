@@ -34,7 +34,7 @@ defmodule MeowNx.CrossoverTest do
       {genomes, _seed} =
         0
         |> Nx.Random.key()
-        |> Nx.Random.uniform(shape: {100,100})
+        |> Nx.Random.uniform(shape: {100, 100})
 
       points = 10
 
