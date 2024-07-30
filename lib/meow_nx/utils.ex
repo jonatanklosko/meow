@@ -427,17 +427,30 @@ defmodule MeowNx.Utils do
     n
   end
 
-  @doc """
-  Produce a random tensor with the given shape.
-
-  Mirrors the deprecated `MeowNx.Utils.random_uniform` so it's easier to upgrade.
-  """
-  defn random_uniform(shape, min \\ 0, max \\ 1) do
-    {result, _seed} =
-      0
+  # TODO proper random
+  deftransform random_uniform(shape, min \\ 0, max \\ 1, opts \\ []) do
+    {result, _key} =
+      :erlang.system_time()
       |> Nx.Random.key()
       |> Nx.Random.uniform(min, max, shape: shape)
 
-    result
+    if type = opts[:type] do
+      Nx.as_type(result, type)
+    else
+      result
+    end
+  end
+
+  deftransform random_normal(shape, mean, sd, opts \\ []) do
+    {result, _key} =
+      :erlang.system_time()
+      |> Nx.Random.key()
+      |> Nx.Random.normal(mean, sd, shape: shape)
+
+    if type = opts[:type] do
+      Nx.as_type(result, type)
+    else
+      result
+    end
   end
 end

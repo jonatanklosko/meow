@@ -1,7 +1,7 @@
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.3.0"},
-  {:exla, "~> 0.3.0"},
+  {:nx, "~> 0.7.0"},
+  {:exla, "~> 0.7.0"},
   {:vega_lite, "~> 0.1.1"},
   {:jason, "~> 1.4"}
 ])

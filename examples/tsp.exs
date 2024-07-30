@@ -8,9 +8,9 @@
 
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.3.0"},
-  {:exla, "~> 0.3.0"},
-  {:req, "~> 0.3.0"}
+  {:nx, "~> 0.7.0"},
+  {:exla, "~> 0.7.0"},
+  {:req, "~> 0.5.0"}
 ])
 
 Nx.Defn.global_default_options(compiler: EXLA)

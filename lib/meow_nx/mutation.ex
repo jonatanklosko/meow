@@ -45,7 +45,7 @@ defmodule MeowNx.Mutation do
 
     # Mutate each gene separately with the given probability
     mutate? = MeowNx.Utils.random_uniform(shape) |> Nx.less(probability)
-    mutated = MeowNx.Utils.random_uniform(min, max, shape)
+    mutated = MeowNx.Utils.random_uniform(shape, min, max)
     Nx.select(mutate?, mutated, genomes)
   end
 
