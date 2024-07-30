@@ -35,7 +35,7 @@ defmodule MeowNx.Mutation do
     * `:min` - the upper bound of the range to draw from.
       Required.
   """
-  defn replace_uniform(genomes, opts \\ []) do
+  defn replace_uniform(genomes, prng_key, opts \\ []) do
     opts = keyword!(opts, [:probability, :min, :max])
     probability = opts[:probability]
     min = opts[:min]
@@ -44,8 +44,9 @@ defmodule MeowNx.Mutation do
     shape = Nx.shape(genomes)
 
     # Mutate each gene separately with the given probability
-    mutate? = MeowNx.Utils.random_uniform(shape) |> Nx.less(probability)
-    mutated = MeowNx.Utils.random_uniform(shape, min, max)
+    {u, prng_key} = Nx.Random.uniform(prng_key, shape: shape)
+    mutate? = Nx.less(u, probability)
+    {mutated, _prng_key} = Nx.Random.uniform(prng_key, min, max, shape: shape)
     Nx.select(mutate?, mutated, genomes)
   end
 
@@ -57,14 +58,15 @@ defmodule MeowNx.Mutation do
     * `:probability` - the probability of each gene
       getting mutated. Required.
   """
-  defn bit_flip(genomes, opts \\ []) do
+  defn bit_flip(genomes, prng_key, opts \\ []) do
     opts = keyword!(opts, [:probability])
     probability = opts[:probability]
 
     shape = Nx.shape(genomes)
 
     # Mutate each gene separately with the given probability
-    mutate? = MeowNx.Utils.random_uniform(shape) |> Nx.less(probability)
+    {u, _prng_key} = Nx.Random.uniform(prng_key, shape: shape)
+    mutate? = Nx.less(u, probability)
     mutated = Nx.subtract(1, genomes)
     Nx.select(mutate?, mutated, genomes)
   end
@@ -91,7 +93,7 @@ defmodule MeowNx.Mutation do
 
     * [Adaptive Mutation Strategies for Evolutionary Algorithms](https://www.dynardo.de/fileadmin/Material_Dynardo/WOST/Paper/wost2.0/AdaptiveMutation.pdf), Section 3.1
   """
-  defn shift_gaussian(genomes, opts \\ []) do
+  defn shift_gaussian(genomes, prng_key, opts \\ []) do
     opts = keyword!(opts, [:probability, sigma: 1.0])
     probability = opts[:probability]
     sigma = opts[:sigma]
@@ -99,8 +101,10 @@ defmodule MeowNx.Mutation do
     shape = Nx.shape(genomes)
 
     # Mutate each gene separately with the given probability
-    mutate? = MeowNx.Utils.random_uniform(shape) |> Nx.less(probability)
-    mutated = genomes + MeowNx.Utils.random_normal(shape, 0.0, sigma)
+    {u, prng_key} = Nx.Random.uniform(prng_key, shape: shape)
+    mutate? = Nx.less(u, probability)
+    {noise, _prng_key} = Nx.Random.normal(prng_key, 0.0, sigma, shape: shape)
+    mutated = genomes + noise
     Nx.select(mutate?, mutated, genomes)
   end
 end

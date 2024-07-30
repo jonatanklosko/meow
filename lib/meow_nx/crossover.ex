@@ -40,7 +40,7 @@ defmodule MeowNx.Crossover do
 
     * [On the Virtues of Parameterized Uniform Crossover](http://www.mli.gmu.edu/papers/91-95/91-18.pdf)
   """
-  defn uniform(parents, opts \\ []) do
+  defn uniform(parents, prng_key, opts \\ []) do
     opts = keyword!(opts, probability: 0.5)
     probability = opts[:probability]
 
@@ -49,8 +49,10 @@ defmodule MeowNx.Crossover do
 
     swapped_parents = Utils.swap_adjacent_rows(parents)
 
+    {random, _prng_key} = Nx.Random.uniform(prng_key, shape: {half_n, length})
+
     swap? =
-      MeowNx.Utils.random_uniform({half_n, length})
+      random
       |> Nx.less_equal(probability)
       |> Utils.duplicate_rows()
 
@@ -64,7 +66,7 @@ defmodule MeowNx.Crossover do
   a random split point and swaps all genes $x_i$, $y_i$
   on one side of that split point.
   """
-  defn single_point(parents) do
+  defn single_point(parents, prng_key) do
     {n, length} = Nx.shape(parents)
     half_n = div(n, 2)
 
@@ -72,12 +74,11 @@ defmodule MeowNx.Crossover do
 
     # Generate n / 2 split points (like [5, 2, 3]), and replicate
     # them for adjacent parents (like [5, 5, 2, 2, 3, 3])
-    split_idx =
-      MeowNx.Utils.random_uniform({half_n, 1}, 1, length)
-      |> Utils.duplicate_rows()
+    {random, _prng_key} = Nx.Random.uniform(prng_key, 1, length, shape: {half_n, 1})
+    random = Nx.as_type(random, {:u, 32})
+    split_idx = Utils.duplicate_rows(random)
 
     swap? = Nx.less_equal(split_idx, Nx.iota({1, length}))
-
     Nx.select(swap?, swapped_parents, parents)
   end
 
@@ -92,7 +93,7 @@ defmodule MeowNx.Crossover do
 
     * `:points` - the number of crossover points
   """
-  defn multi_point(parents, opts \\ []) do
+  defn multi_point(parents, prng_key, opts \\ []) do
     opts = keyword!(opts, [:points])
     points = opts[:points]
 
@@ -107,8 +108,8 @@ defmodule MeowNx.Crossover do
     # then we convert each of them to 1-point crossover mask and finally
     # combine these masks using gen-wise XOR (sum modulo 2)
 
-    split_idx =
-      Utils.random_idx_without_replacement(
+    {split_idx, _prng_key} =
+      Utils.random_idx_without_replacement(prng_key,
         shape: {half_n, points, 1},
         min: 1,
         max: length,
@@ -163,7 +164,7 @@ defmodule MeowNx.Crossover do
     * [Tackling Real-Coded Genetic Algorithms: Operators and Tools for Behavioural Analysis](https://sci2s.ugr.es/sites/default/files/files/ScientificImpact/AIRE12-1998.PDF), Section 4.3
     * [Multiobjective Evolutionary Algorithms forElectric Power Dispatch Problem](https://www.researchgate.net/figure/Blend-crossover-operator-BLX_fig1_226044085), Fig. 1.
   """
-  defn blend_alpha(parents, opts \\ []) do
+  defn blend_alpha(parents, prng_key, opts \\ []) do
     opts = keyword!(opts, alpha: 0.5)
     alpha = opts[:alpha]
 
@@ -177,7 +178,8 @@ defmodule MeowNx.Crossover do
     # may be negative (for y < x), but then we shift from x
     # in the opposite direction, so it works as expected.
 
-    gamma = (1 + 2 * alpha) * MeowNx.Utils.random_uniform({half_n, length}) - alpha
+    {u, _prng_key} = Nx.Random.uniform(prng_key, shape: {half_n, length})
+    gamma = (1 + 2 * alpha) * u - alpha
     gamma = Utils.duplicate_rows(gamma)
 
     x + gamma * (y - x)
@@ -202,7 +204,7 @@ defmodule MeowNx.Crossover do
     * [Self-Adaptive Genetic Algorithms with Simulated Binary Crossover](https://eldorado.tu-dortmund.de/bitstream/2003/5370/1/ci61.pdf)
     * [Engineering Analysis and Design Using Genetic Algorithms / Lecture 4: Real-Coded Genetic Algorithms](https://engineering.purdue.edu/~sudhoff/ee630/Lecture04.pdf)
   """
-  defn simulated_binary(parents, opts \\ []) do
+  defn simulated_binary(parents, prng_key, opts \\ []) do
     opts = keyword!(opts, [:eta])
     eta = opts[:eta]
 
@@ -211,15 +213,8 @@ defmodule MeowNx.Crossover do
 
     {x, y} = {parents, Utils.swap_adjacent_rows(parents)}
 
-    beta_base =
-      MeoxNx.Utils.random_uniform({half_n, length})
-      |> Nx.map(fn u ->
-        if Nx.less(u, 0.5) do
-          2 * u
-        else
-          1 / (2 * (1 - u))
-        end
-      end)
+    {u, _prng_key} = Nx.Random.uniform(prng_key, shape: {half_n, length})
+    beta_base = Nx.select(u < 0.5, 2 * u, 1 / (2 * (1 - u)))
 
     beta = Nx.pow(beta_base, 1 / (eta + 1))
     beta = Utils.duplicate_rows(beta)

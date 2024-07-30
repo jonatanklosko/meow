@@ -22,14 +22,17 @@ defmodule MeowNx.Init do
 
     * `:max` - the maximum possible value of a gene. Required.
   """
-  defn real_random_uniform(opts \\ []) do
+  defn real_random_uniform(prng_key, opts \\ []) do
     opts = keyword!(opts, [:n, :length, :min, :max])
     n = opts[:n]
     length = opts[:length]
     min = opts[:min]
     max = opts[:max]
 
-    MeowNx.Utils.random_uniform({n, length}, min, max, type: {:f, 64})
+    {random, _prng_key} =
+      Nx.Random.uniform(prng_key, min, max, shape: {n, length}, type: {:f, 64})
+
+    random
   end
 
   @doc """
@@ -42,11 +45,12 @@ defmodule MeowNx.Init do
 
     * `:length` - the length of a single genome. Required.
   """
-  defn binary_random_uniform(opts \\ []) do
+  defn binary_random_uniform(prng_key, opts \\ []) do
     opts = keyword!(opts, [:n, :length])
     n = opts[:n]
     length = opts[:length]
 
-    MeowNx.Utils.random_uniform({n, length}, 0, 2) |> Nx.as_type({:u, 8})
+    {random, _prng_key} = Nx.Random.uniform(prng_key, 0, 2, shape: {n, length})
+    Nx.as_type(random, {:u, 8})
   end
 end

@@ -9,7 +9,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds a random initializer for the permutation representation.
 
-  See `MeowNx.Permutation.init_random/1` for more details.
+  See `MeowNx.Permutation.init_random/2` for more details.
   """
   @doc type: :init
   @spec init_permutation_random(non_neg_integer(), non_neg_integer()) :: Op.t()
@@ -24,7 +24,8 @@ defmodule MeowNx.Ops.Permutation do
       out_representation: MeowNx.permutation_representation(),
       impl: fn population, _ctx ->
         Meow.Population.map_genomes(population, fn _genomes ->
-          Permutation.init_random(opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Permutation.init_random(prng_key, opts)
         end)
       end
     }
@@ -33,7 +34,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds a single point crossover operation adopted for permutations.
 
-  See `MeowNx.Permutation.crossover_single_point/1` for more details.
+  See `MeowNx.Permutation.crossover_single_point/2` for more details.
   """
   @doc type: :crossover
   @spec crossover_single_point() :: Op.t()
@@ -45,7 +46,8 @@ defmodule MeowNx.Ops.Permutation do
       in_representations: [MeowNx.permutation_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Permutation.crossover_single_point(genomes)
+          prng_key = MeowNx.Utils.prng_key()
+          Permutation.crossover_single_point(genomes, prng_key)
         end)
       end
     }
@@ -54,7 +56,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds an order crossover operation.
 
-  See `MeowNx.Permutation.crossover_order/1` for more details.
+  See `MeowNx.Permutation.crossover_order/2` for more details.
   """
   @doc type: :crossover
   @spec crossover_order() :: Op.t()
@@ -66,7 +68,8 @@ defmodule MeowNx.Ops.Permutation do
       in_representations: [MeowNx.permutation_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Permutation.crossover_order(genomes)
+          prng_key = MeowNx.Utils.prng_key()
+          Permutation.crossover_order(genomes, prng_key)
         end)
       end
     }
@@ -75,7 +78,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds an position based crossover operation.
 
-  See `MeowNx.Permutation.crossover_position_based/1` for more details.
+  See `MeowNx.Permutation.crossover_position_based/2` for more details.
   """
   @doc type: :crossover
   @spec crossover_position_based() :: Op.t()
@@ -87,7 +90,8 @@ defmodule MeowNx.Ops.Permutation do
       in_representations: [MeowNx.permutation_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Permutation.crossover_position_based(genomes)
+          prng_key = MeowNx.Utils.prng_key()
+          Permutation.crossover_position_based(genomes, prng_key)
         end)
       end
     }
@@ -96,7 +100,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds a linear order crossover operation.
 
-  See `MeowNx.Permutation.crossover_linear_order/1` for more details.
+  See `MeowNx.Permutation.crossover_linear_order/2` for more details.
   """
   @doc type: :crossover
   @spec crossover_linear_order() :: Op.t()
@@ -108,7 +112,8 @@ defmodule MeowNx.Ops.Permutation do
       in_representations: [MeowNx.permutation_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Permutation.crossover_linear_order(genomes)
+          prng_key = MeowNx.Utils.prng_key()
+          Permutation.crossover_linear_order(genomes, prng_key)
         end)
       end
     }
@@ -117,7 +122,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds an inversion mutation operation.
 
-  See `MeowNx.Permutation.mutation_inversion/2` for more details.
+  See `MeowNx.Permutation.mutation_inversion/3` for more details.
   """
   @doc type: :mutation
   @spec mutation_inversion(float()) :: Op.t()
@@ -131,7 +136,8 @@ defmodule MeowNx.Ops.Permutation do
       in_representations: [MeowNx.permutation_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Permutation.mutation_inversion(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Permutation.mutation_inversion(genomes, prng_key, opts)
         end)
       end
     }
@@ -140,7 +146,7 @@ defmodule MeowNx.Ops.Permutation do
   @doc """
   Builds a swap mutation operation.
 
-  See `MeowNx.Permutation.mutation_swap/2` for more details.
+  See `MeowNx.Permutation.mutation_swap/3` for more details.
   """
   @doc type: :mutation
   @spec mutation_swap(float()) :: Op.t()
@@ -154,7 +160,8 @@ defmodule MeowNx.Ops.Permutation do
       in_representations: [MeowNx.permutation_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Permutation.mutation_swap(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Permutation.mutation_swap(genomes, prng_key, opts)
         end)
       end
     }

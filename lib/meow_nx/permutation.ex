@@ -102,12 +102,14 @@ defmodule MeowNx.Permutation do
 
     * `:length` - the length of a single genome. Required.
   """
-  defn init_random(opts \\ []) do
+  defn init_random(prng_key, opts \\ []) do
     opts = keyword!(opts, [:n, :length])
     n = opts[:n]
     length = opts[:length]
 
-    MeowNx.Utils.random_uniform({n, length})
+    {u, _prng_key} = Nx.Random.uniform(prng_key, shape: {n, length})
+
+    u
     |> Nx.argsort(axis: 1)
     |> Nx.as_type({:u, 16})
   end
@@ -124,12 +126,14 @@ defmodule MeowNx.Permutation do
 
     * [Genetic Algorithms for Shop Scheduling Problems: A Survey](https://www.researchgate.net/publication/230724890_GENETIC_ALGORITHMS_FOR_SHOP_SCHEDULING_PROBLEMS_A_SURVEY), Fig. 8.
   """
-  defn crossover_single_point(genomes) do
+  defn crossover_single_point(genomes, prng_key) do
     {n, length} = Nx.shape(genomes)
     half_n = div(n, 2)
 
     positions = permutations_to_positions(genomes)
-    split_position = MeowNx.Utils.random_uniform({half_n, 1}, 1, length) |> Utils.duplicate_rows()
+    {random, _prng_key} = Nx.Random.uniform(prng_key, 1, length, shape: {half_n, 1})
+    random = Nx.as_type(random, {:u, 32})
+    split_position = Utils.duplicate_rows(random)
 
     positions_single_point(positions, positions, split_position)
   end
@@ -150,8 +154,8 @@ defmodule MeowNx.Permutation do
 
     * [Genetic Algorithms for Shop Scheduling Problems: A Survey](https://www.researchgate.net/publication/230724890_GENETIC_ALGORITHMS_FOR_SHOP_SCHEDULING_PROBLEMS_A_SURVEY), Fig. 9.
   """
-  defn crossover_order(genomes) do
-    {offset, block_length} = random_genome_blocks(genomes, paired: true)
+  defn crossover_order(genomes, prng_key) do
+    {offset, block_length, _prng_key} = random_genome_blocks(genomes, prng_key, paired: true)
 
     positions = permutations_to_positions(genomes)
     shifted_positions = shift_positions(positions, -offset)
@@ -183,15 +187,18 @@ defmodule MeowNx.Permutation do
     * [Genetic Algorithms for Shop Scheduling Problems: A Survey](https://www.researchgate.net/publication/230724890_GENETIC_ALGORITHMS_FOR_SHOP_SCHEDULING_PROBLEMS_A_SURVEY), Fig. 12.
     * [Crossover operators for permutations equivalence between position and order-based crossover](https://www.researchgate.net/publication/220245134_Crossover_operators_for_permutations_equivalence_between_position_and_order-based_crossover)
   """
-  defn crossover_position_based(genomes) do
+  defn crossover_position_based(genomes, prng_key) do
     {n, length} = Nx.shape(genomes)
     half_n = div(n, 2)
 
-    fix_position? = MeowNx.Utils.random_uniform({half_n, length}, 0, 2) |> Utils.duplicate_rows()
+    {random, _prng_key} = Nx.Random.uniform(prng_key, 0, 2, shape: {half_n, length})
+    random = Nx.as_type(random, {:u, 8})
+    fix_position? = Utils.duplicate_rows(random)
     split_position = Nx.sum(fix_position?, axes: [1], keep_axes: true)
 
     mapping =
       fix_position?
+      |> Nx.shape()
       |> Nx.iota(axis: 1)
       |> Nx.add(Nx.negate(fix_position?) * length)
       |> relative_positions_to_permutations()
@@ -216,15 +223,15 @@ defmodule MeowNx.Permutation do
     * [Genetic Algorithms for Shop Scheduling Problems: A Survey](https://www.researchgate.net/publication/230724890_GENETIC_ALGORITHMS_FOR_SHOP_SCHEDULING_PROBLEMS_A_SURVEY), Fig. 10.
     * [Non-Wrapping Order Crossover: An Order Preserving Crossover Operator that Respects Absolute Position](https://www.researchgate.net/publication/220739642_Non-wrapping_order_crossover_An_order_preserving_crossover_operator_that_respects_absolute_position)
   """
-  defn crossover_linear_order(genomes) do
-    {offset, block_length} = random_genome_blocks(genomes, paired: true)
+  defn crossover_linear_order(genomes, prng_key) do
+    {offset, block_length, _prng_key} = random_genome_blocks(genomes, prng_key, paired: true)
 
     # A random block divides genome into three parts A B C (where B
     # is the random block). We want to rearrange the genes into parts
     # B A C, so that we can fix genes in B. We do this rearrangement
     # by generating an index mapping
 
-    idx = Nx.iota(genomes, axis: 1)
+    idx = Nx.iota(Nx.shape(genomes), axis: 1)
 
     mapping =
       idx + (idx < block_length) * offset -
@@ -248,21 +255,21 @@ defmodule MeowNx.Permutation do
 
     * [Genetic Algorithms for Shop Scheduling Problems: A Survey](https://www.researchgate.net/publication/230724890_GENETIC_ALGORITHMS_FOR_SHOP_SCHEDULING_PROBLEMS_A_SURVEY), Fig. 15.
   """
-  defn mutation_inversion(genomes, opts \\ []) do
+  defn mutation_inversion(genomes, prng_key, opts \\ []) do
     opts = keyword!(opts, [:probability])
     probability = opts[:probability]
 
-    {offset, block_length} = random_genome_blocks(genomes, paired: false)
+    {offset, block_length, prng_key} = random_genome_blocks(genomes, prng_key, paired: false)
 
     a = offset
     b = offset + block_length - 1
 
-    idx = Nx.iota(genomes, axis: 1)
+    idx = Nx.iota(Nx.shape(genomes), axis: 1)
     block? = a <= idx and idx <= b
     mapping = Nx.select(block?, b - (idx - a), idx)
     mutated = Nx.take_along_axis(genomes, mapping, axis: 1)
 
-    incorporate_mutated(genomes, mutated, probability)
+    incorporate_mutated(genomes, mutated, probability, prng_key)
   end
 
   @doc """
@@ -282,15 +289,17 @@ defmodule MeowNx.Permutation do
 
     * [Genetic Algorithms for Shop Scheduling Problems: A Survey](https://www.researchgate.net/publication/230724890_GENETIC_ALGORITHMS_FOR_SHOP_SCHEDULING_PROBLEMS_A_SURVEY), Fig. 14.
   """
-  defn mutation_swap(genomes, opts \\ []) do
+  defn mutation_swap(genomes, prng_key, opts \\ []) do
     opts = keyword!(opts, [:probability])
     probability = opts[:probability]
 
     {n, length} = Nx.shape(genomes)
 
     # Randomly generate two distinct positions
-    swap_position1 = MeowNx.Utils.random_uniform({n}, 0, length)
-    swap_position2 = MeowNx.Utils.random_uniform({n}, 0, length - 1)
+    {swap_position1, prng_key} = Nx.Random.uniform(prng_key, 0, length, shape: {n})
+    swap_position1 = Nx.as_type(swap_position1, {:u, 32})
+    {swap_position2, prng_key} = Nx.Random.uniform(prng_key, 0, length - 1, shape: {n})
+    swap_position2 = Nx.as_type(swap_position2, {:u, 32})
     swap_position2 = swap_position2 + (swap_position2 >= swap_position1)
     swap_positions = Nx.stack([swap_position1, swap_position2], axis: -1)
 
@@ -306,13 +315,14 @@ defmodule MeowNx.Permutation do
         Nx.reshape(diff, {:auto})
       )
 
-    incorporate_mutated(genomes, mutated, probability)
+    incorporate_mutated(genomes, mutated, probability, prng_key)
   end
 
-  defnp incorporate_mutated(genomes, mutated_genomes, probability) do
+  defnp incorporate_mutated(genomes, mutated_genomes, probability, prng_key) do
     {n, length} = Nx.shape(genomes)
 
-    mutate? = MeowNx.Utils.random_uniform({n, 1}) |> Nx.less(probability)
+    {u, _prng_key} = Nx.Random.uniform(prng_key, shape: {n, 1})
+    mutate? = u |> Nx.less(probability)
 
     mutate?
     |> Nx.broadcast({n, length})
@@ -348,30 +358,32 @@ defmodule MeowNx.Permutation do
     |> Nx.take_along_axis(reverse_mapping, axis: 1)
   end
 
-  defnp random_genome_blocks(genomes, opts \\ []) do
+  defnp random_genome_blocks(genomes, prng_key, opts \\ []) do
     opts = keyword!(opts, paired: false)
-    generate_blocks(genomes, opts[:paired])
+    generate_blocks(genomes, prng_key, opts[:paired])
   end
 
-  deftransformp generate_blocks(genomes, paired) do
+  deftransformp generate_blocks(genomes, prng_key, paired) do
     case paired do
       false ->
         {n, length} = Nx.shape(genomes)
-        random_blocks(n: n, length: length)
+        random_blocks(prng_key, n: n, length: length)
 
       true ->
         {n, length} = Nx.shape(genomes)
-        {offset, block_length} = random_blocks(n: div(n, 2), length: length)
-        {Utils.duplicate_rows(offset), Utils.duplicate_rows(block_length)}
+        {offset, block_length, prng_key} = random_blocks(prng_key, n: div(n, 2), length: length)
+        {Utils.duplicate_rows(offset), Utils.duplicate_rows(block_length), prng_key}
     end
   end
 
-  defnp random_blocks(opts \\ []) do
+  defnp random_blocks(prng_key, opts \\ []) do
     n = opts[:n]
     length = opts[:length]
 
-    idx1 = MeowNx.Utils.random_uniform({n, 1}, 0, length)
-    idx2 = MeowNx.Utils.random_uniform({n, 1}, 0, length)
+    {idx1, prng_key} = Nx.Random.uniform(prng_key, 0, length, shape: {n, 1})
+    idx1 = Nx.as_type(idx1, {:u, 32})
+    {idx2, prng_key} = Nx.Random.uniform(prng_key, 0, length, shape: {n, 1})
+    idx2 = Nx.as_type(idx2, {:u, 32})
 
     a = Nx.min(idx1, idx2)
     b = Nx.max(idx1, idx2)
@@ -379,7 +391,7 @@ defmodule MeowNx.Permutation do
     offset = a
     block_length = b - a + 1
 
-    {offset, block_length}
+    {offset, block_length, prng_key}
   end
 
   defnp shift_positions(positions, offset) do

@@ -7,7 +7,7 @@
 # distance of 937.
 
 Mix.install([
-  {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
+  {:meow, "~> 0.1.0-dev", path: Path.expand("..", __DIR__)},
   {:nx, "~> 0.7.0"},
   {:exla, "~> 0.7.0"},
   {:req, "~> 0.5.0"}
@@ -56,7 +56,7 @@ defmodule Problem do
 end
 
 {tsp_size, distances} =
-  Problem.load_distances("https://people.sc.fsu.edu/~jburkardt/datasets/tsp/fri26_d.txt")
+  Problem.load_distances("https://raw.githubusercontent.com/dada8397/mpi_tsp/master/fri26_d.txt")
 
 algorithm =
   Meow.objective(&Problem.evaluate(&1, distances))

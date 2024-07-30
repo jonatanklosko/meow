@@ -26,14 +26,16 @@ defmodule MeowNx.Selection do
 
     * `:n` - the number of individuals to select. Required.
   """
-  defn tournament(genomes, fitness, opts \\ []) do
+  defn tournament(genomes, fitness, prng_key, opts \\ []) do
     opts = keyword!(opts, [:n])
     n = MeowNx.Utils.resolve_n(opts[:n], genomes)
 
     {base_n, length} = Nx.shape(genomes)
 
-    idx1 = MeowNx.Utils.random_uniform({n}, 0, base_n, type: {:u, 32})
-    idx2 = MeowNx.Utils.random_uniform({n}, 0, base_n, type: {:u, 32})
+    {idx1, prng_key} = Nx.Random.uniform(prng_key, 0, base_n, shape: {n})
+    idx1 = Nx.as_type(idx1, {:u, 32})
+    {idx2, _prng_key} = Nx.Random.uniform(prng_key, 0, base_n, shape: {n})
+    idx2 = Nx.as_type(idx2, {:u, 32})
 
     parents1 = Nx.take(genomes, idx1)
     fitness1 = Nx.take(fitness, idx1)
@@ -94,7 +96,7 @@ defmodule MeowNx.Selection do
 
     * [Fitness proportionate selection](https://en.wikipedia.org/wiki/Fitness_proportionate_selection)
   """
-  defn roulette(genomes, fitness, opts \\ []) do
+  defn roulette(genomes, fitness, prng_key, opts \\ []) do
     opts = keyword!(opts, [:n])
     n = MeowNx.Utils.resolve_n(opts[:n], genomes)
 
@@ -102,7 +104,8 @@ defmodule MeowNx.Selection do
     fitness_sum = fitness_cumulative[-1]
 
     # Random points on the cumulative ruler
-    points = MeoxNx.Utils.random_uniform({n, 1}, 0, fitness_sum)
+    {points, _prng_key} = Nx.Random.uniform(prng_key, 0, fitness_sum, shape: {n, 1})
+    points = Nx.as_type(points, {:u, 32})
     idx = cumulative_points_to_indices(fitness_cumulative, points)
 
     take_individuals(genomes, fitness, idx)
@@ -125,7 +128,7 @@ defmodule MeowNx.Selection do
 
     * [Stochastic universal sampling](https://en.wikipedia.org/wiki/Stochastic_universal_sampling)
   """
-  defn stochastic_universal_sampling(genomes, fitness, opts \\ []) do
+  defn stochastic_universal_sampling(genomes, fitness, prng_key, opts \\ []) do
     opts = keyword!(opts, [:n])
     n = MeowNx.Utils.resolve_n(opts[:n], genomes)
 
@@ -134,7 +137,8 @@ defmodule MeowNx.Selection do
 
     # Random points on the cumulative ruler, each in its own interval
     step = Nx.divide(fitness_sum, n)
-    start = MeowNx.Utils.random_uniform({}, 0, step)
+    {start, _prng_key} = Nx.Random.uniform(prng_key, 0, step, shape: {})
+    start = Nx.as_type(start, {:u, 32})
     points = Nx.iota({n, 1}) |> Nx.multiply(step) |> Nx.add(start)
     idx = cumulative_points_to_indices(fitness_cumulative, points)
 

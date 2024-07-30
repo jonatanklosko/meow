@@ -92,7 +92,7 @@ defmodule MeowNx.Utils do
 
   The resulting tensor has `:shape` with random indices `:axis`.
   """
-  defn random_idx_without_replacement(opts \\ []) do
+  defn random_idx_without_replacement(prng_key, opts \\ []) do
     opts = keyword!(opts, [:shape, :min, :max, :axis])
     shape = opts[:shape]
     min = opts[:min]
@@ -107,11 +107,15 @@ defmodule MeowNx.Utils do
     sample_size = get_sample_size(shape, axis)
     random_shape = get_random_shape(shape, axis, range)
 
-    random_shape
-    |> MeowNx.Utils.random_uniform()
-    |> Nx.argsort(axis: axis)
-    |> Nx.slice_along_axis(0, sample_size, axis: axis)
-    |> Nx.add(min)
+    {u, prng_key} = Nx.Random.uniform(prng_key, shape: random_shape)
+
+    result =
+      u
+      |> Nx.argsort(axis: axis)
+      |> Nx.slice_along_axis(0, sample_size, axis: axis)
+      |> Nx.add(min)
+
+    {result, prng_key}
   end
 
   deftransformp get_sample_size(shape, axis) do
@@ -279,7 +283,7 @@ defmodule MeowNx.Utils do
     |> Nx.axes()
     |> Enum.map(fn
       ^axis -> permutations
-      axis -> Nx.iota(permutations, axis: axis)
+      axis -> Nx.iota(Nx.shape(permutations), axis: axis)
     end)
     |> Nx.stack(axis: -1)
     |> Nx.reshape({:auto, Nx.rank(permutations)})
@@ -427,30 +431,14 @@ defmodule MeowNx.Utils do
     n
   end
 
-  # TODO proper random
-  deftransform random_uniform(shape, min \\ 0, max \\ 1, opts \\ []) do
-    {result, _key} =
-      :erlang.system_time()
-      |> Nx.Random.key()
-      |> Nx.Random.uniform(min, max, shape: shape)
-
-    if type = opts[:type] do
-      Nx.as_type(result, type)
-    else
-      result
-    end
-  end
-
-  deftransform random_normal(shape, mean, sd, opts \\ []) do
-    {result, _key} =
-      :erlang.system_time()
-      |> Nx.Random.key()
-      |> Nx.Random.normal(mean, sd, shape: shape)
-
-    if type = opts[:type] do
-      Nx.as_type(result, type)
-    else
-      result
-    end
+  @doc """
+  Returns a random PRNG key.
+  """
+  def prng_key() do
+    # TODO: currently we use a random key for each opereation call.
+    # Ideally we would use a single seed to control the whole pipeline
+    # and pass keys around accordingly. This is not straightforward
+    # at the moment, because the pipeline is designed to be Nx agnostic
+    Nx.Random.key(:erlang.system_time())
   end
 end
