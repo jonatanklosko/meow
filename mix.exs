@@ -10,7 +10,7 @@ defmodule Meow.MixProject do
       version: @version,
       description: @description,
       name: "Meow",
-      elixir: "~> 1.13",
+      elixir: "~> 1.14",
       deps: deps(),
       docs: docs()
     ]
