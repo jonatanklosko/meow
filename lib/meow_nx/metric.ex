@@ -64,13 +64,16 @@ defmodule MeowNx.Metric do
   defn fitness_entropy(_genomes, fitness, opts \\ []) do
     opts = keyword!(opts, [:precision])
 
-    values =
-      transform({fitness, opts[:precision]}, fn
-        {fitness, nil} -> fitness
-        {fitness, precision} -> fitness |> Nx.divide(precision) |> Nx.round()
-      end)
+    values = transform_fitness(fitness, opts[:precision])
 
     MeowNx.Utils.entropy(values)
+  end
+
+  deftransformp transform_fitness(fitness, precision) do
+    case precision do
+      nil -> fitness
+      _ -> fitness |> Nx.divide(precision) |> Nx.round()
+    end
   end
 
   @doc """

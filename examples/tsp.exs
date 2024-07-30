@@ -8,9 +8,9 @@
 
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.3.0"},
-  {:exla, "~> 0.3.0"},
-  {:req, "~> 0.3.0"}
+  {:nx, "~> 0.7.0"},
+  {:exla, "~> 0.7.0"},
+  {:req, "~> 0.5.0"}
 ])
 
 Nx.Defn.global_default_options(compiler: EXLA)
@@ -56,7 +56,7 @@ defmodule Problem do
 end
 
 {tsp_size, distances} =
-  Problem.load_distances("https://people.sc.fsu.edu/~jburkardt/datasets/tsp/fri26_d.txt")
+  Problem.load_distances("https://raw.githubusercontent.com/dada8397/mpi_tsp/master/fri26_d.txt")
 
 algorithm =
   Meow.objective(&Problem.evaluate(&1, distances))

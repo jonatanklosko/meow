@@ -177,8 +177,8 @@ defmodule Meow.Ops do
         n when is_integer(n) ->
           n..n
 
-        min..max ->
-          min..max
+        min..max//step ->
+          min..max//step
 
         other ->
           raise ArgumentError,

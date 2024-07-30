@@ -15,8 +15,8 @@ You can define the algorithm in a single Elixir script file like this:
 
 Mix.install([
   {:meow, "~> 0.1.0-dev", github: "jonatanklosko/meow"},
-  {:nx, "~> 0.3.0"},
-  {:exla, "~> 0.3.0"}
+  {:nx, "~> 0.7.0"},
+  {:exla, "~> 0.7.0"}
 ])
 
 Nx.Defn.global_default_options(compiler: EXLA)
@@ -32,7 +32,7 @@ defmodule Problem do
 
   defn evaluate_rastrigin(genomes) do
     sums =
-      (10 + Nx.power(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
+      (10 + Nx.pow(genomes, 2) - 10 * Nx.cos(genomes * @two_pi))
       |> Nx.sum(axes: [1])
 
     -sums

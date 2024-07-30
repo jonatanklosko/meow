@@ -21,7 +21,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a random initializer for the real representation.
 
-  See `MeowNx.Init.real_random_uniform/1` for more details.
+  See `MeowNx.Init.real_random_uniform/2` for more details.
   """
   @doc type: :init
   @spec init_real_random_uniform(non_neg_integer(), non_neg_integer(), float(), float()) :: Op.t()
@@ -36,7 +36,8 @@ defmodule MeowNx.Ops do
       out_representation: MeowNx.real_representation(),
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn _genomes ->
-          Init.real_random_uniform(opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Init.real_random_uniform(prng_key, opts)
         end)
       end
     }
@@ -45,7 +46,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a random initializer for the binary representation.
 
-  See `MeowNx.Init.binary_random_uniform/1` for more details.
+  See `MeowNx.Init.binary_random_uniform/2` for more details.
   """
   @doc type: :init
   @spec init_binary_random_uniform(non_neg_integer(), non_neg_integer()) :: Op.t()
@@ -60,7 +61,8 @@ defmodule MeowNx.Ops do
       out_representation: MeowNx.binary_representation(),
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn _genomes ->
-          Init.binary_random_uniform(opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Init.binary_random_uniform(prng_key, opts)
         end)
       end
     }
@@ -69,7 +71,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a tournament selection operation.
 
-  See `MeowNx.Selection.tournament/3` for more details.
+  See `MeowNx.Selection.tournament/4` for more details.
   """
   @doc type: :selection
   @spec selection_tournament(non_neg_integer() | float()) :: Op.t()
@@ -83,7 +85,8 @@ defmodule MeowNx.Ops do
       in_representations: @representations,
       impl: fn population, _ctx ->
         Population.map_genomes_and_fitness(population, fn genomes, fitness ->
-          Selection.tournament(genomes, fitness, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Selection.tournament(genomes, fitness, prng_key, opts)
         end)
       end
     }
@@ -115,7 +118,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a roulette selection operation.
 
-  See `MeowNx.Selection.roulette/3` for more details.
+  See `MeowNx.Selection.roulette/4` for more details.
   """
   @doc type: :selection
   @spec selection_roulette(non_neg_integer() | float()) :: Op.t()
@@ -129,7 +132,8 @@ defmodule MeowNx.Ops do
       in_representations: @representations,
       impl: fn population, _ctx ->
         Population.map_genomes_and_fitness(population, fn genomes, fitness ->
-          Selection.roulette(genomes, fitness, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Selection.roulette(genomes, fitness, prng_key, opts)
         end)
       end
     }
@@ -138,7 +142,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a stochastic universal sampling operation.
 
-  See `MeowNx.Selection.stochastic_universal_sampling/3` for more details.
+  See `MeowNx.Selection.stochastic_universal_sampling/4` for more details.
   """
   @doc type: :selection
   @spec selection_stochastic_universal_sampling(non_neg_integer() | float()) :: Op.t()
@@ -152,7 +156,8 @@ defmodule MeowNx.Ops do
       in_representations: @representations,
       impl: fn population, _ctx ->
         Population.map_genomes_and_fitness(population, fn genomes, fitness ->
-          Selection.stochastic_universal_sampling(genomes, fitness, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Selection.stochastic_universal_sampling(genomes, fitness, prng_key, opts)
         end)
       end
     }
@@ -161,7 +166,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a uniform crossover operation.
 
-  See `MeowNx.Crossover.uniform/2` for more details.
+  See `MeowNx.Crossover.uniform/3` for more details.
   """
   @doc type: :crossover
   @spec crossover_uniform(float()) :: Op.t()
@@ -175,7 +180,8 @@ defmodule MeowNx.Ops do
       in_representations: @representations,
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Crossover.uniform(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Crossover.uniform(genomes, prng_key, opts)
         end)
       end
     }
@@ -184,7 +190,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a single point crossover operation.
 
-  See `MeowNx.Crossover.single_point/1` for more details.
+  See `MeowNx.Crossover.single_point/2` for more details.
   """
   @doc type: :crossover
   @spec crossover_single_point() :: Op.t()
@@ -196,7 +202,8 @@ defmodule MeowNx.Ops do
       in_representations: @representations,
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Crossover.single_point(genomes)
+          prng_key = MeowNx.Utils.prng_key()
+          Crossover.single_point(genomes, prng_key)
         end)
       end
     }
@@ -205,7 +212,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a multi point crossover operation.
 
-  See `MeowNx.Crossover.multi_point/1` for more details.
+  See `MeowNx.Crossover.multi_point/3` for more details.
   """
   @doc type: :crossover
   @spec crossover_multi_point(pos_integer()) :: Op.t()
@@ -219,7 +226,8 @@ defmodule MeowNx.Ops do
       in_representations: @representations,
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Crossover.multi_point(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Crossover.multi_point(genomes, prng_key, opts)
         end)
       end
     }
@@ -228,7 +236,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a blend-alpha crossover operation.
 
-  See `MeowNx.Crossover.blend_alpha/2` for more details.
+  See `MeowNx.Crossover.blend_alpha/3` for more details.
   """
   @doc type: :crossover
   @spec crossover_blend_alpha(float()) :: Op.t()
@@ -242,7 +250,8 @@ defmodule MeowNx.Ops do
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Crossover.blend_alpha(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Crossover.blend_alpha(genomes, prng_key, opts)
         end)
       end
     }
@@ -251,7 +260,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a simulated binary crossover operation.
 
-  See `MeowNx.Crossover.simulated_binary/2` for more details.
+  See `MeowNx.Crossover.simulated_binary/3` for more details.
   """
   @doc type: :crossover
   @spec crossover_simulated_binary(float()) :: Op.t()
@@ -265,7 +274,8 @@ defmodule MeowNx.Ops do
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Crossover.simulated_binary(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Crossover.simulated_binary(genomes, prng_key, opts)
         end)
       end
     }
@@ -274,7 +284,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a uniform replacement mutation operation.
 
-  See `MeowNx.Mutation.replace_uniform/2` for more details.
+  See `MeowNx.Mutation.replace_uniform/3` for more details.
   """
   @doc type: :mutation
   @spec mutation_replace_uniform(float(), float(), float()) :: Op.t()
@@ -288,7 +298,8 @@ defmodule MeowNx.Ops do
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Mutation.replace_uniform(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Mutation.replace_uniform(genomes, prng_key, opts)
         end)
       end
     }
@@ -297,7 +308,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a bit flip mutation operation.
 
-  See `MeowNx.Mutation.replace_uniform/2` for more details.
+  See `MeowNx.Mutation.replace_uniform/3` for more details.
   """
   @doc type: :mutation
   @spec mutation_bit_flip(float()) :: Op.t()
@@ -311,7 +322,8 @@ defmodule MeowNx.Ops do
       in_representations: [MeowNx.binary_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Mutation.bit_flip(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Mutation.bit_flip(genomes, prng_key, opts)
         end)
       end
     }
@@ -320,7 +332,7 @@ defmodule MeowNx.Ops do
   @doc """
   Builds a Gaussian shift mutation operation.
 
-  See `MeowNx.Mutation.shift_gaussian/2` for more details.
+  See `MeowNx.Mutation.shift_gaussian/3` for more details.
   """
   @doc type: :mutation
   @spec mutation_shift_gaussian(float(), keyword()) :: Op.t()
@@ -334,7 +346,8 @@ defmodule MeowNx.Ops do
       in_representations: [MeowNx.real_representation()],
       impl: fn population, _ctx ->
         Population.map_genomes(population, fn genomes ->
-          Mutation.shift_gaussian(genomes, opts)
+          prng_key = MeowNx.Utils.prng_key()
+          Mutation.shift_gaussian(genomes, prng_key, opts)
         end)
       end
     }

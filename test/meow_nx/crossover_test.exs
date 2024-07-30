@@ -8,7 +8,8 @@ defmodule MeowNx.CrossoverTest do
       genomes = Nx.tensor([[1, 2], [1, 2]])
 
       assert_raise ArgumentError, "2-point crossover is not valid for genome of length 2", fn ->
-        Crossover.multi_point(genomes, points: 2)
+        prng_key = MeowNx.Utils.prng_key()
+        Crossover.multi_point(genomes, prng_key, points: 2)
       end
     end
 
@@ -21,7 +22,9 @@ defmodule MeowNx.CrossoverTest do
           [-11, -22, -33, -44]
         ])
 
-      assert Crossover.multi_point(genomes, points: 3) ==
+      prng_key = MeowNx.Utils.prng_key()
+
+      assert Crossover.multi_point(genomes, prng_key, points: 3) ==
                Nx.tensor([
                  [1, -2, 3, -4],
                  [-1, 2, -3, 4],
@@ -31,10 +34,15 @@ defmodule MeowNx.CrossoverTest do
     end
 
     test "property: the number of crossover points matches the specified one" do
-      genomes = Nx.random_uniform({100, 100})
+      {genomes, _seed} =
+        0
+        |> Nx.Random.key()
+        |> Nx.Random.uniform(shape: {100, 100})
+
       points = 10
 
-      offsprings = Crossover.multi_point(genomes, points: points)
+      prng_key = MeowNx.Utils.prng_key()
+      offsprings = Crossover.multi_point(genomes, prng_key, points: points)
 
       same_gene? = Nx.equal(genomes, offsprings)
 

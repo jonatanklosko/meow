@@ -10,7 +10,7 @@ defmodule Meow.MixProject do
       version: @version,
       description: @description,
       name: "Meow",
-      elixir: "~> 1.13",
+      elixir: "~> 1.14",
       deps: deps(),
       docs: docs()
     ]
@@ -24,7 +24,7 @@ defmodule Meow.MixProject do
 
   defp deps do
     [
-      {:nx, "~> 0.3.0"},
+      {:nx, "~> 0.7"},
       {:vega_lite, "~> 0.1.1", optional: true},
       {:jason, "~> 1.2", optional: true},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false}

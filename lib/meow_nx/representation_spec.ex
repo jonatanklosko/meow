@@ -40,7 +40,11 @@ defmodule MeowNx.RepresentationSpec do
 
   defn concatenate_tuple(populations) do
     populations
-    |> transform(&Tuple.to_list/1)
+    |> tuple_to_list()
     |> Nx.concatenate()
+  end
+
+  deftransformp tuple_to_list(tuple) do
+    Tuple.to_list(tuple)
   end
 end
